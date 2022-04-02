@@ -5,7 +5,7 @@ import supertest from 'supertest';
 
 const request = supertest(app);
 
-let uploadUrl = { url: '', fields: [{ key: '', value: '' }] };
+let uploadUrl: string;
 
 beforeAll(() => {
   process.env.NODE_ENV = 'test';
@@ -28,8 +28,8 @@ test('Fetching pre-signed upload URL for example.txt', (done) => {
       expect(res.body).toBeInstanceOf(Object);
       expect(res.body.data.getUploadUrl.url).not.toBeNull();
       expect(res.body.data.getUploadUrl.fields).toBeInstanceOf(Object);
-      uploadUrl.url = res.body.data.getUploadUrl.url;
-      uploadUrl.fields = res.body.data.getUploadUrl.fields;
+      uploadUrl = res.body.data.getUploadUrl.url;
+      console.log(uploadUrl)
       done();
     });
 });
