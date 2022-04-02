@@ -1,7 +1,8 @@
 import { fetchUpUrlQuery } from '../../helpers/test-queries.help';
-import { createReadStream } from 'fs';
+import { createReadStream, statSync } from 'fs';
 import app from '../../app';
 import supertest from 'supertest';
+import fetch from 'cross-fetch';
 
 const request = supertest(app);
 
@@ -27,27 +28,24 @@ test('Fetching pre-signed upload URL for example.txt', (done) => {
       if (err) return done(err);
       expect(res.body).toBeInstanceOf(Object);
       expect(res.body.data.getUploadUrl.url).not.toBeNull();
-      expect(res.body.data.getUploadUrl.fields).toBeInstanceOf(Object);
+      expect(res.body.data.getUploadUrl.url).toContain('aws');
       uploadUrl = res.body.data.getUploadUrl.url;
-      console.log(uploadUrl)
       done();
     });
 });
 
-// test('Uploading example.txt with pre-signed URL', async () => {
-//   const form = new FormData();
-//   for (const f of uploadUrl.fields) form.append(f.key, f.value);
+test('Uploading example.txt with pre-signed URL', async () => {
+  const filePath = './src/pseudo/example.txt'
+  const payload = createReadStream(filePath);
 
-//   form.append(
-//     'test-user-1234abcd/translations/example.txt',
-//     createReadStream('./example.txt')
-//   );
+  const res = await fetch(uploadUrl, {
+    method: 'PUT',
+    headers: {
+      "Content-Length": `${statSync(filePath).size}`
+    },
+    // @ts-ignore
+    body: payload,
+  });
 
-//   const res = await fetch(uploadUrl.url, {
-//     method: 'POST',
-//     //@ts-ignore
-//     body: form,
-//   });
-
-//   expect(res.status).toBe(200);
-// });
+  expect(res.status).toBe(200);
+});
