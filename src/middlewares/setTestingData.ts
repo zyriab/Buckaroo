@@ -5,7 +5,7 @@ export function setTestingData(req: RequestBody, res: ResponseBody<any>, next: (
     name: 'test-bucket',
     bucket: {
       exists: true,
-      name: `${process.env.BUCKET_NAMESPACE}-test-bucket-app`,
+      name: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
     }
   }
 
