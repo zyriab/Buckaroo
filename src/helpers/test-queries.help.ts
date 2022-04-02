@@ -68,10 +68,6 @@ export const fetchUpUrlQuery = {
         __typename
         ... on SignedUrl {
           url
-          fields {
-            key
-            value
-          }
         }
         ${errorSpreads}
       }
