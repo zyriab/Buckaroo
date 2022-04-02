@@ -12,6 +12,7 @@ import {
   deleteDirectory,
   checkBucketExists,
   checkBucketVersioning,
+  getDownloadUrl,
 } from '../../utils/s3.utils';
 import { listBucketContent } from '../../utils/s3/listBucketContent';
 import { resolveAuth } from '../../utils/auth.utils';
@@ -52,7 +53,10 @@ export const gqlResolvers = {
   // FIXME: Signed post URL is missing headers
   getUploadUrl: async (args: { fileInput: FileInput }, req: RequestBody) => {
     try {
-      const [authed, error] = resolveAuth(req);
+      const [authed, error] = resolveAuth(
+        req,
+        args.fileInput.rootPath ? 'create:file' : undefined
+      );
       if (!authed) return error;
 
       const [failure, url, fields] = await requestSignedUrl({
@@ -78,12 +82,14 @@ export const gqlResolvers = {
   },
   getDownloadUrl: async (args: { fileInput: FileInput }, req: RequestBody) => {
     try {
-      const [authed, error] = resolveAuth(req);
+      const [authed, error] = resolveAuth(
+        req,
+        args.fileInput.rootPath ? 'read:bucket' : undefined
+      );
       if (!authed) return error;
 
-      const [failure, url] = await requestSignedUrl({
-        req: req,
-        reqCommand: 'DOWNLOAD',
+      const [failure, url] = await getDownloadUrl({
+        req,
         fileName: args.fileInput.fileName,
         path: args.fileInput.path,
         versionId: args.fileInput.versionId || undefined,
@@ -104,7 +110,10 @@ export const gqlResolvers = {
   },
   deleteOneFile: async (args: { fileInput: FileInput }, req: RequestBody) => {
     try {
-      const [authed, error] = resolveAuth(req);
+      const [authed, error] = resolveAuth(
+        req,
+        args.fileInput.rootPath ? 'delete:file' : undefined
+      );
       if (!authed) return error;
 
       const [failure, fileName] = await deleteOneFile({
@@ -214,10 +223,17 @@ export const gqlResolvers = {
     req: RequestBody
   ) => {
     try {
-      const [authed, error] = resolveAuth(req);
+      const [authed, error] = resolveAuth(
+        req,
+        args.fileInput.rootPath ? 'update:file' : undefined
+      );
       if (!authed) return error;
 
-      if (!await checkBucketVersioning({ bucketName: req.body.tenant.bucket.name }))
+      if (
+        !(await checkBucketVersioning({
+          bucketName: req.body.tenant.bucket.name,
+        }))
+      )
         throw new Error('The requested file is not on a versioned storage.');
 
       const [failure, newId] = await restoreFileVersion({
@@ -241,5 +257,5 @@ export const gqlResolvers = {
     }
   },
   // TODO: Implement upload through the API
-  // uploadFile: async (args: UploadInput, req: RequestBody) => {},
+  uploadFile: async (args: UploadInput, req: RequestBody) => {},
 };
