@@ -75,12 +75,6 @@ export type ListInput = {
   showRoot?: InputMaybe<Scalars['Boolean']>;
 };
 
-export type MapTuple = {
-  __typename?: 'MapTuple';
-  key: Scalars['String'];
-  value: Scalars['String'];
-};
-
 export type Mutations = {
   __typename?: 'Mutations';
   deleteDirectory?: Maybe<DeleteDirectoryResult>;
@@ -140,7 +134,6 @@ export type ServerError = {
 
 export type SignedUrl = {
   __typename?: 'SignedUrl';
-  fields: Array<MapTuple>;
   url: Scalars['String'];
 };
 
@@ -260,7 +253,6 @@ export type ResolversTypes = {
   Int: ResolverTypeWrapper<Scalars['Int']>;
   ListBucketResult: ResolversTypes['FileList'] | ResolversTypes['ServerError'] | ResolversTypes['StorageNotFound'] | ResolversTypes['Unauthenticated'] | ResolversTypes['Unauthorized'];
   ListInput: ListInput;
-  MapTuple: ResolverTypeWrapper<MapTuple>;
   Mutations: ResolverTypeWrapper<{}>;
   Queries: ResolverTypeWrapper<{}>;
   RestoreFileResult: ResolversTypes['ServerError'] | ResolversTypes['StorageNotFound'] | ResolversTypes['Unauthenticated'] | ResolversTypes['Unauthorized'] | ResolversTypes['VersionId'];
@@ -292,7 +284,6 @@ export type ResolversParentTypes = {
   Int: Scalars['Int'];
   ListBucketResult: ResolversParentTypes['FileList'] | ResolversParentTypes['ServerError'] | ResolversParentTypes['StorageNotFound'] | ResolversParentTypes['Unauthenticated'] | ResolversParentTypes['Unauthorized'];
   ListInput: ListInput;
-  MapTuple: MapTuple;
   Mutations: {};
   Queries: {};
   RestoreFileResult: ResolversParentTypes['ServerError'] | ResolversParentTypes['StorageNotFound'] | ResolversParentTypes['Unauthenticated'] | ResolversParentTypes['Unauthorized'] | ResolversParentTypes['VersionId'];
@@ -351,12 +342,6 @@ export type ListBucketResultResolvers<ContextType = any, ParentType extends Reso
   __resolveType: TypeResolveFn<'FileList' | 'ServerError' | 'StorageNotFound' | 'Unauthenticated' | 'Unauthorized', ParentType, ContextType>;
 };
 
-export type MapTupleResolvers<ContextType = any, ParentType extends ResolversParentTypes['MapTuple'] = ResolversParentTypes['MapTuple']> = {
-  key?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  value?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export type MutationsResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutations'] = ResolversParentTypes['Mutations']> = {
   deleteDirectory?: Resolver<Maybe<ResolversTypes['DeleteDirectoryResult']>, ParentType, ContextType, Partial<MutationsDeleteDirectoryArgs>>;
   deleteManyFiles?: Resolver<Maybe<ResolversTypes['DeleteFileResult']>, ParentType, ContextType, RequireFields<MutationsDeleteManyFilesArgs, 'fileInput'>>;
@@ -380,7 +365,6 @@ export type ServerErrorResolvers<ContextType = any, ParentType extends Resolvers
 };
 
 export type SignedUrlResolvers<ContextType = any, ParentType extends ResolversParentTypes['SignedUrl'] = ResolversParentTypes['SignedUrl']> = {
-  fields?: Resolver<Array<ResolversTypes['MapTuple']>, ParentType, ContextType>;
   url?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -427,7 +411,6 @@ export type Resolvers<ContextType = any> = {
   FileName?: FileNameResolvers<ContextType>;
   FileNameList?: FileNameListResolvers<ContextType>;
   ListBucketResult?: ListBucketResultResolvers<ContextType>;
-  MapTuple?: MapTupleResolvers<ContextType>;
   Mutations?: MutationsResolvers<ContextType>;
   Queries?: QueriesResolvers<ContextType>;
   RestoreFileResult?: RestoreFileResultResolvers<ContextType>;
