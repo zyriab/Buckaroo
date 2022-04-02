@@ -5,7 +5,7 @@ import fetch from 'cross-fetch';
 
 const request = supertest(app);
 
-let downloadUrl = '';
+let downloadUrl: string;
 
 beforeAll(() => {
   process.env.NODE_ENV = 'test';
