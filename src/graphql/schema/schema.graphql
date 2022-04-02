@@ -1,0 +1,135 @@
+type Version {
+  id: ID!
+  name: String!
+  lastModified: String!
+  size: Int!
+  path: String!
+}
+
+type File {
+  id: ID
+  name: String!
+  lastModified: String!
+  size: Int!
+  path: String!
+  versions: [Version!]
+}
+
+type FileList {
+  list: [File!]!
+}
+
+type SignedUrl {
+  url: String!
+}
+
+type FileName {
+  name: String!
+}
+
+type FileNameList {
+  names: [String!]!
+}
+
+type VersionId {
+  id: ID!
+}
+
+type Directory {
+  name: String!
+  path: String!
+  bucketName: String
+}
+
+"ERROR TYPES"
+type Unauthenticated {
+  message: String!
+}
+
+type StorageNotFound {
+  message: String!
+}
+
+type ServerError {
+  message: String!
+}
+
+type Unauthorized {
+  message: String!
+}
+
+"INPUT TYPES"
+input ListInput {
+  path: String!
+  showRoot: Boolean
+}
+
+input FileInput {
+  fileName: String!
+  path: String!
+  versionId: String
+  rootPath: Boolean
+}
+
+input FilesInput {
+  fileNames: [String!]!
+  path: String!
+}
+
+input DirectoryInput {
+  dirPath: String!
+  bucketName: String
+}
+
+union ListBucketResult =
+    FileList
+  | Unauthenticated
+  | Unauthorized
+  | StorageNotFound
+  | ServerError
+
+union SignedUrlResult =
+    SignedUrl
+  | Unauthenticated
+  | Unauthorized
+  | StorageNotFound
+  | ServerError
+
+union DeleteFileResult =
+    FileName
+  | FileNameList
+  | Unauthenticated
+  | Unauthorized
+  | StorageNotFound
+  | ServerError
+
+union DeleteDirectoryResult =
+    Directory
+  | Unauthenticated
+  | Unauthorized
+  | StorageNotFound
+  | ServerError
+
+union RestoreFileResult =
+    VersionId
+  | Unauthenticated
+  | Unauthorized
+  | StorageNotFound
+  | ServerError
+
+type Queries {
+  listBucketContent(listInput: ListInput!): ListBucketResult!
+  getUploadUrl(fileInput: FileInput!): SignedUrlResult!
+  getDownloadUrl(fileInput: FileInput!): SignedUrlResult!
+}
+
+type Mutations {
+  deleteOneFile(fileInput: FileInput!): DeleteFileResult
+  deleteManyFiles(fileInput: FileInput!): DeleteFileResult
+  deleteDirectory(directoryInput: DirectoryInput): DeleteDirectoryResult
+  restoreFileVersion(fileInput: FileInput!): RestoreFileResult
+}
+schema {
+  query: Queries
+  mutation: Mutations
+}
