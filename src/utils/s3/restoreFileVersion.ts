@@ -1,15 +1,16 @@
 import { RequestBody } from '../../definitions/root';
-import { CopyObjectCommand, CopyObjectCommandInput } from '@aws-sdk/client-s3';
+import { CopyObjectCommand } from '@aws-sdk/client-s3';
 import { s3Client } from './s3Client';
 import sanitize from 'sanitize-filename';
 import { deleteOneFile } from './deleteOneFile';
-import normalize from 'normalize-path'
+import normalize from 'normalize-path';
 
 interface InputArgs {
   req: RequestBody;
   fileName: string;
   path: string;
   versionId: string;
+  rootPath?: boolean;
 }
 
 export async function restoreFileVersion(
@@ -19,13 +20,15 @@ export async function restoreFileVersion(
     if (!args.versionId) throw new Error('VersionId is needed');
 
     const bucket = args.req.body.tenant.bucket.name;
-    const dirName = `${args.req.body.userName}-${args.req.body.userId}`;
+    const dirName = args.rootPath
+      ? ''
+      : `${args.req.body.userName}-${args.req.body.userId}/`;
     const fileName = sanitize(args.fileName);
     const path = normalize(args.path);
-    const params: CopyObjectCommandInput = {
+    const params = {
       Bucket: bucket,
-      CopySource: `${bucket}/${dirName}/${path}/${fileName}?versionId=${args.versionId}`,
-      Key: `${dirName}/${path}/${fileName}`,
+      CopySource: `${bucket}/${dirName}${path}/${fileName}?versionId=${args.versionId}`,
+      Key: `${dirName}${path}/${fileName}`,
       MetadataDirective: 'REPLACE',
     };
     const res = await s3Client().send(new CopyObjectCommand(params));
@@ -37,7 +40,12 @@ export async function restoreFileVersion(
         `Could not perform the copy. The server returned the error code: ${res.$metadata.httpStatusCode}`
       );
 
-    const [error] = await deleteOneFile({ req: args.req, fileName, path, versionId: args.versionId });
+    const [error] = await deleteOneFile({
+      req: args.req,
+      fileName,
+      path,
+      versionId: args.versionId,
+    });
 
     if (error) throw error;
 
