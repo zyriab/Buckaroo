@@ -10,7 +10,7 @@ interface InputArgs {
   fileName: string;
   path: string;
   versionId?: string;
-  root?: boolean;
+  rootPath?: boolean;
 }
 
 export async function getDownloadUrl(
@@ -18,7 +18,7 @@ export async function getDownloadUrl(
 ): Promise<[undefined, string] | [Error]> {
   try {
     const client = s3Client();
-    const dirName = args.root
+    const dirName = args.rootPath
       ? ''
       : `${args.req.body.userName}-${args.req.body.userId}/`;
     const fileName = sanitize(args.fileName);

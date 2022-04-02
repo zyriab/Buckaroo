@@ -43,7 +43,7 @@ export async function deleteDirectory(
         req: args.req,
         fileNames: files!.map((f) => f.name),
         path,
-        root: true,
+        rootPath: true,
       });
       if (error) throw error;
     }

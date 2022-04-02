@@ -13,7 +13,7 @@ interface InputArgs {
   fileName: string;
   path: string;
   versionId?: string;
-  root?: boolean;
+  rootPath?: boolean;
 }
 
 export async function deleteOneFile(
@@ -23,7 +23,7 @@ export async function deleteOneFile(
     let res: DeleteObjectCommandOutput | undefined;
     const fileName = sanitize(args.fileName);
     const path = normalize(args.path);
-    const dirName = args.root
+    const dirName = args.rootPath
       ? ''
       : `${args.req.body.userName}-${args.req.body.userId}`;
     const params = {
@@ -39,7 +39,7 @@ export async function deleteOneFile(
         req: args.req,
         fileName,
         path,
-        root: args.root,
+        rootPath: args.rootPath,
       });
 
       if (error) return [error];

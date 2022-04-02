@@ -5,7 +5,7 @@ interface InputArgs {
   req: RequestBody;
   fileName: string;
   path: string;
-  root?: boolean;
+  rootPath?: boolean;
 }
 
 export async function getAllFileVersions(
@@ -15,7 +15,7 @@ export async function getAllFileVersions(
     req: args.req,
     path: args.path,
     getMarkersIds: true,
-    showRoot: args.root,
+    showRoot: args.rootPath,
   });
 
   if (error) return [error];

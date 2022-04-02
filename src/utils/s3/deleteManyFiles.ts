@@ -9,7 +9,7 @@ interface InputArgs {
   req: RequestBody;
   fileNames: string[];
   path: string;
-  root?: boolean;
+  rootPath?: boolean;
 }
 
 export async function deleteManyFiles(
@@ -18,7 +18,7 @@ export async function deleteManyFiles(
   try {
     const path = normalize(args.path);
     const fileNames = args.fileNames.map((n) => sanitize(n));
-    const dirName = args.root
+    const dirName = args.rootPath
       ? ''
       : `${args.req.body.userName}-${args.req.body.userId}/`;
 
@@ -34,7 +34,7 @@ export async function deleteManyFiles(
         req: args.req,
         fileName: n,
         path: path,
-        root: args.root,
+        rootPath: args.rootPath,
       });
 
       if (error) throw error;
