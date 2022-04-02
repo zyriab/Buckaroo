@@ -1,4 +1,5 @@
 export { requestSignedUrl } from './s3/requestSignedUrl';
+export { getDownloadUrl } from './s3/getDownloadUrl';
 export { listBucketContent } from './s3/listBucketContent';
 export { deleteOneFile } from './s3/deleteOneFile';
 export { deleteManyFiles } from './s3/deleteManyFiles';
