@@ -1,8 +1,6 @@
 import { Request, Response } from 'express';
 import { DecodedToken, Permission } from './auth';
 
-export type ReqCommand = 'UPLOAD' | 'DOWNLOAD';
-
 export interface Tenant {
   name: string;
   bucket: {
