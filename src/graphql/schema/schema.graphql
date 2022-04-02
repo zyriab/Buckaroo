@@ -19,14 +19,8 @@ type FileList {
   list: [File!]!
 }
 
-type MapTuple {
-  key: String!
-  value: String!
-}
-
 type SignedUrl {
   url: String!
-  fields: [MapTuple!]!
 }
 
 type FileName {
