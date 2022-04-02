@@ -74,6 +74,7 @@ input FileInput {
   fileName: String!
   path: String!
   versionId: String
+  rootPath: Boolean
 }
 
 input FilesInput {
