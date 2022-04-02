@@ -25,10 +25,10 @@ export async function deleteOneFile(
     const path = normalize(args.path);
     const dirName = args.rootPath
       ? ''
-      : `${args.req.body.userName}-${args.req.body.userId}`;
+      : `${args.req.body.userName}-${args.req.body.userId}/`;
     const params = {
       Bucket: args.req.body.tenant.bucket.name,
-      Key: path ? `${dirName}/${path}/${fileName}` : `${dirName}/${fileName}`,
+      Key: path ? `${dirName}${path}/${fileName}` : `${dirName}${fileName}`,
       VersionId: args.versionId,
     };
 
