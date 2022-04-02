@@ -1,2 +1,4 @@
 # buckaroo
-A miniservice to interact with S3 buckets
+A miniservice API to interact with S3 buckets
+
+README coming soon(ish)
