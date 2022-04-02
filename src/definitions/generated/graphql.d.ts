@@ -43,6 +43,7 @@ export type File = {
 export type FileInput = {
   fileName: Scalars['String'];
   path: Scalars['String'];
+  rootPath?: InputMaybe<Scalars['Boolean']>;
   versionId?: InputMaybe<Scalars['String']>;
 };
 
