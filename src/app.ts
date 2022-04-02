@@ -10,7 +10,6 @@ import { checkAuth } from './middlewares/checkAuth';
 import { checkBucketExists } from './middlewares/checkBucketExists';
 import { setReqMetadata } from './middlewares/setReqMetadata';
 import { setTestingData } from './middlewares/setTestingData';
-import {graphqlUploadExpress} from 'graphql-upload';
 import dotenv from 'dotenv';
 
 const IS_DEV = process.env.NODE_ENV !== 'production';
@@ -43,14 +42,12 @@ if (process.env.NODE_ENV !== 'test') {
   app.use(setTestingData);
 }
 
-// app.use(graphqlUploadExpress)
-
 app.use(
   '/gql',
   graphqlHTTP(async () => ({
     schema: gqlSchema,
     rootValue: gqlResolvers,
-    // validationRules: [NoSchemaIntrospectionCustomRule],
+    validationRules: [NoSchemaIntrospectionCustomRule],
     graphiql: IS_DEV,
   }))
 );

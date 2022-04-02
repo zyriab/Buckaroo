@@ -256,6 +256,4 @@ export const gqlResolvers = {
       };
     }
   },
-  // TODO: Implement upload through the API
-  uploadFile: async (args: UploadInput, req: RequestBody) => {},
 };
