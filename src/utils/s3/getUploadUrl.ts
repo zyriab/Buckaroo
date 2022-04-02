@@ -21,7 +21,7 @@ export async function getUploadUrl(
       ? ''
       : `${args.req.body.userName}-${args.req.body.userId}/`;
     const fileName = sanitize(args.fileName);
-    const expirationTime = 60 * 1;
+    const expirationTime = 60 * 0.5;
 
     let params = {
       Bucket: args.req.body.tenant.bucket.name,
