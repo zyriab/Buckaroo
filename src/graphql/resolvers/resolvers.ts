@@ -5,7 +5,6 @@ import {
   DirectoryInput,
 } from '../../definitions/generated/graphql';
 import {
-  requestSignedUrl,
   deleteManyFiles,
   deleteOneFile,
   restoreFileVersion,
@@ -13,6 +12,7 @@ import {
   checkBucketExists,
   checkBucketVersioning,
   getDownloadUrl,
+  getUploadUrl,
 } from '../../utils/s3.utils';
 import { listBucketContent } from '../../utils/s3/listBucketContent';
 import { resolveAuth } from '../../utils/auth.utils';
@@ -50,7 +50,6 @@ export const gqlResolvers = {
       };
     }
   },
-  // FIXME: Signed post URL is missing headers
   getUploadUrl: async (args: { fileInput: FileInput }, req: RequestBody) => {
     try {
       const [authed, error] = resolveAuth(
@@ -59,11 +58,11 @@ export const gqlResolvers = {
       );
       if (!authed) return error;
 
-      const [failure, url, fields] = await requestSignedUrl({
-        req: req,
-        reqCommand: 'UPLOAD',
+      const [failure, url] = await getUploadUrl({
+        req,
         fileName: args.fileInput.fileName,
         path: args.fileInput.path,
+        rootPath: args.fileInput.rootPath || undefined,
       });
 
       if (failure !== undefined) throw failure;
@@ -71,7 +70,6 @@ export const gqlResolvers = {
       return {
         __typename: 'SignedUrl',
         url: url,
-        fields: fields,
       };
     } catch (err) {
       return {
@@ -93,6 +91,7 @@ export const gqlResolvers = {
         fileName: args.fileInput.fileName,
         path: args.fileInput.path,
         versionId: args.fileInput.versionId || undefined,
+        rootPath: args.fileInput.rootPath || undefined,
       });
 
       if (failure) throw failure;
@@ -120,6 +119,7 @@ export const gqlResolvers = {
         req,
         fileName: args.fileInput.fileName,
         path: args.fileInput.path,
+        rootPath: args.fileInput.rootPath || undefined,
       });
 
       if (failure) throw failure;
@@ -241,6 +241,7 @@ export const gqlResolvers = {
         fileName: args.fileInput.fileName,
         path: args.fileInput.path,
         versionId: args.fileInput.versionId!,
+        rootPath: args.fileInput.rootPath || undefined,
       });
 
       if (failure) throw failure;
