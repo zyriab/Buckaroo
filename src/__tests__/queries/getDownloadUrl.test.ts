@@ -2,6 +2,7 @@ import { fetchDlUrlQuery } from '../../helpers/test-queries.help';
 import app from '../../app';
 import supertest from 'supertest';
 import fetch from 'cross-fetch';
+import fs from 'fs';
 
 const request = supertest(app);
 
@@ -36,4 +37,13 @@ test('Fetching pre-signed download URL for example.txt', (done) => {
 test('Fetching example.txt with pre-signed URL', async () => {
   const res = await fetch(downloadUrl);
   expect(res.status).toBe(200);
+
+  const fileStream = fs.createWriteStream('./src/pseudo/example.txt');
+  await new Promise((resolve, reject) => {
+    // @ts-ignore
+    res.body!.pipe(fileStream);
+    // @ts-ignore
+    res.body!.on('error', reject);
+    fileStream.on('finish', resolve);
+  });
 });
