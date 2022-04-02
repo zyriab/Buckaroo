@@ -5,6 +5,9 @@ const errorSpreads = `
   ... on Unauthenticated {
     message
   }
+  ... on Unauthorized {
+    message
+  }
   ... on StorageNotFound {
     message
   }
@@ -30,9 +33,6 @@ export const listQuery = {
               path
             }
           }
-        }
-        ... on Unauthorized {
-          message
         }
         ${errorSpreads}
       }
@@ -145,9 +145,6 @@ export const deleteDirectoryQuery = {
           name
           path
           bucketName
-        }
-        ... on Unauthorized {
-          message
         }
         ${errorSpreads}
       }

@@ -97,6 +97,7 @@ union ListBucketResult =
 union SignedUrlResult =
     SignedUrl
   | Unauthenticated
+  | Unauthorized
   | StorageNotFound
   | ServerError
 
@@ -104,6 +105,7 @@ union DeleteFileResult =
     FileName
   | FileNameList
   | Unauthenticated
+  | Unauthorized
   | StorageNotFound
   | ServerError
 
@@ -117,6 +119,7 @@ union DeleteDirectoryResult =
 union RestoreFileResult =
     VersionId
   | Unauthenticated
+  | Unauthorized
   | StorageNotFound
   | ServerError
 
@@ -132,7 +135,6 @@ type Mutations {
   deleteDirectory(directoryInput: DirectoryInput): DeleteDirectoryResult
   restoreFileVersion(fileInput: FileInput!): RestoreFileResult
 }
-"uploadFile(uploadInput: FileUploadInput!): UploadResult"
 schema {
   query: Queries
   mutation: Mutations

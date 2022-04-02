@@ -87,6 +87,11 @@
             "kind": "OBJECT",
             "name": "Unauthenticated",
             "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "Unauthorized",
+            "ofType": null
           }
         ]
       },
@@ -903,6 +908,11 @@
           },
           {
             "kind": "OBJECT",
+            "name": "Unauthorized",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
             "name": "VersionId",
             "ofType": null
           }
@@ -1013,6 +1023,11 @@
           {
             "kind": "OBJECT",
             "name": "Unauthenticated",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "Unauthorized",
             "ofType": null
           }
         ]
