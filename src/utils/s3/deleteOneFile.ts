@@ -20,6 +20,9 @@ export async function deleteOneFile(
   args: InputArgs
 ): Promise<[undefined, string] | [Error]> {
   try {
+    if (args.versionId && typeof args.versionId !== 'string')
+      throw new Error('VersionId needs to be a string.');
+
     let res: DeleteObjectCommandOutput | undefined;
     const fileName = sanitize(args.fileName);
     const path = normalize(args.path);

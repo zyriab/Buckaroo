@@ -17,6 +17,9 @@ export async function deleteManyFiles(
   args: InputArgs
 ): Promise<[undefined, string[]] | [Error]> {
   try {
+    if (args.versionIds && typeof args.versionIds !== 'string')
+      throw new Error('VersionIds need to be strings.');
+
     const path = normalize(args.path);
     const fileNames = args.fileNames.map((n) => sanitize(n));
     const dirName = args.rootPath
