@@ -17,12 +17,12 @@ export async function restoreFileVersion(
   args: InputArgs
 ): Promise<[undefined, string] | [Error]> {
   try {
-    if (!args.versionId) throw new Error('VersionId is needed');
+    if (typeof args.versionId !== 'string') throw new Error('VersionId needs to be a string.');
 
     const bucket = args.req.body.tenant.bucket.name;
     const dirName = args.rootPath
       ? ''
-      : `${args.req.body.userName}-${args.req.body.userId}/`;
+      : `${args.req.body.username}-${args.req.body.userId}/`;
     const fileName = sanitize(args.fileName);
     const path = normalize(args.path);
     const params = {

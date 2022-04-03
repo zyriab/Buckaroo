@@ -20,12 +20,15 @@ export async function deleteOneFile(
   args: InputArgs
 ): Promise<[undefined, string] | [Error]> {
   try {
+    if (args.versionId && typeof args.versionId !== 'string')
+      throw new Error('VersionId needs to be a string.');
+
     let res: DeleteObjectCommandOutput | undefined;
     const fileName = sanitize(args.fileName);
     const path = normalize(args.path);
     const dirName = args.rootPath
       ? ''
-      : `${args.req.body.userName}-${args.req.body.userId}/`;
+      : `${args.req.body.username}-${args.req.body.userId}/`;
     const params = {
       Bucket: args.req.body.tenant.bucket.name,
       Key: path ? `${dirName}${path}/${fileName}` : `${dirName}${fileName}`,

@@ -8,7 +8,7 @@
     "dev": "ts-node-dev --respawn --pretty --transpile-only src/index.ts",
     "build": "tsc -p .",
     "check": "tsc --noEmit",
-    "test": "npx jest",
+    "test": "npx jest --coverage --watch",
     "gqlgen": "graphql-codegen --config codegen.yml",
     "checkerr": "tsc --noEmit"
   },

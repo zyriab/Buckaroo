@@ -12,6 +12,7 @@ interface InputArgs {
   rootPath?: boolean;
 }
 
+// TODO: need to use a webhook to remove oldest version once the upload succeded (if + than n versions already exist) 
 export async function getUploadUrl(
   args: InputArgs
 ): Promise<[undefined, string] | [Error]> {
@@ -19,7 +20,7 @@ export async function getUploadUrl(
     const client = s3Client();
     const dirName = args.rootPath
       ? ''
-      : `${args.req.body.userName}-${args.req.body.userId}/`;
+      : `${args.req.body.username}-${args.req.body.userId}/`;
     const fileName = sanitize(args.fileName);
     const expirationTime = 60 * 0.5;
 

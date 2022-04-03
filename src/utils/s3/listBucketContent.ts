@@ -33,7 +33,7 @@ export async function listBucketContent(
   try {
     const dirName = args.showRoot
       ? ''
-      : `${args.req.body.userName}-${args.req.body.userId}/`;
+      : `${args.req.body.username}-${args.req.body.userId}/`;
     const prefix = args.path
       ? `${dirName}${normalize(args.path)}/`
       : `${dirName}`;

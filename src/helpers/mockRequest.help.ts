@@ -12,6 +12,17 @@ const tkn = {
   sub: 'auth0|1234abcd',
 };
 
+ let permissions: any = [];
+
+ if (process.env.TEST_AUTH === 'true')
+   permissions = [
+     'read:bucket',
+     'delete:directory',
+     'create:file',
+     'update:file',
+     'delete:file',
+   ];
+
 const tenant = {
   name: 'test-bucket',
   bucket: {
@@ -26,9 +37,9 @@ const req: RequestBody = {
     token: tkn,
     isAuth: true,
     userId: '1234abcd',
-    userName: 'test-user',
+    username: 'test-user',
     userEmail: 'test-user@example.com',
-    permissions: ['read:bucket'],
+    permissions: permissions,
     tenant: tenant
   },
 };

@@ -3,7 +3,6 @@ import { deleteManyFiles, listBucketContent } from '../s3.utils';
 import { s3Client } from './s3Client';
 import { DeleteObjectCommand } from '@aws-sdk/client-s3';
 import normalize from 'normalize-path';
-import { MarkerData } from './listBucketContent';
 
 interface InputArgs {
   req: RequestBody;

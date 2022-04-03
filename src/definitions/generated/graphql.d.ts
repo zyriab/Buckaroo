@@ -65,6 +65,8 @@ export type FileNameList = {
 export type FilesInput = {
   fileNames: Array<Scalars['String']>;
   path: Scalars['String'];
+  rootPath?: InputMaybe<Scalars['Boolean']>;
+  versionIds?: InputMaybe<Array<Scalars['String']>>;
 };
 
 export type ListBucketResult = FileList | ServerError | StorageNotFound | Unauthenticated | Unauthorized;
@@ -90,7 +92,7 @@ export type MutationsDeleteDirectoryArgs = {
 
 
 export type MutationsDeleteManyFilesArgs = {
-  fileInput: FileInput;
+  filesInput: FilesInput;
 };
 
 
@@ -344,7 +346,7 @@ export type ListBucketResultResolvers<ContextType = any, ParentType extends Reso
 
 export type MutationsResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutations'] = ResolversParentTypes['Mutations']> = {
   deleteDirectory?: Resolver<Maybe<ResolversTypes['DeleteDirectoryResult']>, ParentType, ContextType, Partial<MutationsDeleteDirectoryArgs>>;
-  deleteManyFiles?: Resolver<Maybe<ResolversTypes['DeleteFileResult']>, ParentType, ContextType, RequireFields<MutationsDeleteManyFilesArgs, 'fileInput'>>;
+  deleteManyFiles?: Resolver<Maybe<ResolversTypes['DeleteFileResult']>, ParentType, ContextType, RequireFields<MutationsDeleteManyFilesArgs, 'filesInput'>>;
   deleteOneFile?: Resolver<Maybe<ResolversTypes['DeleteFileResult']>, ParentType, ContextType, RequireFields<MutationsDeleteOneFileArgs, 'fileInput'>>;
   restoreFileVersion?: Resolver<Maybe<ResolversTypes['RestoreFileResult']>, ParentType, ContextType, RequireFields<MutationsRestoreFileVersionArgs, 'fileInput'>>;
 };

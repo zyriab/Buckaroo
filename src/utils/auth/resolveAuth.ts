@@ -2,14 +2,10 @@ import { Permission } from '../../definitions/auth';
 import { RequestBody } from '../../definitions/root';
 import { hasPermission } from './hasPermission';
 
-type Resolve =
-  | [boolean, undefined]
-  | [boolean, { __typename: string; message: string }];
-
 export function resolveAuth(
   req: RequestBody,
   permission?: Permission
-): Resolve {
+): [boolean, undefined] | [boolean, { __typename: string; message: string }] {
   if (!req.body.isAuth) {
     return [
       false,

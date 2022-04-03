@@ -20,7 +20,7 @@ export async function getDownloadUrl(
     const client = s3Client();
     const dirName = args.rootPath
       ? ''
-      : `${args.req.body.userName}-${args.req.body.userId}/`;
+      : `${args.req.body.username}-${args.req.body.userId}/`;
     const fileName = sanitize(args.fileName);
     const expirationTime = 60 * 1;
 

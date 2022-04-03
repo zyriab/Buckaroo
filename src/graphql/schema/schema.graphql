@@ -74,6 +74,8 @@ input FileInput {
 input FilesInput {
   fileNames: [String!]!
   path: String!
+  versionIds: [String!]
+  rootPath: Boolean
 }
 
 input DirectoryInput {
@@ -125,7 +127,7 @@ type Queries {
 
 type Mutations {
   deleteOneFile(fileInput: FileInput!): DeleteFileResult
-  deleteManyFiles(fileInput: FileInput!): DeleteFileResult
+  deleteManyFiles(filesInput: FilesInput!): DeleteFileResult
   deleteDirectory(directoryInput: DirectoryInput): DeleteDirectoryResult
   restoreFileVersion(fileInput: FileInput!): RestoreFileResult
 }
