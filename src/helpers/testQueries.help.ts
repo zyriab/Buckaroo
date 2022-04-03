@@ -15,8 +15,8 @@ const errorSpreads = `
 
 export const listQuery = {
   query: `
-    query ListBucketContent($path: String!) {
-      listBucketContent(listInput: {path: $path}) {
+    query ListBucketContent($path: String!, $showRoot: Boolean) {
+      listBucketContent(listInput: { path: $path, showRoot: $showRoot }) {
         __typename
         ... on FileList {
           list {
@@ -40,13 +40,14 @@ export const listQuery = {
   `,
   variables: {
     path: '',
+    showRoot: false,
   },
 };
 
 export const fetchDlUrlQuery = {
   query: `
-    query GetDownloadUrl($fileName: String!, $path: String!){
-      getDownloadUrl(fileInput: {fileName: $fileName, path: $path}) {
+    query GetDownloadUrl($fileName: String!, $path: String!, $rootPath: Boolean){
+      getDownloadUrl(fileInput: {fileName: $fileName, path: $path, rootPath: $rootPath}) {
         __typename
         ... on SignedUrl {
           url
@@ -58,13 +59,14 @@ export const fetchDlUrlQuery = {
   variables: {
     fileName: '',
     path: '',
+    rootPath: false,
   },
 };
 
 export const fetchUpUrlQuery = {
   query: `
-    query GetUploadUrl($fileName: String!, $path: String!) {
-      getUploadUrl(fileInput: {fileName: $fileName, path: $path}) {
+    query GetUploadUrl($fileName: String!, $path: String!, $rootPath: Boolean) {
+      getUploadUrl(fileInput: {fileName: $fileName, path: $path, rootPath: $rootPath}) {
         __typename
         ... on SignedUrl {
           url
@@ -76,13 +78,14 @@ export const fetchUpUrlQuery = {
   variables: {
     fileName: '',
     path: '',
+    rootPath: false,
   },
 };
 
 export const deleteFileQuery = {
   query: `
-    mutation DeleteOneFile($fileName: String!, $path: String!) {
-      deleteOneFile(fileInput: {fileName: $fileName, path: $path}) {
+    mutation DeleteOneFile($fileName: String!, $path: String!, $rootPath: Boolean) {
+      deleteOneFile(fileInput: {fileName: $fileName, path: $path, rootPath: $rootPath}) {
         __typename
         ... on FileName {
           name
@@ -94,13 +97,14 @@ export const deleteFileQuery = {
   variables: {
     fileName: '',
     path: '',
+    rootPath: false,
   },
 };
 
 export const deleteManyFileQuery = {
   query: `
-    mutation deleteManyFiles($fileNames: [String!]!, $path: String!) {
-      deleteManyFiles(fileInput: {fileNames: $filesNames, path: $path}) {
+    mutation deleteManyFiles($fileNames: [String!]!, $path: String!, $versionIds: [String!], $rootPath: Boolean) {
+      deleteManyFiles(filesInput: { fileNames: $fileNames, path: $path, versionIds: $versionIds, rootPath: $rootPath }) {
         __typename
         ... on FileNameList {
           names
@@ -112,13 +116,15 @@ export const deleteManyFileQuery = {
   variables: {
     fileNames: [''],
     path: '',
+    versionIds: [''],
+    rootPath: false,
   },
 };
 
 export const restoreFileVersionQuery = {
   query: `
-  mutation RestoreFileVersion($versionId: String!) {
-    restoreFileVersion(fileInput: {fileName: "example.txt", path: "translations", versionId: $versionId}) {
+  mutation RestoreFileVersion($fileName: String!, $path: String!, $versionId: String!, $rootPath: Boolean) {
+    restoreFileVersion(fileInput: { fileName: $fileName, path: $path, versionId: $versionId, rootPath: $rootPath }) {
       __typename
       ... on VersionId {
         id
@@ -128,14 +134,17 @@ export const restoreFileVersionQuery = {
   }
   `,
   variables: {
+    fileName: '',
+    path: '',
     versionId: '',
+    rootPath: false,
   },
 };
 
 export const deleteDirectoryQuery = {
   query: `
-    mutation deleteDir($dirPath: String!){
-      deleteDirectory(directoryInput: {dirPath: $dirPath}) {
+    mutation deleteDir($dirPath: String!, $bucketName: String){
+      deleteDirectory(directoryInput: { dirPath: $dirPath, bucketName: $bucketName }) {
         __typename
         ... on Directory {
           name
@@ -148,5 +157,6 @@ export const deleteDirectoryQuery = {
   `,
   variables: {
     dirPath: '',
+    bucketName: '',
   },
 };
