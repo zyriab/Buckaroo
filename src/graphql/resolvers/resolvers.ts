@@ -140,7 +140,7 @@ export const gqlResolvers = {
     req: RequestBody
   ) => {
     try {
-      const [authed, error] = resolveAuth(req);
+      const [authed, error] = resolveAuth(req, args.filesInput.rootPath ? 'delete:file' : undefined);
       if (!authed) return error;
 
       const [failure, fileNames] = await deleteManyFiles({
@@ -169,7 +169,7 @@ export const gqlResolvers = {
     try {
       const isOwner =
         args.directoryInput.dirPath ===
-        `${req.body.userName}-${req.body.userId}`;
+        `${req.body.username}-${req.body.userId}`;
 
       const [authed, error] = resolveAuth(
         req,
@@ -201,13 +201,16 @@ export const gqlResolvers = {
       if (failure) throw failure;
       if (!done) throw new Error('Something went wrong...');
 
-      const dirName = args.directoryInput.dirPath.split('/').pop()!;
+      const dirName = normalize(args.directoryInput.dirPath)
+        .split('/')
+        .filter(Boolean)
+        .pop()!;
       const path = normalize(args.directoryInput.dirPath.replace(dirName, ''));
 
       return {
         __typename: 'Directory',
-        name: dirName != '' ? dirName : path,
-        path: `${path}/`,
+        name: `${dirName}/`,
+        path: normalize(`${path}/`, false),
         bucketName:
           args.directoryInput.bucketName || req.body.tenant.bucket.name,
       };
