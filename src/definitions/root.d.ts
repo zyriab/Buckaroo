@@ -14,7 +14,7 @@ export interface RequestBody extends Request {
     token: DecodedToken;
     isAuth: boolean;
     userId: string;
-    userName: string;
+    username: string;
     userEmail: string;
     permissions: Permission[];
     tenant: Tenant;
