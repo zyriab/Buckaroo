@@ -1,9 +1,5 @@
 import { RequestBody, ResponseBody } from '../definitions/root';
-import { ListBucketsCommand } from '@aws-sdk/client-s3';
-import {
-  s3Client,
-  checkBucketExists as checkBucketExistUtils,
-} from '../utils/s3.utils';
+import { checkBucketExists as checkBucketExistUtils } from '../utils/s3.utils';
 
 export async function checkBucketExists(
   req: RequestBody,
@@ -11,7 +7,10 @@ export async function checkBucketExists(
   next: () => void
 ) {
   try {
-    if (!req.body.isAuth) next();
+    if (!req.body.isAuth) {
+      req.body.tenant.bucket.exists = false;
+      return next();
+    }
 
     const [error, exists] = await checkBucketExistUtils(
       req.body.tenant.bucket.name
@@ -20,14 +19,13 @@ export async function checkBucketExists(
     if (error) throw error;
 
     if (!exists) {
-      res.status(404);
-      next();
+      req.body.tenant.bucket.exists = false;
+      return next();
     }
 
     req.body.tenant.bucket.exists = true;
     next();
   } catch (err) {
-    res.status(500);
     return next();
   }
 }
