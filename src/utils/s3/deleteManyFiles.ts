@@ -9,6 +9,7 @@ interface InputArgs {
   req: RequestBody;
   fileNames: string[];
   path: string;
+  versionIds?: string[];
   rootPath?: boolean;
 }
 
@@ -20,7 +21,7 @@ export async function deleteManyFiles(
     const fileNames = args.fileNames.map((n) => sanitize(n));
     const dirName = args.rootPath
       ? ''
-      : `${args.req.body.userName}-${args.req.body.userId}/`;
+      : `${args.req.body.username}-${args.req.body.userId}/`;
 
     const params = {
       Bucket: args.req.body.tenant.bucket.name,
@@ -30,14 +31,17 @@ export async function deleteManyFiles(
     };
 
     for (const n of args.fileNames) {
-      const [error, versionIds] = await getAllFileVersions({
-        req: args.req,
-        fileName: n,
-        path: path,
-        rootPath: args.rootPath,
-      });
+      let versionIds: string[] | undefined, error: Error | undefined;
+      if (!args.versionIds) {
+        [error, versionIds] = await getAllFileVersions({
+          req: args.req,
+          fileName: n,
+          path: path,
+          rootPath: args.rootPath,
+        });
 
-      if (error) throw error;
+        if (error) throw error;
+      } else versionIds = args.versionIds;
 
       for (const i of versionIds!) {
         params.Delete.Objects.push({
