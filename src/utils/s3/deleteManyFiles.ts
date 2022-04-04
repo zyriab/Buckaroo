@@ -1,6 +1,6 @@
 import { RequestBody } from '../../definitions/root';
 import { DeleteObjectsCommand } from '@aws-sdk/client-s3';
-import { getAllFileVersions } from './getAllFileVersions';
+import { getManyFilesVersionsIds } from './getManyFilesVersionsIds';
 import { s3Client } from './s3Client';
 import sanitize from 'sanitize-filename';
 import normalize from 'normalize-path';
@@ -17,9 +17,6 @@ export async function deleteManyFiles(
   args: InputArgs
 ): Promise<[undefined, string[]] | [Error]> {
   try {
-    if (args.versionIds && typeof args.versionIds !== 'string')
-      throw new Error('VersionIds need to be strings.');
-
     const path = normalize(args.path);
     const fileNames = args.fileNames.map((n) => sanitize(n));
     const dirName = args.rootPath
@@ -33,25 +30,39 @@ export async function deleteManyFiles(
       },
     };
 
-    for (const n of args.fileNames) {
-      let versionIds: string[] | undefined, error: Error | undefined;
-      if (!args.versionIds) {
-        [error, versionIds] = await getAllFileVersions({
-          req: args.req,
-          fileName: n,
-          path: path,
-          rootPath: args.rootPath,
-        });
+    let versionIdsMap: [string, string[]][] | undefined,
+      error: Error | undefined;
+    if (args.req.body.tenant.bucket.isVersioned && !args.versionIds) {
+      [error, versionIdsMap] = await getManyFilesVersionsIds({
+        req: args.req,
+        fileNames,
+        path,
+        addDeleteMarkersIds: true,
+        rootPath: args.rootPath,
+      });
 
-        if (error) throw error;
-      } else versionIds = args.versionIds;
+      if (error) throw error;
 
-      for (const i of versionIds!) {
+      for (const map of versionIdsMap!) {
+        for (const i of map[1])
+          params.Delete.Objects.push({
+            Key: `${dirName}${path}/${map[0]}`,
+            VersionId: i,
+          });
+      }
+    } else if (args.req.body.tenant.bucket.isVersioned && args.versionIds) {
+      for (const n of args.fileNames)
+        for (const i of args.versionIds!) {
+          params.Delete.Objects.push({
+            Key: `${dirName}${path}/${n}`,
+            VersionId: i,
+          });
+        }
+    } else {
+      for (const n of args.fileNames)
         params.Delete.Objects.push({
           Key: `${dirName}${path}/${n}`,
-          VersionId: i,
         });
-      }
     }
 
     const res = await s3Client().send(new DeleteObjectsCommand(params));
