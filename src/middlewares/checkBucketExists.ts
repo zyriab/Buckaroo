@@ -1,5 +1,5 @@
 import { RequestBody, ResponseBody } from '../definitions/root';
-import { checkBucketExists as checkBucketExistUtils } from '../utils/s3.utils';
+import { isBucketExisting } from '../utils/s3.utils';
 
 export async function checkBucketExists(
   req: RequestBody,
@@ -12,7 +12,7 @@ export async function checkBucketExists(
       return next();
     }
 
-    const [error, exists] = await checkBucketExistUtils(
+    const [error, exists] = await isBucketExisting(
       req.body.tenant.bucket.name
     );
 

@@ -1,5 +1,5 @@
 import { restoreFileVersionQuery } from '../../helpers/testQueries.help';
-import { getAllFileVersions } from '../../utils/s3/getAllFileVersions';
+import { getOneFileVersionsIds } from '../../utils/s3/getOneFileVersionsIds';
 import fakeReq from '../../helpers/mockRequest.help';
 import app from '../../app';
 import supertest from 'supertest';
@@ -36,7 +36,7 @@ beforeAll(async () => {
       res.push(await uploadFileToS3(u, './src/pseudo/', fileName));
   }
 
-  [e, v] = await getAllFileVersions({
+  [e, v] = await getOneFileVersionsIds({
     req: fakeReq,
     fileName,
     path,
@@ -71,7 +71,7 @@ test('Should restore older version of file', (done) => {
       expect(res.body).toBeInstanceOf(Object);
       expect(res.body.data.restoreFileVersion.id).not.toBeUndefined();
 
-      getAllFileVersions({
+      getOneFileVersionsIds({
         req: fakeReq,
         fileName,
         path,
