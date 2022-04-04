@@ -3,6 +3,7 @@ import { deleteManyFiles, listBucketContent } from '../s3.utils';
 import { s3Client } from './s3Client';
 import { DeleteObjectCommand } from '@aws-sdk/client-s3';
 import normalize from 'normalize-path';
+import { DeleteMarker } from './listBucketContent';
 
 interface InputArgs {
   req: RequestBody;
@@ -20,30 +21,70 @@ export async function deleteDirectory(
     const [fail, files, markers, dirs] = await listBucketContent({
       req: args.req,
       path,
-      getMarkersIds: true,
       getDirs: true,
+      getDeleteMarkers: true,
       showRoot: true,
     });
 
     if (fail) throw fail;
 
-    if (dirs!.length > 0)
+    // First we sort the directory names by farthest from root to closest
+    // then we iterate through the directories array and delete each files
+    // then we delete the remaining delete markers if there's any
+    if (dirs!.length > 0) {
+      (<string[]>dirs).sort(
+        (a, b) =>
+          normalize(b).split('/').length - normalize(a).split('/').length
+      );
+
       for (const d of dirs!) {
-        const [error] = await deleteDirectory({
+        let [error] = await deleteManyFiles({
           req: args.req,
-          dirPath: <string>d,
-          bucketName,
+          fileNames: files!.filter((f) => f.path === d).map((f) => f.name),
+          path: <string>d,
+          versionIds: args.req.body.tenant.bucket.isVersioned
+            ? files!.filter((f) => f.path === d).map((f) => f.id!)
+            : undefined,
         });
+
+        if (error) throw error;
+
+        [error] = await deleteManyFiles({
+          req: args.req,
+          fileNames: (markers as DeleteMarker[])!
+            .filter((f) => f.path === d)
+            .map((f) => f.name),
+          path: <string>d,
+          versionIds: args.req.body.tenant.bucket.isVersioned
+            ? (markers as DeleteMarker[])!
+                .filter((f) => f.path === d)
+                .map((f) => f.id!)
+            : undefined,
+        });
+
         if (error) throw error;
       }
-
-    if (files!.length > 0) {
-      const [error] = await deleteManyFiles({
+    } else {
+      let [error] = await deleteManyFiles({
         req: args.req,
         fileNames: files!.map((f) => f.name),
         path,
-        rootPath: true,
+        versionIds: args.req.body.tenant.bucket.isVersioned
+          ? files!.map((f) => f.id!)
+          : undefined,
       });
+
+      if (error) throw error;
+
+      [error] = await deleteManyFiles({
+        req: args.req,
+        fileNames: (markers as DeleteMarker[])!.map((f) => f.name),
+        path,
+        versionIds: args.req.body.tenant.bucket.isVersioned
+          ? (markers as DeleteMarker[])!.map((f) => f.id!)
+          : undefined,
+      });
+
       if (error) throw error;
     }
 
