@@ -17,7 +17,7 @@ export async function restoreFileVersion(
   args: InputArgs
 ): Promise<[undefined, string] | [Error]> {
   try {
-    if (typeof args.versionId !== 'string') throw new Error('VersionId needs to be a string.');
+    if (typeof args.versionId !== 'string') throw new Error('versionId needs to be a string.');
 
     const bucket = args.req.body.tenant.bucket.name;
     const dirName = args.rootPath
