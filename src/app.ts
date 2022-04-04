@@ -8,6 +8,7 @@ import { gqlSchema } from './graphql/schema/gqlSchema';
 import { gqlResolvers } from './graphql/resolvers/resolvers';
 import { checkAuth } from './middlewares/checkAuth';
 import { checkBucketExists } from './middlewares/checkBucketExists';
+import { checkBucketVersioning } from './middlewares/checkBucketVersioning';
 import { setReqMetadata } from './middlewares/setReqMetadata';
 import { setTestingData } from './middlewares/setTestingData';
 import dotenv from 'dotenv';
@@ -38,6 +39,7 @@ if (process.env.NODE_ENV !== 'test') {
   app.use(checkAuth);
   app.use(setReqMetadata);
   app.use(checkBucketExists);
+  app.use(checkBucketVersioning);
 } else {
   app.use(setTestingData);
 }
