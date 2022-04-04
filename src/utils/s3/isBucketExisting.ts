@@ -1,7 +1,7 @@
 import { ListBucketsCommand } from '@aws-sdk/client-s3';
 import { s3Client } from './s3Client';
 
-export async function checkBucketExists(bucketName: string): Promise<[undefined, boolean] | [Error]> {
+export async function isBucketExisting(bucketName: string): Promise<[undefined, boolean] | [Error]> {
   try {
     const data = await s3Client().send(new ListBucketsCommand({}));
     if (!data.Buckets) return [undefined, false];
