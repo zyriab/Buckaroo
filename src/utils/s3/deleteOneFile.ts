@@ -4,7 +4,7 @@ import {
   DeleteObjectCommandOutput,
 } from '@aws-sdk/client-s3';
 import { s3Client } from './s3Client';
-import { getAllFileVersions } from './getAllFileVersions';
+import { getOneFileVersionsIds } from './getOneFileVersionsIds';
 import sanitize from 'sanitize-filename';
 import normalize from 'normalize-path';
 
@@ -20,9 +20,6 @@ export async function deleteOneFile(
   args: InputArgs
 ): Promise<[undefined, string] | [Error]> {
   try {
-    if (args.versionId && typeof args.versionId !== 'string')
-      throw new Error('VersionId needs to be a string.');
-
     let res: DeleteObjectCommandOutput | undefined;
     const fileName = sanitize(args.fileName);
     const path = normalize(args.path);
@@ -38,10 +35,11 @@ export async function deleteOneFile(
     if (args.versionId)
       res = await s3Client().send(new DeleteObjectCommand(params));
     else {
-      const [error, versionIds] = await getAllFileVersions({
+      const [error, versionIds] = await getOneFileVersionsIds({
         req: args.req,
         fileName,
         path,
+        addDeleteMarkersIds: true,
         rootPath: args.rootPath,
       });
 
@@ -58,9 +56,9 @@ export async function deleteOneFile(
     if (status && status >= 200 && status <= 299) return [undefined, fileName];
 
     throw new Error(
-      `Could not finish deletion: ${status}. Some object may have been deleted.`
+      `Could not finish deletion: ${status}. Some objects may have been deleted.`
     );
-  } catch (err: any) {
+  } catch (err) {
     return [err as Error];
   }
 }
