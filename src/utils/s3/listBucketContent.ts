@@ -11,23 +11,25 @@ import normalize from 'normalize-path';
 interface InputArgs {
   req: RequestBody;
   path?: string;
-  getMarkersIds?: boolean;
+  getDeleteMarkers?: boolean;
   getDirs?: boolean;
   showRoot?: boolean;
 }
 
-export interface MarkerData {
+export interface DeleteMarker {
   name: string;
   id: string;
+  path: string;
+  isLatest: boolean;
 }
 
 export async function listBucketContent(
   args: InputArgs
 ): Promise<
   | [undefined, File[]]
-  | [undefined, File[], MarkerData[]]
+  | [undefined, File[], DeleteMarker[]]
   | [undefined, File[], string[]]
-  | [undefined, File[], MarkerData[], string[]]
+  | [undefined, File[], DeleteMarker[], string[]]
   | [Error]
 > {
   try {
@@ -64,44 +66,49 @@ export async function listBucketContent(
       ];
       const dirs = dirSet.filter((d) => normalize(`${d}/`, false) !== prefix);
 
-      const markers =
+      const markers: DeleteMarker[] =
         res.DeleteMarkers?.filter(
-          (m: DeleteMarkerEntry) =>
-            m.Key && m.VersionId !== 'null' && m.Key !== prefix
+          (m) => m.Key && m.VersionId !== 'null' && m.Key !== prefix
         ).map((m) => {
-          return { name: m.Key!.replace(prefix, ''), id: m.VersionId! };
+          return {
+            name: m.Key!.replace(prefix, ''),
+            id: m.VersionId!,
+            path: prefix,
+            isLatest: m.IsLatest!,
+          };
         }) || [];
 
-      const fileList = files!
+      const fileList: File[] = files!
         .filter((f: ObjectVersion) => f.IsLatest)
         .map((f) => {
           return {
-            id: f.VersionId!,
-            name: f.Key?.replace(prefix, '')!,
-            lastModified: f.LastModified?.toISOString()!,
+            id: f.VersionId,
+            name: f.Key!.replace(prefix, ''),
+            lastModified: f.LastModified!.toISOString(),
             size: f.Size!,
             path: prefix,
             versions: [] as Version[],
           };
         });
 
-      for (const f of fileList) {
-        f.versions = versions!
-          .filter((v) => v.Key?.replace(prefix, '') === f.name)
-          .map((v) => {
-            return {
-              id: v.VersionId!,
-              name: v.Key?.replace(prefix, '')!,
-              lastModified: v.LastModified?.toISOString()!,
-              size: v.Size!,
-              path: prefix,
-            } as Version;
-          });
-      }
+      if (args.req.body.tenant.bucket.isVersioned)
+        for (const f of fileList) {
+          f.versions = versions!
+            .filter((v) => v.Key!.replace(prefix, '') === f.name)
+            .map((v) => {
+              return {
+                id: v.VersionId,
+                name: v.Key!.replace(prefix, ''),
+                lastModified: v.LastModified!.toISOString(),
+                size: v.Size,
+                path: prefix,
+              } as Version;
+            });
+        }
 
       data.push(undefined);
       data.push(fileList);
-      if (args.getMarkersIds) data.push(markers);
+      if (args.getDeleteMarkers) data.push(markers);
       if (args.getDirs) data.push(dirs);
 
       return data;
