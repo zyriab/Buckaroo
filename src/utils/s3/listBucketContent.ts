@@ -6,6 +6,7 @@ import {
   ObjectVersion,
 } from '@aws-sdk/client-s3';
 import { s3Client } from './s3Client';
+import { getFileExtension } from '../tools/getFileExtension.utils';
 import normalize from 'normalize-path';
 
 interface InputArgs {
@@ -46,20 +47,16 @@ export async function listBucketContent(
     const status = res.$metadata.httpStatusCode;
     if (status && status >= 200 && status <= 299) {
       // Returns file extension if there's one or undefined if not, /folder.name/ returns undefined
-      const fileExtensionRegExp = /(?:\.([^./]+))?$/;
       const files =
         res.Versions?.filter(
-          (v: ObjectVersion) =>
-            v.Key && fileExtensionRegExp.exec(v.Key)![1] !== undefined
+          (v: ObjectVersion) => v.Key && getFileExtension(v.Key)
         ) || [];
       const versions = files.filter((f: ObjectVersion) => !f.IsLatest);
       const dirSet = [
         ...new Set(
           res.Versions?.map((v: ObjectVersion) => {
             const a = v.Key!.split('/');
-            fileExtensionRegExp.exec(a[a.length - 1])![1] !== undefined
-              ? a.pop()
-              : '';
+            getFileExtension(a[a.length - 1]) ? a.pop() : '';
             return a.join('/');
           })
         ),
