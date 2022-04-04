@@ -5,6 +5,7 @@ export interface Tenant {
   name: string;
   bucket: {
     exists: boolean,
+    isVersioned: boolean,
     name: string;
   };
 }

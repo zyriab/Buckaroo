@@ -9,6 +9,7 @@ export function setTestingData(
     name: 'test-bucket',
     bucket: {
       exists: true,
+      isVersioned: true,
       name: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
     },
   };

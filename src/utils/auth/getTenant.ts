@@ -13,6 +13,7 @@ export function getTenant(tkn: DecodedToken): Tenant | undefined {
     name: name,
     bucket: {
       exists: false,
+      isVersioned: false,
       name: `${process.env.BUCKET_NAMESPACE}${name.toLowerCase()}-app`,
     },
   };
