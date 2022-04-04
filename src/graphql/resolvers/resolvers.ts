@@ -9,8 +9,8 @@ import {
   deleteOneFile,
   restoreFileVersion,
   deleteDirectory,
-  checkBucketExists,
-  checkBucketVersioning,
+  isBucketExisting,
+  isBucketVersioned,
   getDownloadUrl,
   getUploadUrl,
 } from '../../utils/s3.utils';
@@ -140,7 +140,10 @@ export const gqlResolvers = {
     req: RequestBody
   ) => {
     try {
-      const [authed, error] = resolveAuth(req, args.filesInput.rootPath ? 'delete:file' : undefined);
+      const [authed, error] = resolveAuth(
+        req,
+        args.filesInput.rootPath ? 'delete:file' : undefined
+      );
       if (!authed) return error;
 
       const [failure, fileNames] = await deleteManyFiles({
@@ -167,9 +170,9 @@ export const gqlResolvers = {
     req: RequestBody
   ) => {
     try {
-      const isOwner =
-        args.directoryInput.dirPath ===
-        `${req.body.username}-${req.body.userId}`;
+      const isOwner = args.directoryInput.dirPath.startsWith(
+        `${req.body.username}-${req.body.userId}`
+      );
 
       const [authed, error] = resolveAuth(
         req,
@@ -177,20 +180,16 @@ export const gqlResolvers = {
       );
       if (!authed) return error;
 
-      const [storageError, exists] = await checkBucketExists(
+      const [storageError, exists] = await isBucketExisting(
         args.directoryInput.bucketName || req.body.tenant.bucket.name
       );
 
       if (storageError) throw storageError;
       if (!exists)
-        return [
-          undefined,
-          false,
-          {
-            __typename: 'StorageNotFound',
-            message: 'The requested bucket could not be found',
-          },
-        ];
+        return {
+          __typename: 'StorageNotFound',
+          message: 'The requested bucket could not be found',
+        };
 
       const [failure, done] = await deleteDirectory({
         req,
@@ -232,12 +231,11 @@ export const gqlResolvers = {
       );
       if (!authed) return error;
 
-      if (
-        !(await checkBucketVersioning({
-          bucketName: req.body.tenant.bucket.name,
-        }))
-      )
+      if (!(await isBucketVersioned(req.body.tenant.bucket.name)))
         throw new Error('The requested file is not on a versioned storage.');
+
+      if (!args.fileInput.versionId)
+        throw new Error('No version id specified!');
 
       const [failure, newId] = await restoreFileVersion({
         req,
