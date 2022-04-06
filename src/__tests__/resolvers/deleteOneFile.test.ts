@@ -47,7 +47,8 @@ test('Should delete specified file', (done) => {
     .end((err: any, res: any) => {
       if (err) return done(err);
       expect(res.body).toBeInstanceOf(Object);
-      expect(res.body.data.deleteOneFile.name).not.toBeUndefined();
+      expect(res.body.data.deleteOneFile).not.toBeUndefined();
+      expect(res.body.data.deleteOneFile.__typename).toBe('FileName');
       expect(res.body.data.deleteOneFile.name).toMatch(fileName);
       done();
     });

@@ -34,6 +34,8 @@ test('Should fetch pre-signed upload URL for <user-folder>/translations/example.
     .end((err: any, res: any) => {
       if (err) return done(err);
       expect(res.body).toBeInstanceOf(Object);
+      expect(res.body.data.getUploadUrl).not.toBeUndefined();
+      expect(res.body.data.getUploadUrl.__typename).toBe('SignedUrl');
       expect(res.body.data.getUploadUrl.url).not.toBeUndefined();
       uploadUrl = res.body.data.getUploadUrl.url;
       done();

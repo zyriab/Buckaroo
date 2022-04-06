@@ -53,6 +53,8 @@ test('Should delete files example.txt & example2.txt', (done) => {
     .end((err: any, res: any) => {
       if (err) return done(err);
       expect(res.body).toBeInstanceOf(Object);
+      expect(res.body.data.deleteManyFiles).not.toBeUndefined();
+      expect(res.body.data.deleteManyFiles.__typename).toBe('FileNameList');
       expect(res.body.data.deleteManyFiles.names).not.toBeUndefined();
       expect(res.body.data.deleteManyFiles.names[0]).toMatch('example.txt');
       expect(res.body.data.deleteManyFiles.names[1]).toMatch('example2.txt');

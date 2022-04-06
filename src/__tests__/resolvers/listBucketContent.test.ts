@@ -18,6 +18,7 @@ beforeAll(async () => {
     req: fakeReq,
     fileName,
     path,
+    root: 'test-user-1234abcd',
   });
 
   if (!err) {
@@ -32,7 +33,6 @@ afterAll(() => {
 test("Should query and list current user's directory content", (done) => {
   const query = listQuery;
   query.variables.path = path;
-  query.variables.showRoot = false;
 
   request
     .post('/gql')
@@ -54,8 +54,8 @@ test("Should query and list current user's directory content", (done) => {
 
 test("Should query and list other user's directory content", (done) => {
   const query = listQuery;
-  query.variables.path = `other-user-1234abcd/${path}`;
-  query.variables.showRoot = true;
+  query.variables.path = path;
+  query.variables.root = 'other-user-1234abcd/';
 
   request
     .post('/gql')
@@ -66,8 +66,9 @@ test("Should query and list other user's directory content", (done) => {
     .end((err: any, res: any) => {
       if (err) return done(err);
       expect(res.body).toBeInstanceOf(Object);
+      expect(res.body.data.listBucketContent).not.toBeUndefined();
+      expect(res.body.data.listBucketContent.__typename).toBe('FileList');
       expect(res.body.data.listBucketContent.list).not.toBeUndefined();
-      expect(res.body.data.listBucketContent.list.length).toBe(2);
       done();
     });
 });
@@ -75,7 +76,7 @@ test("Should query and list other user's directory content", (done) => {
 test('Should query and list an empty folder (non-existant folder)', (done) => {
   const query = listQuery;
   query.variables.path = path;
-  query.variables.showRoot = true;
+  query.variables.root = '';
 
   request
     .post('/gql')
@@ -94,8 +95,8 @@ test('Should query and list an empty folder (non-existant folder)', (done) => {
 
 test("Should be blocked when querying and list other user's directory content (Unauthorized)", (done) => {
   const query = listQuery;
-  query.variables.path = `other-user-1234abcd/${path}`;
-  query.variables.showRoot = true;
+  query.variables.path = path;
+  query.variables.root = 'other-user-1234abcd/';
 
   process.env.TEST_AUTH = 'false';
 

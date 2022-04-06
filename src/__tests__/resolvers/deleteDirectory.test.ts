@@ -31,7 +31,7 @@ test('Should delete folder another-user/ in test-bucket', (done) => {
     .end((err: any, res: any) => {
       if (err) return done(err);
       expect(res.body).toBeInstanceOf(Object);
-      expect(res.body.data).not.toBeNull();
+      expect(res.body.data.deleteDirectory).not.toBeUndefined();
       expect(res.body.data.deleteDirectory.__typename).toBe('Directory');
       expect(res.body.data.deleteDirectory.name).toBe(`another-user/`);
       expect(res.body.data.deleteDirectory.path).toBe('/');
@@ -54,7 +54,7 @@ test('Should try to delete non-existant folder some-user/', (done) => {
     .end((err: any, res: any) => {
       if (err) return done(err);
       expect(res.body).toBeInstanceOf(Object);
-      expect(res.body.data).not.toBeNull();
+      expect(res.body.data.deleteDirectory).not.toBeUndefined();
       expect(res.body.data.deleteDirectory.__typename).toBe('Directory');
       expect(res.body.data.deleteDirectory.name).toBe(`${dirPath}`);
       expect(res.body.data.deleteDirectory.path).toBe('/');
@@ -79,7 +79,7 @@ test('Should be blocked when trying to delete a folder (Unauthorized)', (done) =
     .end((err: any, res: any) => {
       if (err) return done(err);
       expect(res.body).toBeInstanceOf(Object);
-      expect(res.body.data).not.toBeNull();
+      expect(res.body.data.deleteDirectory).not.toBeUndefined();
       expect(res.body.data.deleteDirectory.__typename).toBe('Unauthorized');
       done();
     });

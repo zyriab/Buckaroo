@@ -50,6 +50,8 @@ test('Should fetch pre-signed download URL for <user-folder>/translations/exampl
     .end((err: any, res: any) => {
       if (err) return done(err);
       expect(res.body).toBeInstanceOf(Object);
+      expect(res.body.data.getDownloadUrl).not.toBeUndefined();
+      expect(res.body.data.getDownloadUrl.__typename).toBe('SignedUrl');
       expect(res.body.data.getDownloadUrl.url).not.toBeUndefined();
       expect(res.body.data.getDownloadUrl.url).not.toContain('undefined');
       downloadUrl = res.body.data.getDownloadUrl.url;

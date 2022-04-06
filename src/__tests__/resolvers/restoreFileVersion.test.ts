@@ -76,6 +76,8 @@ test('Should restore older version of file', (done) => {
     .end((err: any, res: any) => {
       if (err) return done(err);
       expect(res.body).toBeInstanceOf(Object);
+      expect(res.body.data.restoreFileVersion).not.toBeUndefined();
+      expect(res.body.data.restoreFileVersion.__typename).toBe('VersionId');
       expect(res.body.data.restoreFileVersion.id).not.toBeUndefined();
 
       getOneFileVersionsIds({
