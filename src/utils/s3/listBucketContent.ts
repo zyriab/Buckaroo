@@ -16,6 +16,7 @@ interface InputArgs {
   path?: string;
   getDeleteMarkers?: boolean;
   getDirs?: boolean;
+  bucketName?: string;
 }
 
 export interface DeleteMarker {
@@ -44,7 +45,7 @@ export async function listBucketContent(
     const path = normalize(args.path || '');
     const fullPath = formatPath(`${root}/${path}/`, { stripTrailing: false });
     const params = {
-      Bucket: args.req.body.tenant.bucket.name,
+      Bucket: args.bucketName || args.req.body.tenant.bucket.name,
       Prefix: fullPath,
     };
     const res = await s3Client().send(new ListObjectVersionsCommand(params));
