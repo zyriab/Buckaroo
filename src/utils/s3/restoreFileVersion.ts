@@ -1,16 +1,17 @@
 import { RequestBody } from '../../definitions/root';
 import { CopyObjectCommand } from '@aws-sdk/client-s3';
+import { formatPath } from '../tools/formatPath.utils';
 import { s3Client } from './s3Client';
-import sanitize from 'sanitize-filename';
 import { deleteOneFile } from './deleteOneFile';
+import sanitize from 'sanitize-filename';
 import normalize from 'normalize-path';
 
 interface InputArgs {
   req: RequestBody;
   fileName: string;
+  root: string;
   path: string;
   versionId: string;
-  rootPath?: boolean;
 }
 
 export async function restoreFileVersion(
@@ -18,15 +19,14 @@ export async function restoreFileVersion(
 ): Promise<[undefined, string] | [Error]> {
   try {
     const bucket = args.req.body.tenant.bucket.name;
-    const dirName = args.rootPath
-      ? ''
-      : `${args.req.body.username}-${args.req.body.userId}/`;
+    const root = normalize(args.root);
     const fileName = sanitize(args.fileName);
     const path = normalize(args.path);
+    const fullPath = formatPath(`${root}/${path}/`, { stripTrailing: false });
     const params = {
       Bucket: bucket,
-      CopySource: `${bucket}/${dirName}${path}/${fileName}?versionId=${args.versionId}`,
-      Key: `${dirName}${path}/${fileName}`,
+      CopySource: `${bucket}/${fullPath}${fileName}?versionId=${args.versionId}`,
+      Key: `${fullPath}${fileName}`,
       MetadataDirective: 'REPLACE',
     };
     const res = await s3Client().send(new CopyObjectCommand(params));
@@ -41,6 +41,7 @@ export async function restoreFileVersion(
     const [error] = await deleteOneFile({
       req: args.req,
       fileName,
+      root,
       path,
       versionId: args.versionId,
     });

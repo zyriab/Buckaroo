@@ -5,15 +5,16 @@ import {
 } from '@aws-sdk/client-s3';
 import { s3Client } from './s3Client';
 import { getOneFileVersionsIds } from './getOneFileVersionsIds';
+import { formatPath } from '../tools/formatPath.utils';
 import sanitize from 'sanitize-filename';
 import normalize from 'normalize-path';
 
 interface InputArgs {
   req: RequestBody;
   fileName: string;
+  root: string;
   path: string;
   versionId?: string;
-  rootPath?: boolean;
 }
 
 export async function deleteOneFile(
@@ -22,13 +23,12 @@ export async function deleteOneFile(
   try {
     let res: DeleteObjectCommandOutput | undefined;
     const fileName = sanitize(args.fileName);
+    const root = normalize(args.root);
     const path = normalize(args.path);
-    const dirName = args.rootPath
-      ? ''
-      : `${args.req.body.username}-${args.req.body.userId}/`;
+    const fullPath = formatPath(`${root}/${path}/`, { stripTrailing: false });
     const params = {
       Bucket: args.req.body.tenant.bucket.name,
-      Key: path ? `${dirName}${path}/${fileName}` : `${dirName}${fileName}`,
+      Key: `${fullPath}${fileName}`,
       VersionId: args.versionId,
     };
 
@@ -40,7 +40,7 @@ export async function deleteOneFile(
         fileName,
         path,
         addDeleteMarkersIds: true,
-        rootPath: args.rootPath,
+        root,
       });
 
       if (error) return [error];

@@ -1,24 +1,28 @@
 import { File } from '../../definitions/generated/graphql';
 import { RequestBody } from '../../definitions/root';
 import { listBucketContent, DeleteMarker } from './listBucketContent';
+import normalize from 'normalize-path';
 
 interface InputArgs {
   req: RequestBody;
   fileName: string;
+  root: string;
   path: string;
   addDeleteMarkersIds?: boolean;
-  rootPath?: boolean;
 }
 
 export async function getOneFileVersionsIds(
   args: InputArgs
 ): Promise<[undefined, string[]] | [Error]> {
   try {
+    const root = normalize(args.root);
+    const path = normalize(args.path);
+
     const [error, fileList, markers] = await listBucketContent({
       req: args.req,
-      path: args.path,
+      root,
+      path,
       getDeleteMarkers: true,
-      showRoot: args.rootPath,
     });
 
     if (error) return [error];

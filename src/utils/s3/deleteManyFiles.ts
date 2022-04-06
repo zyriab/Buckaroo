@@ -1,6 +1,7 @@
 import { RequestBody } from '../../definitions/root';
 import { DeleteObjectsCommand } from '@aws-sdk/client-s3';
 import { getManyFilesVersionsIds } from './getManyFilesVersionsIds';
+import { formatPath } from '../tools/formatPath.utils';
 import { s3Client } from './s3Client';
 import sanitize from 'sanitize-filename';
 import normalize from 'normalize-path';
@@ -8,20 +9,19 @@ import normalize from 'normalize-path';
 interface InputArgs {
   req: RequestBody;
   fileNames: string[];
+  root: string;
   path: string;
   versionIds?: string[];
-  rootPath?: boolean;
 }
 
 export async function deleteManyFiles(
   args: InputArgs
 ): Promise<[undefined, string[]] | [Error]> {
   try {
+    const root = normalize(args.root);
     const path = normalize(args.path);
     const fileNames = args.fileNames.map((n) => sanitize(n));
-    const dirName = args.rootPath
-      ? ''
-      : `${args.req.body.username}-${args.req.body.userId}/`;
+    const fullPath = formatPath(`${root}/${path}/`, { stripTrailing: false });
 
     const params = {
       Bucket: args.req.body.tenant.bucket.name,
@@ -38,15 +38,15 @@ export async function deleteManyFiles(
         fileNames,
         path,
         addDeleteMarkersIds: true,
-        rootPath: args.rootPath,
+        root,
       });
-
+      
       if (error) throw error;
 
       for (const map of versionIdsMap!) {
         for (const i of map[1])
           params.Delete.Objects.push({
-            Key: `${dirName}${path}/${map[0]}`,
+            Key: `${fullPath}${map[0]}`,
             VersionId: i,
           });
       }
@@ -54,14 +54,14 @@ export async function deleteManyFiles(
       for (const n of args.fileNames)
         for (const i of args.versionIds!) {
           params.Delete.Objects.push({
-            Key: `${dirName}${path}/${n}`,
+            Key: `${fullPath}${n}`,
             VersionId: i,
           });
         }
     } else {
       for (const n of args.fileNames)
         params.Delete.Objects.push({
-          Key: `${dirName}${path}/${n}`,
+          Key: `${fullPath}${n}`,
         });
     }
 

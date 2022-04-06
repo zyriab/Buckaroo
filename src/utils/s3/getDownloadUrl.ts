@@ -8,9 +8,9 @@ import normalize from 'normalize-path';
 interface InputArgs {
   req: RequestBody;
   fileName: string;
+  root: string;
   path: string;
   versionId?: string;
-  rootPath?: boolean;
 }
 
 export async function getDownloadUrl(
@@ -18,15 +18,13 @@ export async function getDownloadUrl(
 ): Promise<[undefined, string] | [Error]> {
   try {
     const client = s3Client();
-    const dirName = args.rootPath
-      ? ''
-      : `${args.req.body.username}-${args.req.body.userId}/`;
+    const root = normalize(args.root);
     const fileName = sanitize(args.fileName);
     const expirationTime = 60 * 1;
 
     let params = {
       Bucket: args.req.body.tenant.bucket.name,
-      Key: `${dirName}${normalize(args.path)}/${fileName}`,
+      Key: `${root}/${normalize(args.path)}/${fileName}`,
     };
 
     const res = await getSignedUrl(client, new GetObjectCommand(params), {
