@@ -62,6 +62,7 @@ type Unauthorized {
 input ListInput {
   path: String!
   root: String
+  bucketName: String
 }
 
 input FileInput {

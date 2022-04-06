@@ -74,6 +74,7 @@ export type ListBucketResult = FileList | ServerError | StorageNotFound | Unauth
 
 /** INPUT TYPES */
 export type ListInput = {
+  bucketName?: InputMaybe<Scalars['String']>;
   path: Scalars['String'];
   root?: InputMaybe<Scalars['String']>;
 };
