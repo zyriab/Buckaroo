@@ -169,7 +169,7 @@
             "deprecationReason": null
           },
           {
-            "name": "dirPath",
+            "name": "path",
             "description": null,
             "type": {
               "kind": "NON_NULL",
@@ -179,6 +179,18 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "root",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -335,11 +347,11 @@
             "deprecationReason": null
           },
           {
-            "name": "rootPath",
+            "name": "root",
             "description": null,
             "type": {
               "kind": "SCALAR",
-              "name": "Boolean",
+              "name": "String",
               "ofType": null
             },
             "defaultValue": null,
@@ -507,11 +519,11 @@
             "deprecationReason": null
           },
           {
-            "name": "rootPath",
+            "name": "root",
             "description": null,
             "type": {
               "kind": "SCALAR",
-              "name": "Boolean",
+              "name": "String",
               "ofType": null
             },
             "defaultValue": null,
@@ -622,11 +634,11 @@
             "deprecationReason": null
           },
           {
-            "name": "showRoot",
+            "name": "root",
             "description": null,
             "type": {
               "kind": "SCALAR",
-              "name": "Boolean",
+              "name": "String",
               "ofType": null
             },
             "defaultValue": null,
