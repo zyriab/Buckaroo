@@ -61,25 +61,26 @@ type Unauthorized {
 "INPUT TYPES"
 input ListInput {
   path: String!
-  showRoot: Boolean
+  root: String
 }
 
 input FileInput {
   fileName: String!
   path: String!
+  root: String
   versionId: String
-  rootPath: Boolean
 }
 
 input FilesInput {
   fileNames: [String!]!
   path: String!
+  root: String
   versionIds: [String!]
-  rootPath: Boolean
 }
 
 input DirectoryInput {
-  dirPath: String!
+  path: String!
+  root: String
   bucketName: String
 }
 
