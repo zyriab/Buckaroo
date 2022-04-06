@@ -18,6 +18,7 @@ import { listBucketContent } from '../../utils/s3/listBucketContent';
 import { resolveAuth } from '../../utils/auth.utils';
 import { RequestBody } from '../../definitions/root';
 import normalize from 'normalize-path';
+import { formatPath } from '../../utils/tools/formatPath.utils';
 
 export const gqlResolvers = {
   listBucketContent: async (
@@ -27,14 +28,17 @@ export const gqlResolvers = {
     try {
       const [authed, error] = resolveAuth(
         req,
-        args.listInput.showRoot ? 'read:bucket' : undefined
+        args.listInput.root !== undefined ? 'read:bucket' : undefined
       );
       if (!authed) return error;
 
+      const root =
+        args.listInput.root ?? `${req.body.username}-${req.body.userId}`;
+
       const [failure, content] = await listBucketContent({
         req: req,
+        root,
         path: args.listInput.path,
-        showRoot: args.listInput.showRoot || undefined,
       });
 
       if (failure) throw failure;
@@ -54,15 +58,18 @@ export const gqlResolvers = {
     try {
       const [authed, error] = resolveAuth(
         req,
-        args.fileInput.rootPath ? 'create:file' : undefined
+        args.fileInput.root !== undefined ? 'create:file' : undefined
       );
       if (!authed) return error;
+
+      const root =
+        args.fileInput.root ?? `${req.body.username}-${req.body.userId}`;
 
       const [failure, url] = await getUploadUrl({
         req,
         fileName: args.fileInput.fileName,
+        root,
         path: args.fileInput.path,
-        rootPath: args.fileInput.rootPath || undefined,
       });
 
       if (failure !== undefined) throw failure;
@@ -82,16 +89,19 @@ export const gqlResolvers = {
     try {
       const [authed, error] = resolveAuth(
         req,
-        args.fileInput.rootPath ? 'read:bucket' : undefined
+        args.fileInput.root !== undefined ? 'read:bucket' : undefined
       );
       if (!authed) return error;
+
+      const root =
+        args.fileInput.root ?? `${req.body.username}-${req.body.userId}`;
 
       const [failure, url] = await getDownloadUrl({
         req,
         fileName: args.fileInput.fileName,
+        root,
         path: args.fileInput.path,
         versionId: args.fileInput.versionId || undefined,
-        rootPath: args.fileInput.rootPath || undefined,
       });
 
       if (failure) throw failure;
@@ -111,15 +121,18 @@ export const gqlResolvers = {
     try {
       const [authed, error] = resolveAuth(
         req,
-        args.fileInput.rootPath ? 'delete:file' : undefined
+        args.fileInput.root !== undefined ? 'delete:file' : undefined
       );
       if (!authed) return error;
+
+      const root =
+        args.fileInput.root ?? `${req.body.username}-${req.body.userId}`;
 
       const [failure, fileName] = await deleteOneFile({
         req,
         fileName: args.fileInput.fileName,
         path: args.fileInput.path,
-        rootPath: args.fileInput.rootPath || undefined,
+        root,
       });
 
       if (failure) throw failure;
@@ -142,13 +155,17 @@ export const gqlResolvers = {
     try {
       const [authed, error] = resolveAuth(
         req,
-        args.filesInput.rootPath ? 'delete:file' : undefined
+        args.filesInput.root !== undefined ? 'delete:file' : undefined
       );
       if (!authed) return error;
+
+      const root =
+        args.filesInput.root ?? `${req.body.username}-${req.body.userId}`;
 
       const [failure, fileNames] = await deleteManyFiles({
         req,
         fileNames: args.filesInput.fileNames,
+        root,
         path: args.filesInput.path,
       });
 
@@ -170,7 +187,9 @@ export const gqlResolvers = {
     req: RequestBody
   ) => {
     try {
-      const isOwner = args.directoryInput.dirPath.startsWith(
+      const root =
+        args.directoryInput.root ?? `${req.body.username}-${req.body.userId}`;
+      const isOwner = root.startsWith(
         `${req.body.username}-${req.body.userId}`
       );
 
@@ -193,18 +212,17 @@ export const gqlResolvers = {
 
       const [failure, done] = await deleteDirectory({
         req,
-        dirPath: args.directoryInput.dirPath,
+        path: args.directoryInput.path,
+        root,
         bucketName: args.directoryInput.bucketName || undefined,
       });
 
       if (failure) throw failure;
       if (!done) throw new Error('Something went wrong...');
 
-      const dirName = normalize(args.directoryInput.dirPath)
-        .split('/')
-        .filter(Boolean)
-        .pop()!;
-      const path = normalize(args.directoryInput.dirPath.replace(dirName, ''));
+      const fullPath = formatPath(`${root}/${args.directoryInput.path}`);
+      const dirName = fullPath.split('/').filter(Boolean).pop()!;
+      const path = normalize(fullPath.replace(dirName, ''));
 
       return {
         __typename: 'Directory',
@@ -227,7 +245,7 @@ export const gqlResolvers = {
     try {
       const [authed, error] = resolveAuth(
         req,
-        args.fileInput.rootPath ? 'update:file' : undefined
+        args.fileInput.root !== undefined ? 'update:file' : undefined
       );
       if (!authed) return error;
 
@@ -237,12 +255,15 @@ export const gqlResolvers = {
       if (!args.fileInput.versionId)
         throw new Error('No version id specified!');
 
+      const root =
+        args.fileInput.root ?? `${req.body.username}-${req.body.userId}`;
+
       const [failure, newId] = await restoreFileVersion({
         req,
         fileName: args.fileInput.fileName,
+        root,
         path: args.fileInput.path,
         versionId: args.fileInput.versionId!,
-        rootPath: args.fileInput.rootPath || undefined,
       });
 
       if (failure) throw failure;
