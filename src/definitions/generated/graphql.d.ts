@@ -27,7 +27,8 @@ export type Directory = {
 
 export type DirectoryInput = {
   bucketName?: InputMaybe<Scalars['String']>;
-  dirPath: Scalars['String'];
+  path: Scalars['String'];
+  root?: InputMaybe<Scalars['String']>;
 };
 
 export type File = {
@@ -43,7 +44,7 @@ export type File = {
 export type FileInput = {
   fileName: Scalars['String'];
   path: Scalars['String'];
-  rootPath?: InputMaybe<Scalars['Boolean']>;
+  root?: InputMaybe<Scalars['String']>;
   versionId?: InputMaybe<Scalars['String']>;
 };
 
@@ -65,7 +66,7 @@ export type FileNameList = {
 export type FilesInput = {
   fileNames: Array<Scalars['String']>;
   path: Scalars['String'];
-  rootPath?: InputMaybe<Scalars['Boolean']>;
+  root?: InputMaybe<Scalars['String']>;
   versionIds?: InputMaybe<Array<Scalars['String']>>;
 };
 
@@ -74,7 +75,7 @@ export type ListBucketResult = FileList | ServerError | StorageNotFound | Unauth
 /** INPUT TYPES */
 export type ListInput = {
   path: Scalars['String'];
-  showRoot?: InputMaybe<Scalars['Boolean']>;
+  root?: InputMaybe<Scalars['String']>;
 };
 
 export type Mutations = {
