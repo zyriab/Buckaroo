@@ -26,6 +26,7 @@ beforeAll(async () => {
       req: fakeReq,
       fileName,
       path,
+      root: 'test-user-1234abcd'
     });
     errors.push(err);
     urls.push(`${url}`);
@@ -40,12 +41,18 @@ beforeAll(async () => {
     req: fakeReq,
     fileName,
     path,
+    root: 'test-user-1234abcd',
   });
 });
 
 afterAll(async () => {
   if (process.env.TEST_AUTH === 'true')
-    await deleteOneFile({ req: fakeReq, fileName, path });
+    await deleteOneFile({
+      req: fakeReq,
+      fileName,
+      path,
+      root: 'test-user-1234abcd',
+    });
   process.env.TEST_AUTH = 'false';
 });
 
@@ -58,7 +65,7 @@ test('Should restore older version of file', (done) => {
   query.variables.fileName = fileName;
   query.variables.path = path;
   query.variables.versionId = v[v.length - 1];
-  query.variables.rootPath = false;
+  query.variables.root = undefined;
 
   request
     .post('/gql')
@@ -75,6 +82,7 @@ test('Should restore older version of file', (done) => {
         req: fakeReq,
         fileName,
         path,
+        root: 'test-user-1234abcd',
       }).then((ids) => {
         expect(ids).not.toContain(v[v.length - 1]);
         expect(ids[1]![0]).toBe(res.body.data.restoreFileVersion.id);
@@ -94,7 +102,7 @@ test('Should be blocked when restoring older version of file (Unauthorized)', (d
   query.variables.fileName = fileName;
   query.variables.path = path;
   query.variables.versionId = v[v.length - 1];
-  query.variables.rootPath = true;
+  query.variables.root = 'other-user-1234abcd';
 
   request
     .post('/gql')

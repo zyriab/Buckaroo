@@ -16,11 +16,13 @@ beforeAll(async () => {
     req: fakeReq,
     fileName: 'example.txt',
     path: 'translations',
+    root: 'test-user-1234abcd',
   });
   [err2, url2] = await getUploadUrl({
     req: fakeReq,
     fileName: 'example2.txt',
     path: 'translations',
+    root: 'test-user-1234abcd',
   });
   if (!err1 && !err2) {
     res1 = await uploadFileToS3(url1!, './src/pseudo/', 'example.txt');
@@ -41,8 +43,6 @@ test('Should delete files example.txt & example2.txt', (done) => {
   const query = deleteManyFileQuery;
   query.variables.fileNames = ['example.txt', 'example2.txt'];
   query.variables.path = 'translations';
-  query.variables.versionIds = [''];
-  query.variables.rootPath = false;
 
   request
     .post('/gql')
@@ -69,8 +69,7 @@ test('Should be blocked when trying to delete files example.txt & example2.txt f
   const query = deleteManyFileQuery;
   query.variables.fileNames = ['example.txt', 'example2.txt'];
   query.variables.path = 'translations';
-  query.variables.versionIds = [''];
-  query.variables.rootPath = true;
+  query.variables.root = 'other-user-1234abcd';
 
   process.env.TEST_AUTH = 'false';
 

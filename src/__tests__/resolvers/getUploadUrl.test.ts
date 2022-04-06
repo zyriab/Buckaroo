@@ -16,7 +16,7 @@ beforeAll(() => {
 });
 
 afterAll(() => {
-  deleteOneFile({ req: fakeReq, fileName, path });
+  deleteOneFile({ req: fakeReq, fileName, path, root: 'test-user-1234abcd' });
   process.env.TEST_AUTH = 'false';
 });
 

@@ -18,6 +18,7 @@ beforeAll(async () => {
     req: fakeReq,
     fileName,
     path,
+    root: 'test-user-1234abcd',
   });
 
   if (!err) {
@@ -36,7 +37,6 @@ test('Should delete specified file', (done) => {
   const query = deleteFileQuery;
   query.variables.fileName = fileName;
   query.variables.path = path;
-  query.variables.rootPath = false;
 
   request
     .post('/gql')
@@ -60,7 +60,7 @@ test('Should be blocked when deleting specified file from root (Unauthorized)', 
   const query = deleteFileQuery;
   query.variables.fileName = fileName;
   query.variables.path = path;
-  query.variables.rootPath = true;
+  query.variables.root = 'other-user-1234abcd';
 
   process.env.TEST_AUTH = 'false';
 
