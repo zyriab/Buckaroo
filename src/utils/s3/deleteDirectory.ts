@@ -1,29 +1,37 @@
 import { RequestBody } from '../../definitions/root';
 import { deleteManyFiles, listBucketContent } from '../s3.utils';
 import { s3Client } from './s3Client';
-import { DeleteObjectCommand } from '@aws-sdk/client-s3';
+import {
+  DeleteObjectCommand,
+  DeleteObjectCommandOutput,
+} from '@aws-sdk/client-s3';
 import normalize from 'normalize-path';
-import { DeleteMarker } from './listBucketContent';
+import { DeleteMarker, Directory } from './listBucketContent';
+import { getFileExtension } from '../tools/getFileExtension.utils';
 
 interface InputArgs {
   req: RequestBody;
-  dirPath: string;
+  path: string;
+  root: string;
   bucketName?: string;
 }
 
+// TODO: Need to see if there's a way to see if something was deleted or no...
+// because, as is, it returns true even when the directory doesn't exist
 export async function deleteDirectory(
   args: InputArgs
 ): Promise<[undefined, boolean] | [Error]> {
   try {
-    const path = normalize(args.dirPath);
+    const path = normalize(args.path);
+    const root = normalize(args.root);
     const bucketName = args.bucketName || args.req.body.tenant.bucket.name;
 
-    const [fail, files, markers, dirs] = await listBucketContent({
+    let [fail, files, markers, dirs] = await listBucketContent({
       req: args.req,
+      root,
       path,
       getDirs: true,
       getDeleteMarkers: true,
-      showRoot: true,
     });
 
     if (fail) throw fail;
@@ -32,72 +40,137 @@ export async function deleteDirectory(
     // then we iterate through the directories array and delete each files
     // then we delete the remaining delete markers if there's any
     if (dirs!.length > 0) {
-      (<string[]>dirs).sort(
+      (<Directory[]>dirs).sort(
         (a, b) =>
-          normalize(b).split('/').length - normalize(a).split('/').length
+          normalize(b.path).split('/').length -
+          normalize(a.path).split('/').length
       );
 
       for (const d of dirs!) {
-        let [error] = await deleteManyFiles({
-          req: args.req,
-          fileNames: files!.filter((f) => f.path === d).map((f) => f.name),
-          path: <string>d,
-          versionIds: args.req.body.tenant.bucket.isVersioned
-            ? files!.filter((f) => f.path === d).map((f) => f.id!)
-            : undefined,
-        });
+        let error: any;
+        const dirFiles = files!.filter(
+          (f) => normalize(f.path) === normalize(`${root}/${d.path}`)
+        );
+        const dirMarkers = (markers as DeleteMarker[])!.filter(
+          (m) => normalize(m.path) === normalize(`${root}/${m.path}`)
+        );
 
-        if (error) throw error;
+        if (dirFiles.length > 0) {
+          [error] = await deleteManyFiles({
+            req: args.req,
+            fileNames: dirFiles.map((f) => f.name),
+            root,
+            path: d.path,
+            versionIds: args.req.body.tenant.bucket.isVersioned
+              ? dirFiles.map((f) => f.id!)
+              : undefined,
+          });
 
+          if (error) throw error;
+
+          files = files!.filter((f) =>
+            dirFiles.map((df) => df.name).includes(f.name)
+          );
+        }
+
+        if (dirMarkers.length > 0) {
+          [error] = await deleteManyFiles({
+            req: args.req,
+            fileNames: dirMarkers.map((m) => m.name),
+            root,
+            path: d.path,
+            versionIds: args.req.body.tenant.bucket.isVersioned
+              ? dirMarkers.map((m) => m.id!)
+              : undefined,
+          });
+
+          if (error) throw error;
+
+          markers = (markers as DeleteMarker[])!.filter((m) =>
+            dirMarkers.map((dm) => dm.name).includes(m.name)
+          );
+        }
+
+        // deleting empty dir (if there's files, gets automatically deleted)
+        if (dirFiles.length === 0 && dirMarkers.length === 0) {
+          const res = await s3Client().send(
+            new DeleteObjectCommand({
+              Bucket: bucketName,
+              Key: normalize(`${root}/${d.path}/`, false),
+              VersionId: d.id,
+            })
+          );
+
+          const status = res ? res.$metadata.httpStatusCode : 500;
+          if (status && status <= 200 && status >= 299)
+            throw new Error(
+              `Could not delete folder: ${status}. Some objects inside may have been deleted.`
+            );
+        }
+      }
+    }
+
+    // If anything is present in the root folder
+    if (files!.length > 0 || markers!.length > 0) {
+      files!.sort(
+        (a, b) =>
+          normalize(b.path).split('/').length -
+          normalize(a.path).split('/').length
+      );
+
+      markers!.sort(
+        (a, b) =>
+          normalize(b.path).split('/').length -
+          normalize(a.path).split('/').length
+      );
+
+      let error: any;
+      if (files!.length > 0) {
         [error] = await deleteManyFiles({
           req: args.req,
-          fileNames: (markers as DeleteMarker[])!
-            .filter((f) => f.path === d)
-            .map((f) => f.name),
-          path: <string>d,
+          fileNames: files!.map((f) => f.name),
+          root,
+          path,
           versionIds: args.req.body.tenant.bucket.isVersioned
-            ? (markers as DeleteMarker[])!
-                .filter((f) => f.path === d)
-                .map((f) => f.id!)
+            ? files!.map((f) => f.id!)
             : undefined,
         });
 
         if (error) throw error;
       }
-    } else {
-      let [error] = await deleteManyFiles({
-        req: args.req,
-        fileNames: files!.map((f) => f.name),
-        path,
-        versionIds: args.req.body.tenant.bucket.isVersioned
-          ? files!.map((f) => f.id!)
-          : undefined,
-      });
 
-      if (error) throw error;
+      if (markers!.length > 0) {
+        [error] = await deleteManyFiles({
+          req: args.req,
+          fileNames: (markers as DeleteMarker[])!.map((m) =>
+            m.name !== `${root}/` ? m.name : ''
+          ),
+          root,
+          path,
+          versionIds: args.req.body.tenant.bucket.isVersioned
+            ? (markers as DeleteMarker[])!.map((m) => m.id!)
+            : undefined,
+        });
 
-      [error] = await deleteManyFiles({
-        req: args.req,
-        fileNames: (markers as DeleteMarker[])!.map((f) => f.name),
-        path,
-        versionIds: args.req.body.tenant.bucket.isVersioned
-          ? (markers as DeleteMarker[])!.map((f) => f.id!)
-          : undefined,
-      });
-
-      if (error) throw error;
+        if (error) throw error;
+      }
     }
 
-    const res = await s3Client().send(
-      new DeleteObjectCommand({
-        Bucket: bucketName,
-        Key: `${path}/`,
-      })
-    );
+    let res: DeleteObjectCommandOutput;
+    if (dirs!.length > 0) {
+      res = await s3Client().send(
+        new DeleteObjectCommand({
+          Bucket: bucketName,
+          Key: normalize(`${root}/`, false),
+          VersionId: args.req.body.tenant.bucket.isVersioned
+            ? dirs!.find((d) => d.path === '/')!.id
+            : 'null',
+        })
+      );
+      const status = res ? res.$metadata.httpStatusCode : 500;
 
-    const status = res ? res.$metadata.httpStatusCode : 500;
-
-    if (status && status >= 200 && status <= 299) return [undefined, true];
+      if (status && status >= 200 && status <= 299) return [undefined, true];
+    } else return [undefined, true];
 
     throw new Error(
       `Could not delete folder: ${status}. Some objects inside may have been deleted.`
