@@ -1,9 +1,11 @@
+import normalize from 'normalize-path';
 import {
   ListInput,
   FileInput,
   FilesInput,
   DirectoryInput,
 } from '../../definitions/generated/graphql';
+import { RequestBody } from '../../definitions/root';
 import {
   deleteManyFiles,
   deleteOneFile,
@@ -13,14 +15,12 @@ import {
   isBucketVersioned,
   getDownloadUrl,
   getUploadUrl,
+  listBucketContent
 } from '../../utils/s3.utils';
-import { listBucketContent } from '../../utils/s3/listBucketContent';
 import { resolveAuth } from '../../utils/auth.utils';
-import { RequestBody } from '../../definitions/root';
-import normalize from 'normalize-path';
-import { formatPath } from '../../utils/tools/formatPath.utils';
+import formatPath from '../../utils/tools/formatPath.utils';
 
-export const gqlResolvers = {
+const gqlResolvers = {
   listBucketContent: async (
     args: { listInput: ListInput },
     req: RequestBody
@@ -53,7 +53,7 @@ export const gqlResolvers = {
         args.listInput.root ?? `${req.body.username}-${req.body.userId}`;
 
       const [failure, content] = await listBucketContent({
-        req: req,
+        req,
         root,
         path: args.listInput.path,
         bucketName: args.listInput.bucketName || undefined,
@@ -105,7 +105,7 @@ export const gqlResolvers = {
 
       return {
         __typename: 'SignedUrl',
-        url: url,
+        url,
       };
     } catch (err) {
       return {
@@ -148,7 +148,7 @@ export const gqlResolvers = {
 
       return {
         __typename: 'SignedUrl',
-        url: url,
+        url,
       };
     } catch (err) {
       return {
@@ -353,3 +353,5 @@ export const gqlResolvers = {
     }
   },
 };
+
+export default gqlResolvers;

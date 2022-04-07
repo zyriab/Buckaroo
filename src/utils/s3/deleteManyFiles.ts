@@ -1,10 +1,10 @@
-import { RequestBody } from '../../definitions/root';
 import { DeleteObjectsCommand } from '@aws-sdk/client-s3';
-import { getManyFilesVersionsIds } from './getManyFilesVersionsIds';
-import { formatPath } from '../tools/formatPath.utils';
-import { s3Client } from './s3Client';
 import sanitize from 'sanitize-filename';
 import normalize from 'normalize-path';
+import getManyFilesVersionsIds from './getManyFilesVersionsIds';
+import formatPath from '../tools/formatPath.utils';
+import s3Client from './s3Client';
+import { RequestBody } from '../../definitions/root';
 
 interface InputArgs {
   req: RequestBody;
@@ -14,7 +14,7 @@ interface InputArgs {
   versionIds?: string[];
 }
 
-export async function deleteManyFiles(
+export default async function deleteManyFiles(
   args: InputArgs
 ): Promise<[undefined, string[]] | [Error]> {
   try {
@@ -30,8 +30,8 @@ export async function deleteManyFiles(
       },
     };
 
-    let versionIdsMap: [string, string[]][] | undefined,
-      error: Error | undefined;
+    let versionIdsMap: [string, string[]][] | undefined;
+    let error: Error | undefined;
     if (args.req.body.tenant.bucket.isVersioned && !args.versionIds) {
       [error, versionIdsMap] = await getManyFilesVersionsIds({
         req: args.req,
@@ -40,7 +40,7 @@ export async function deleteManyFiles(
         addDeleteMarkersIds: true,
         root,
       });
-      
+
       if (error) throw error;
 
       for (const map of versionIdsMap!) {

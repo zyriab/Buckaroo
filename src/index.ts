@@ -1,5 +1,8 @@
+/* eslint-disable no-console */
 import app from './app';
 
-export const server = app.listen(process.env.PORT, () =>
+const server = app.listen(process.env.PORT, () =>
   console.log(`Listening on port ${process.env.PORT}...`)
 );
+
+export default server;

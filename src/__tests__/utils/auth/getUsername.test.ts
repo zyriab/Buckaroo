@@ -1,4 +1,4 @@
-import { getUsername } from '../../../utils/auth/getUsername';
+import getUsername from '../../../utils/auth/getUsername';
 import fakeToken from '../../../helpers/mockToken.help';
 import 'dotenv/config';
 

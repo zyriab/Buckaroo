@@ -1,14 +1,11 @@
-import { RequestBody } from '../../definitions/root';
-import { File, Version } from '../../definitions/generated/graphql';
-import {
-  DeleteMarkerEntry,
-  ListObjectVersionsCommand,
-  ObjectVersion,
-} from '@aws-sdk/client-s3';
-import { formatPath } from '../tools/formatPath.utils';
-import { getFileExtension } from '../tools/getFileExtension.utils';
-import { s3Client } from './s3Client';
+import { ListObjectVersionsCommand, ObjectVersion } from '@aws-sdk/client-s3';
 import normalize from 'normalize-path';
+import formatPath from '../tools/formatPath.utils';
+import getFileExtension from '../tools/getFileExtension.utils';
+import s3Client from './s3Client';
+import { File, Version } from '../../definitions/generated/graphql';
+import { RequestBody } from '../../definitions/root';
+import { DeleteMarker, Directory } from '../../definitions/s3';
 
 interface InputArgs {
   req: RequestBody;
@@ -19,19 +16,7 @@ interface InputArgs {
   bucketName?: string;
 }
 
-export interface DeleteMarker {
-  name: string;
-  id: string;
-  path: string;
-  isLatest: boolean;
-}
-
-export interface Directory {
-  path: string;
-  id: string;
-}
-
-export async function listBucketContent(
+export default async function listBucketContent(
   args: InputArgs
 ): Promise<
   | [undefined, File[]]
@@ -62,28 +47,29 @@ export async function listBucketContent(
         ...new Set<Directory>(
           res.Versions?.map((v: ObjectVersion) => {
             const a = v.Key!.split('/');
-            getFileExtension(a[a.length - 1]) ? a.pop() : '';
+            if (getFileExtension(a[a.length - 1])) a.pop();
             return { path: a.join('/'), id: v.VersionId! };
           })
         ),
       ];
-      const dirs: Directory[] = dirSet.map((d) => {
-        return {
-          path: normalize(`${d.path.replace(`${root}/`, '')}/`, false),
-          id: d.id,
-        };
-      });
+      const dirs: Directory[] = dirSet.map((d) => ({
+        path: normalize(`${d.path.replace(`${root}/`, '')}/`, false),
+        id: d.id,
+      }));
 
       const markers: DeleteMarker[] =
         res.DeleteMarkers?.filter((m) => m.Key && m.VersionId !== 'null').map(
           (m) => {
-            const name =
+            const mname =
               m.Key === fullPath ? m.Key : m.Key!.replace(fullPath, '');
-            const path = `${normalize(m.Key!.replace(`${name}/`, ''), false)}`;
+            const mpath = `${normalize(
+              m.Key!.replace(`${mname}/`, ''),
+              false
+            )}`;
             return {
-              name: name,
+              name: mname,
               id: m.VersionId!,
-              path: path,
+              path: mpath,
               isLatest: m.IsLatest!,
             };
           }
@@ -107,15 +93,16 @@ export async function listBucketContent(
         for (const f of fileList) {
           f.versions = versions!
             .filter((v) => v.Key!.replace(fullPath, '') === f.name)
-            .map((v) => {
-              return {
-                id: v.VersionId,
-                name: v.Key!.replace(fullPath, ''),
-                lastModified: v.LastModified!.toISOString(),
-                size: v.Size,
-                path: fullPath,
-              } as Version;
-            });
+            .map(
+              (v) =>
+                ({
+                  id: v.VersionId,
+                  name: v.Key!.replace(fullPath, ''),
+                  lastModified: v.LastModified!.toISOString(),
+                  size: v.Size,
+                  path: fullPath,
+                } as Version)
+            );
         }
 
       data.push(undefined);

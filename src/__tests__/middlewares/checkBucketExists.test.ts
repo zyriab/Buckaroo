@@ -1,4 +1,4 @@
-import { checkBucketExists } from '../../middlewares/checkBucketExists';
+import checkBucketExists from '../../middlewares/checkBucketExists';
 import fakeReq from '../../helpers/mockRequest.help';
 import 'dotenv/config';
 

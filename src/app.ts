@@ -1,17 +1,17 @@
 import express from 'express';
-import { RequestBody, ResponseBody } from './definitions/root';
-import { graphqlHTTP } from 'express-graphql';
-import { NoSchemaIntrospectionCustomRule } from 'graphql';
 import bodyParser from 'body-parser';
 import helmet from 'helmet';
-import { gqlSchema } from './graphql/schema/gqlSchema';
-import { gqlResolvers } from './graphql/resolvers/resolvers';
-import { checkAuth } from './middlewares/checkAuth';
-import { checkBucketExists } from './middlewares/checkBucketExists';
-import { checkBucketVersioning } from './middlewares/checkBucketVersioning';
-import { setReqMetadata } from './middlewares/setReqMetadata';
-import { setTestingData } from './middlewares/setTestingData';
 import dotenv from 'dotenv';
+import { graphqlHTTP } from 'express-graphql';
+import { NoSchemaIntrospectionCustomRule } from 'graphql';
+import { RequestBody, ResponseBody } from './definitions/root';
+import gqlSchema from './graphql/schema/gqlSchema';
+import gqlResolvers from './graphql/resolvers/resolvers';
+import checkAuth from './middlewares/checkAuth';
+import checkBucketExists from './middlewares/checkBucketExists';
+import checkBucketVersioning from './middlewares/checkBucketVersioning';
+import setReqMetadata from './middlewares/setReqMetadata';
+import setTestingData from './middlewares/setTestingData';
 
 const IS_DEV = process.env.NODE_ENV !== 'production';
 
@@ -25,6 +25,7 @@ if (!IS_DEV) {
 
 app.use(bodyParser.json());
 
+// eslint-disable-next-line consistent-return
 app.use((req: RequestBody, res: ResponseBody<any>, next: any) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST,GET,OPTIONS');

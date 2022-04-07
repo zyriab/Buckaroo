@@ -1,4 +1,4 @@
-import { getFileSizeRange } from '../../../utils/tools/getFileSizeRange.utils';
+import getFileSizeRange from '../../../utils/tools/getFileSizeRange.utils';
 
 test('Should return a range with 10MiB', () => {
   const result = getFileSizeRange('image');

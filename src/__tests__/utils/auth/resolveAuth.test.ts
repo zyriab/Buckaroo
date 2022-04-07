@@ -1,4 +1,5 @@
-import { resolveAuth } from '../../../utils/auth/resolveAuth';
+/* eslint-disable no-underscore-dangle */
+import resolveAuth from '../../../utils/auth/resolveAuth';
 import fakeReq from '../../../helpers/mockRequest.help';
 import 'dotenv/config';
 

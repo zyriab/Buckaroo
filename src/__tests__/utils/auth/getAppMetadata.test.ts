@@ -1,5 +1,5 @@
 import { DecodedToken } from '../../../definitions/auth';
-import { getAppMetadata } from '../../../utils/auth/getAppMetadata';
+import getAppMetadata from '../../../utils/auth/getAppMetadata';
 import fakeToken from '../../../helpers/mockToken.help';
 import 'dotenv/config';
 

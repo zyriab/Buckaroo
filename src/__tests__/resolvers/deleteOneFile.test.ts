@@ -1,17 +1,22 @@
+/* eslint-disable consistent-return */
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable @typescript-eslint/no-shadow */
+import supertest from 'supertest';
+import app from '../../app';
 import { deleteFileQuery } from '../../helpers/testQueries.help';
 import { uploadFileToS3 } from '../../helpers/downloadUpload.help';
 import { getUploadUrl } from '../../utils/s3.utils';
-import supertest from 'supertest';
-import app from '../../app';
 import fakeReq from '../../helpers/mockRequest.help';
 
 const request = supertest(app);
 
-let err: any, url: any, res: any;
+let err: any;
+let url: any;
+let res: any;
 const fileName = 'example.txt';
 const path = 'translations';
 beforeAll(async () => {
-  process.env.NODE_ENV === 'test';
+  process.env.NODE_ENV = 'test';
   process.env.TEST_AUTH = 'true';
 
   [err, url] = await getUploadUrl({

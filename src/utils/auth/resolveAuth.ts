@@ -1,8 +1,8 @@
 import { Permission } from '../../definitions/auth';
 import { RequestBody } from '../../definitions/root';
-import { hasPermission } from './hasPermission';
+import hasPermission from './hasPermission';
 
-export function resolveAuth(
+export default function resolveAuth(
   req: RequestBody,
   permission?: Permission
 ): [boolean, undefined] | [boolean, { __typename: string; message: string }] {

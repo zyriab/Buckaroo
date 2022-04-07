@@ -1,6 +1,6 @@
 import { RequestBody, ResponseBody } from '../definitions/root';
 
-export function setTestingData(
+export default function setTestingData(
   req: RequestBody,
   res: ResponseBody<any>,
   next: () => void

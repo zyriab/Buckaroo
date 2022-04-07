@@ -1,7 +1,7 @@
 import { Permission } from '../../definitions/auth';
 import { RequestBody } from '../../definitions/root';
 
-export function hasPermission(
+export default function hasPermission(
   req: RequestBody,
   permission: Permission
 ): boolean {

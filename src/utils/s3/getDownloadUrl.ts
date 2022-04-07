@@ -1,9 +1,9 @@
-import { RequestBody } from '../../definitions/root';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { s3Client } from './s3Client';
 import sanitize from 'sanitize-filename';
 import normalize from 'normalize-path';
+import s3Client from './s3Client';
+import { RequestBody } from '../../definitions/root';
 
 interface InputArgs {
   req: RequestBody;
@@ -13,7 +13,7 @@ interface InputArgs {
   versionId?: string;
 }
 
-export async function getDownloadUrl(
+export default async function getDownloadUrl(
   args: InputArgs
 ): Promise<[undefined, string] | [Error]> {
   try {
@@ -22,7 +22,7 @@ export async function getDownloadUrl(
     const fileName = sanitize(args.fileName);
     const expirationTime = 60 * 1;
 
-    let params = {
+    const params = {
       Bucket: args.req.body.tenant.bucket.name,
       Key: `${root}/${normalize(args.path)}/${fileName}`,
     };

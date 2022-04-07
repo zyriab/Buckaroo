@@ -1,3 +1,8 @@
+/* eslint-disable consistent-return */
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable @typescript-eslint/no-shadow */
+import supertest from 'supertest';
+import app from '../../app';
 import { fetchDlUrlQuery } from '../../helpers/testQueries.help';
 import {
   downloadFileLocally,
@@ -5,17 +10,16 @@ import {
 } from '../../helpers/downloadUpload.help';
 import { getUploadUrl } from '../../utils/s3.utils';
 import fakeReq from '../../helpers/mockRequest.help';
-import app from '../../app';
-import supertest from 'supertest';
 
 const request = supertest(app);
 
 let downloadUrl: string;
-let err: any, url: any, res: any;
+let err: any;
+let url: any;
 const fileName = 'example.txt';
 const path = 'translations';
 beforeAll(async () => {
-  process.env.NODE_ENV === 'test';
+  process.env.NODE_ENV = 'test';
   process.env.TEST_AUTH = 'true';
 
   [err, url] = await getUploadUrl({
@@ -26,7 +30,7 @@ beforeAll(async () => {
   });
 
   if (!err) {
-    res = await uploadFileToS3(url!, './src/pseudo/', 'example.txt');
+    await uploadFileToS3(url!, './src/pseudo/', 'example.txt');
   }
 });
 

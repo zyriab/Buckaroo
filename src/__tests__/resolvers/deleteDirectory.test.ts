@@ -1,6 +1,8 @@
-import { deleteDirectoryQuery } from '../../helpers/testQueries.help';
-import app from '../../app';
+/* eslint-disable consistent-return */
+/* eslint-disable no-underscore-dangle */
 import supertest from 'supertest';
+import app from '../../app';
+import { deleteDirectoryQuery } from '../../helpers/testQueries.help';
 import 'dotenv/config';
 
 const request = supertest(app);

@@ -1,32 +1,39 @@
-import { restoreFileVersionQuery } from '../../helpers/testQueries.help';
-import { getOneFileVersionsIds } from '../../utils/s3/getOneFileVersionsIds';
-import fakeReq from '../../helpers/mockRequest.help';
-import app from '../../app';
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable consistent-return */
+/* eslint-disable @typescript-eslint/no-shadow */
 import supertest from 'supertest';
+import app from '../../app';
+import { restoreFileVersionQuery } from '../../helpers/testQueries.help';
+import getOneFileVersionsIds from '../../utils/s3/getOneFileVersionsIds';
+import fakeReq from '../../helpers/mockRequest.help';
 import { deleteOneFile, getUploadUrl } from '../../utils/s3.utils';
 import { uploadFileToS3 } from '../../helpers/downloadUpload.help';
 
 const request = supertest(app);
 
-let e: any, v: any;
-let errors: any[], urls: any[], res: any[];
+let e: any;
+let v: any;
+let errors: any[];
+let urls: any[];
+let res: any[];
 const fileName = 'example3.txt';
 const path = 'translations';
 
 beforeAll(async () => {
-  process.env.NODE_ENV === 'test';
+  process.env.NODE_ENV = 'test';
   process.env.TEST_AUTH = 'true';
 
   errors = [];
   urls = ([] as string[]) || undefined;
   res = [];
 
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 3; i+=1) {
+    // eslint-disable-next-line no-await-in-loop
     const [err, url] = await getUploadUrl({
       req: fakeReq,
       fileName,
       path,
-      root: 'test-user-1234abcd'
+      root: 'test-user-1234abcd',
     });
     errors.push(err);
     urls.push(`${url}`);
@@ -34,6 +41,7 @@ beforeAll(async () => {
 
   if (!urls.includes('undefined')) {
     for (const u of urls)
+      // eslint-disable-next-line no-await-in-loop
       res.push(await uploadFileToS3(u, './src/pseudo/', fileName));
   }
 
@@ -117,6 +125,7 @@ test('Should be blocked when restoring older version of file (Unauthorized)', (d
       expect(res.body).toBeInstanceOf(Object);
       expect(res.body.data.restoreFileVersion).not.toBeUndefined();
       expect(res.body.data.restoreFileVersion.__typename).toBe('Unauthorized');
+      process.env.TEST_AUTH = 'true';
       done();
     });
 }, 10000);

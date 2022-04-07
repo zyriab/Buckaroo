@@ -1,8 +1,6 @@
-export type Filetype = 'text' | 'image';
-
 /** For presigned POST conditionning */
-export function getFileSizeRange(
-  type?: Filetype
+export default function getFileSizeRange(
+  type?:  'text' | 'image'
 ): ['content-length-range', 0, number] {
   const mib = 1048576;
   let max = 0;

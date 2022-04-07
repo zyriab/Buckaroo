@@ -1,8 +1,10 @@
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable consistent-return */
+import supertest from 'supertest';
+import app from '../../app';
 import { fetchUpUrlQuery } from '../../helpers/testQueries.help';
 import { uploadFileToS3 } from '../../helpers/downloadUpload.help';
 import { deleteOneFile } from '../../utils/s3.utils';
-import app from '../../app';
-import supertest from 'supertest';
 import fakeReq from '../../helpers/mockRequest.help';
 
 const request = supertest(app);

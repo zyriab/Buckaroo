@@ -1,4 +1,4 @@
-import { hasPermission } from '../../../utils/auth/hasPermission';
+import hasPermission from '../../../utils/auth/hasPermission';
 import fakeReq from '../../../helpers/mockRequest.help';
 
 test('Should return true on given permission', () => {

@@ -1,7 +1,7 @@
 import { GetBucketVersioningCommand } from '@aws-sdk/client-s3';
-import { s3Client } from './s3Client';
+import s3Client from './s3Client';
 
-export async function isBucketVersioned(
+export default async function isBucketVersioned(
   bucketName: string
 ): Promise<[undefined, boolean] | [Error]> {
   try {

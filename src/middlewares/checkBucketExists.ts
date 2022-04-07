@@ -1,7 +1,8 @@
 import { RequestBody, ResponseBody } from '../definitions/root';
 import { isBucketExisting } from '../utils/s3.utils';
 
-export async function checkBucketExists(
+// eslint-disable-next-line consistent-return
+export default async function checkBucketExists(
   req: RequestBody,
   res: ResponseBody<any>,
   next: () => void

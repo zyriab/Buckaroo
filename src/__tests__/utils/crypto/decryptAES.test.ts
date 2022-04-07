@@ -1,4 +1,4 @@
-import { decryptAES } from '../../../utils/crypto/decryptAES';
+import decryptAES from '../../../utils/crypto/decryptAES';
 import 'dotenv/config';
 
 test('Should decrypt ENCRYPTED_TEST_TENANT to test-user', () => {

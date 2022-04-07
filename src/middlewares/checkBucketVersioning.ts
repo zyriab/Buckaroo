@@ -1,7 +1,8 @@
 import { RequestBody, ResponseBody } from '../definitions/root';
 import { isBucketVersioned } from '../utils/s3.utils';
 
-export async function checkBucketVersioning(
+// eslint-disable-next-line consistent-return
+export default async function checkBucketVersioning(
   req: RequestBody,
   res: ResponseBody<any>,
   next: () => void

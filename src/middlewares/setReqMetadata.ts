@@ -6,7 +6,7 @@ import {
   getUsername,
 } from '../utils/auth.utils';
 
-export async function setReqMetadata(
+export default async function setReqMetadata(
   req: RequestBody,
   res: ResponseBody<any>,
   next: () => void
@@ -14,7 +14,6 @@ export async function setReqMetadata(
   try {
     if (!req.body.isAuth) next();
 
-    let email, username;
     const tkn = req.body.token;
     const tenant = getTenant(tkn);
 
@@ -24,14 +23,14 @@ export async function setReqMetadata(
       next();
     }
 
-    email = getUserEmail(tkn);
+    const email = getUserEmail(tkn);
 
     if (!email) {
       req.body.isAuth = false;
       next();
     }
 
-    username = getUsername(tkn);
+    const username = getUsername(tkn);
 
     if (!username) {
       req.body.isAuth = false;

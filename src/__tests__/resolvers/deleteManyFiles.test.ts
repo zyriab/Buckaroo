@@ -1,15 +1,22 @@
+/* eslint-disable consistent-return */
+/* eslint-disable no-underscore-dangle */
+import supertest from 'supertest';
+import app from '../../app';
 import { deleteManyFileQuery } from '../../helpers/testQueries.help';
 import { getUploadUrl } from '../../utils/s3.utils';
 import fakeReq from '../../helpers/mockRequest.help';
-import supertest from 'supertest';
-import app from '../../app';
 import { uploadFileToS3 } from '../../helpers/downloadUpload.help';
 
 const request = supertest(app);
 
-let err1: any, err2: any, url1: any, url2: any, res1: any, res2: any;
+let err1: any;
+let err2: any;
+let url1: any;
+let url2: any;
+let res1: any;
+let res2: any;
 beforeAll(async () => {
-  process.env.NODE_ENV === 'test';
+  process.env.NODE_ENV = 'test';
   process.env.TEST_AUTH = 'true';
 
   [err1, url1] = await getUploadUrl({

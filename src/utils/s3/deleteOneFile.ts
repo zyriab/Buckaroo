@@ -1,13 +1,14 @@
-import { RequestBody } from '../../definitions/root';
 import {
   DeleteObjectCommand,
   DeleteObjectCommandOutput,
+  DeleteObjectsCommand,
 } from '@aws-sdk/client-s3';
-import { s3Client } from './s3Client';
-import { getOneFileVersionsIds } from './getOneFileVersionsIds';
-import { formatPath } from '../tools/formatPath.utils';
 import sanitize from 'sanitize-filename';
 import normalize from 'normalize-path';
+import s3Client from './s3Client';
+import getOneFileVersionsIds from './getOneFileVersionsIds';
+import formatPath from '../tools/formatPath.utils';
+import { RequestBody } from '../../definitions/root';
 
 interface InputArgs {
   req: RequestBody;
@@ -17,7 +18,7 @@ interface InputArgs {
   versionId?: string;
 }
 
-export async function deleteOneFile(
+export default async function deleteOneFile(
   args: InputArgs
 ): Promise<[undefined, string] | [Error]> {
   try {
@@ -26,7 +27,7 @@ export async function deleteOneFile(
     const root = normalize(args.root);
     const path = normalize(args.path);
     const fullPath = formatPath(`${root}/${path}/`, { stripTrailing: false });
-    const params = {
+    let params: any = {
       Bucket: args.req.body.tenant.bucket.name,
       Key: `${fullPath}${fileName}`,
       VersionId: args.versionId,
@@ -45,10 +46,21 @@ export async function deleteOneFile(
 
       if (error) return [error];
 
-      for (const id of versionIds!) {
-        params.VersionId = id;
-        res = await s3Client().send(new DeleteObjectCommand(params));
+      params = {
+        Bucket: args.req.body.tenant.bucket.name,
+        Delete: {
+          Objects: [] as any,
+        },
+      };
+
+      for (const i of versionIds!) {
+        params.Delete.Objects.push({
+          Key: `${fullPath}${fileName}`,
+          versionId: i,
+        });
       }
+
+      res = await s3Client().send(new DeleteObjectsCommand(params));
     }
 
     const status = res ? res.$metadata.httpStatusCode : 500;

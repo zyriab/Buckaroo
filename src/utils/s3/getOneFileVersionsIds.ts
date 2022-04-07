@@ -1,7 +1,7 @@
-import { File } from '../../definitions/generated/graphql';
-import { RequestBody } from '../../definitions/root';
-import { listBucketContent, DeleteMarker } from './listBucketContent';
 import normalize from 'normalize-path';
+import listBucketContent from './listBucketContent';
+import { RequestBody } from '../../definitions/root';
+import { DeleteMarker } from '../../definitions/s3';
 
 interface InputArgs {
   req: RequestBody;
@@ -11,7 +11,7 @@ interface InputArgs {
   addDeleteMarkersIds?: boolean;
 }
 
-export async function getOneFileVersionsIds(
+export default async function getOneFileVersionsIds(
   args: InputArgs
 ): Promise<[undefined, string[]] | [Error]> {
   try {

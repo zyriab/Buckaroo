@@ -1,10 +1,10 @@
-import { RequestBody } from '../../definitions/root';
 import { CopyObjectCommand } from '@aws-sdk/client-s3';
-import { formatPath } from '../tools/formatPath.utils';
-import { s3Client } from './s3Client';
-import { deleteOneFile } from './deleteOneFile';
 import sanitize from 'sanitize-filename';
 import normalize from 'normalize-path';
+import formatPath from '../tools/formatPath.utils';
+import s3Client from './s3Client';
+import deleteOneFile from './deleteOneFile';
+import { RequestBody } from '../../definitions/root';
 
 interface InputArgs {
   req: RequestBody;
@@ -14,7 +14,7 @@ interface InputArgs {
   versionId: string;
 }
 
-export async function restoreFileVersion(
+export default async function restoreFileVersion(
   args: InputArgs
 ): Promise<[undefined, string] | [Error]> {
   try {

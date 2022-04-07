@@ -1,4 +1,4 @@
-import { getUserId } from '../../../utils/auth/getUserId';
+import getUserId from '../../../utils/auth/getUserId';
 import fakeToken from '../../../helpers/mockToken.help';
 import 'dotenv/config';
 

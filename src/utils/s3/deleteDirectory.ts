@@ -1,13 +1,13 @@
-import { RequestBody } from '../../definitions/root';
-import { deleteManyFiles, listBucketContent } from '../s3.utils';
-import { s3Client } from './s3Client';
 import {
   DeleteObjectCommand,
   DeleteObjectCommandOutput,
 } from '@aws-sdk/client-s3';
 import normalize from 'normalize-path';
-import { DeleteMarker, Directory } from './listBucketContent';
-import { getFileExtension } from '../tools/getFileExtension.utils';
+import s3Client from './s3Client';
+import deleteManyFiles from './deleteManyFiles';
+import listBucketContent from './listBucketContent';
+import { RequestBody } from '../../definitions/root';
+import { DeleteMarker, Directory } from '../../definitions/s3';
 
 interface InputArgs {
   req: RequestBody;
@@ -18,7 +18,7 @@ interface InputArgs {
 
 // TODO: Need to see if there's a way to see if something was deleted or no...
 // because, as is, it returns true even when the directory doesn't exist
-export async function deleteDirectory(
+export default async function deleteDirectory(
   args: InputArgs
 ): Promise<[undefined, boolean] | [Error]> {
   try {
@@ -26,6 +26,7 @@ export async function deleteDirectory(
     const root = normalize(args.root);
     const bucketName = args.bucketName || args.req.body.tenant.bucket.name;
 
+    // eslint-disable-next-line prefer-const
     let [fail, files, markers, dirs] = await listBucketContent({
       req: args.req,
       root,
@@ -56,6 +57,7 @@ export async function deleteDirectory(
         );
 
         if (dirFiles.length > 0) {
+          // eslint-disable-next-line no-await-in-loop
           [error] = await deleteManyFiles({
             req: args.req,
             fileNames: dirFiles.map((f) => f.name),
@@ -74,6 +76,7 @@ export async function deleteDirectory(
         }
 
         if (dirMarkers.length > 0) {
+          // eslint-disable-next-line no-await-in-loop
           [error] = await deleteManyFiles({
             req: args.req,
             fileNames: dirMarkers.map((m) => m.name),
@@ -93,6 +96,7 @@ export async function deleteDirectory(
 
         // deleting empty dir (if there's files, gets automatically deleted)
         if (dirFiles.length === 0 && dirMarkers.length === 0) {
+          // eslint-disable-next-line no-await-in-loop
           const res = await s3Client().send(
             new DeleteObjectCommand({
               Bucket: bucketName,
@@ -157,6 +161,7 @@ export async function deleteDirectory(
     }
 
     let res: DeleteObjectCommandOutput;
+    let statusCode: number;
     if (dirs!.length > 0) {
       res = await s3Client().send(
         new DeleteObjectCommand({
@@ -167,13 +172,14 @@ export async function deleteDirectory(
             : 'null',
         })
       );
-      const status = res ? res.$metadata.httpStatusCode : 500;
+      statusCode = res ? res.$metadata.httpStatusCode! : 500;
 
-      if (status && status >= 200 && status <= 299) return [undefined, true];
+      if (statusCode && statusCode >= 200 && statusCode <= 299)
+        return [undefined, true];
     } else return [undefined, true];
 
     throw new Error(
-      `Could not delete folder: ${status}. Some objects inside may have been deleted.`
+      `Could not delete folder: ${statusCode}. Some objects inside may have been deleted.`
     );
   } catch (err) {
     return [err as Error];
