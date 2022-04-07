@@ -15,7 +15,7 @@ import {
   isBucketVersioned,
   getDownloadUrl,
   getUploadUrl,
-  listBucketContent
+  listBucketContent,
 } from '../../utils/s3.utils';
 import { resolveAuth } from '../../utils/auth.utils';
 import formatPath from '../../utils/tools/formatPath.utils';
@@ -36,6 +36,7 @@ const gqlResolvers = {
           ? 'read:bucket'
           : undefined
       );
+
       if (!authed) return error;
 
       const [storageError, exists] = await isBucketExisting(
@@ -43,11 +44,13 @@ const gqlResolvers = {
       );
 
       if (storageError) throw storageError;
-      if (!exists)
+
+      if (!exists) {
         return {
           __typename: 'StorageNotFound',
           message: 'The requested bucket could not be found',
         };
+      }
 
       const root =
         args.listInput.root ?? `${req.body.username}-${req.body.userId}`;
@@ -78,6 +81,7 @@ const gqlResolvers = {
         req,
         args.fileInput.root !== undefined ? 'create:file' : undefined
       );
+
       if (!authed) return error;
 
       const [storageError, exists] = await isBucketExisting(
@@ -85,11 +89,13 @@ const gqlResolvers = {
       );
 
       if (storageError) throw storageError;
-      if (!exists)
+
+      if (!exists) {
         return {
           __typename: 'StorageNotFound',
           message: 'The requested bucket could not be found',
         };
+      }
 
       const root =
         args.fileInput.root ?? `${req.body.username}-${req.body.userId}`;
@@ -120,6 +126,7 @@ const gqlResolvers = {
         req,
         args.fileInput.root !== undefined ? 'read:bucket' : undefined
       );
+
       if (!authed) return error;
 
       const [storageError, exists] = await isBucketExisting(
@@ -127,11 +134,13 @@ const gqlResolvers = {
       );
 
       if (storageError) throw storageError;
-      if (!exists)
+
+      if (!exists) {
         return {
           __typename: 'StorageNotFound',
           message: 'The requested bucket could not be found',
         };
+      }
 
       const root =
         args.fileInput.root ?? `${req.body.username}-${req.body.userId}`;
@@ -163,6 +172,7 @@ const gqlResolvers = {
         req,
         args.fileInput.root !== undefined ? 'delete:file' : undefined
       );
+
       if (!authed) return error;
 
       const [storageError, exists] = await isBucketExisting(
@@ -170,11 +180,13 @@ const gqlResolvers = {
       );
 
       if (storageError) throw storageError;
-      if (!exists)
+
+      if (!exists) {
         return {
           __typename: 'StorageNotFound',
           message: 'The requested bucket could not be found',
         };
+      }
 
       const root =
         args.fileInput.root ?? `${req.body.username}-${req.body.userId}`;
@@ -208,6 +220,7 @@ const gqlResolvers = {
         req,
         args.filesInput.root !== undefined ? 'delete:file' : undefined
       );
+
       if (!authed) return error;
 
       const [storageError, exists] = await isBucketExisting(
@@ -215,11 +228,13 @@ const gqlResolvers = {
       );
 
       if (storageError) throw storageError;
-      if (!exists)
+
+      if (!exists) {
         return {
           __typename: 'StorageNotFound',
           message: 'The requested bucket could not be found',
         };
+      }
 
       const root =
         args.filesInput.root ?? `${req.body.username}-${req.body.userId}`;
@@ -259,6 +274,7 @@ const gqlResolvers = {
         req,
         !isOwner ? 'delete:directory' : undefined
       );
+
       if (!authed) return error;
 
       const [storageError, exists] = await isBucketExisting(
@@ -266,11 +282,13 @@ const gqlResolvers = {
       );
 
       if (storageError) throw storageError;
-      if (!exists)
+
+      if (!exists) {
         return {
           __typename: 'StorageNotFound',
           message: 'The requested bucket could not be found',
         };
+      }
 
       const [failure, done] = await deleteDirectory({
         req,
@@ -309,6 +327,7 @@ const gqlResolvers = {
         req,
         args.fileInput.root !== undefined ? 'update:file' : undefined
       );
+
       if (!authed) return error;
 
       const [storageError, exists] = await isBucketExisting(
@@ -316,17 +335,21 @@ const gqlResolvers = {
       );
 
       if (storageError) throw storageError;
-      if (!exists)
+
+      if (!exists) {
         return {
           __typename: 'StorageNotFound',
           message: 'The requested bucket could not be found',
         };
+      }
 
-      if (!(await isBucketVersioned(req.body.tenant.bucket.name)))
+      if (!(await isBucketVersioned(req.body.tenant.bucket.name))) {
         throw new Error('The requested file is not on a versioned storage.');
+      }
 
-      if (!args.fileInput.versionId)
+      if (!args.fileInput.versionId) {
         throw new Error('No version id specified!');
+      }
 
       const root =
         args.fileInput.root ?? `${req.body.username}-${req.body.userId}`;
