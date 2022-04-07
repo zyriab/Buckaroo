@@ -18,7 +18,7 @@ export default async function getOneFileVersionsIds(
     const root = normalize(args.root);
     const path = normalize(args.path);
 
-    const [error, fileList, markers] = await listBucketContent({
+    const [error, files, markers] = await listBucketContent({
       req: args.req,
       root,
       path,
@@ -27,18 +27,19 @@ export default async function getOneFileVersionsIds(
 
     if (error) return [error];
 
-    const versionIds = fileList!
+    const versionIds = files!
       .filter((f) => f.name === args.fileName)
       .map((f) => f.id!);
 
-    if (args.addDeleteMarkersIds)
+    if (args.addDeleteMarkersIds) {
       versionIds.push(
         ...(markers as DeleteMarker[])
           .filter((m) => m.name === args.fileName)
           .map((m) => m.id)
       );
+    }
 
-    fileList!
+    files!
       .filter((f) => f.name === args.fileName && f.versions)
       .map((f) => f.versions!.map((v) => v.id))
       .forEach((i) => versionIds.push(...i));

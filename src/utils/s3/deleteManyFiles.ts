@@ -32,13 +32,14 @@ export default async function deleteManyFiles(
 
     let versionIdsMap: [string, string[]][] | undefined;
     let error: Error | undefined;
+
     if (args.req.body.tenant.bucket.isVersioned && !args.versionIds) {
       [error, versionIdsMap] = await getManyFilesVersionsIds({
         req: args.req,
         fileNames,
+        root,
         path,
         addDeleteMarkersIds: true,
-        root,
       });
 
       if (error) throw error;
@@ -66,8 +67,12 @@ export default async function deleteManyFiles(
     }
 
     const res = await s3Client().send(new DeleteObjectsCommand(params));
-    const status = res.$metadata.httpStatusCode;
-    if (status && status >= 200 && status <= 299) return [undefined, fileNames];
+    
+    const status = res.$metadata.httpStatusCode || 500;
+
+    if (status >= 200 && status <= 299) {
+      return [undefined, fileNames];
+    }
 
     throw new Error(`Error while deleting objects: ${status} - ${res.Errors}.`);
   } catch (err: any) {

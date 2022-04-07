@@ -29,29 +29,39 @@ export default async function listBucketContent(
     const root = normalize(args.root);
     const path = normalize(args.path || '');
     const fullPath = formatPath(`${root}/${path}/`, { stripTrailing: false });
+    const data: any = [];
+
     const params = {
       Bucket: args.bucketName || args.req.body.tenant.bucket.name,
       Prefix: fullPath,
     };
-    const res = await s3Client().send(new ListObjectVersionsCommand(params));
-    const data: any = [];
 
-    const status = res.$metadata.httpStatusCode;
-    if (status && status >= 200 && status <= 299) {
+    const res = await s3Client().send(new ListObjectVersionsCommand(params));
+
+    const status = res.$metadata.httpStatusCode || 500;
+
+    if (status >= 200 && status <= 299) {
       const files =
         res.Versions?.filter(
           (v: ObjectVersion) => v.Key && getFileExtension(v.Key)
         ) || [];
+
       const versions = files.filter((f: ObjectVersion) => !f.IsLatest);
+
       const dirSet = [
         ...new Set<Directory>(
           res.Versions?.map((v: ObjectVersion) => {
             const a = v.Key!.split('/');
-            if (getFileExtension(a[a.length - 1])) a.pop();
+            
+            if (getFileExtension(a[a.length - 1])) {
+              a.pop();
+            }
+
             return { path: a.join('/'), id: v.VersionId! };
           })
         ),
       ];
+
       const dirs: Directory[] = dirSet.map((d) => ({
         path: normalize(`${d.path.replace(`${root}/`, '')}/`, false),
         id: d.id,
@@ -66,6 +76,7 @@ export default async function listBucketContent(
               m.Key!.replace(`${mname}/`, ''),
               false
             )}`;
+
             return {
               name: mname,
               id: m.VersionId!,
@@ -79,6 +90,7 @@ export default async function listBucketContent(
         .filter((f: ObjectVersion) => f.IsLatest)
         .map((f) => {
           const filePath = `${f.Key!.slice(0, f.Key!.lastIndexOf('/'))}/`;
+
           return {
             id: f.VersionId,
             name: f.Key!.replace(filePath, ''),
