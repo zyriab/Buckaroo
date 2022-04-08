@@ -13,9 +13,12 @@ export default async function checkBucketExists(
       return next();
     }
 
-    const [error, exists] = await isBucketExisting(
-      req.body.tenant.bucket.name
-    );
+    if (req.body.tenant.name === 's3-versioning-control') {
+      req.body.tenant.bucket.exists = true;
+      return next();
+    }
+
+    const [error, exists] = await isBucketExisting(req.body.tenant.bucket.name);
 
     if (error) throw error;
 
