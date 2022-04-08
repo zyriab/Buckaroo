@@ -1,6 +1,6 @@
 {
   "name": "buckaroo",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "A miniservice to interact with S3 buckets",
   "private": true,
   "main": "index.ts",
@@ -14,7 +14,7 @@
     "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "author": "Arthur Wallendorff - Metaoist Dsgn",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.56.0",
     "@aws-sdk/s3-presigned-post": "^3.56.0",
