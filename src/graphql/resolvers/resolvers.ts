@@ -4,6 +4,7 @@ import {
   FileInput,
   FilesInput,
   DirectoryInput,
+  UploadInput,
 } from '../../definitions/generated/graphql';
 import { RequestBody } from '../../definitions/root';
 import {
@@ -19,6 +20,7 @@ import {
 } from '../../utils/s3.utils';
 import { resolveAuth } from '../../utils/auth.utils';
 import formatPath from '../../utils/tools/formatPath.utils';
+import { FileType } from '../../definitions/types';
 
 const gqlResolvers = {
   listBucketContent: async (
@@ -75,11 +77,14 @@ const gqlResolvers = {
       };
     }
   },
-  getUploadUrl: async (args: { fileInput: FileInput }, req: RequestBody) => {
+  getUploadUrl: async (
+    args: { uploadInput: UploadInput },
+    req: RequestBody
+  ) => {
     try {
       const [authed, error] = resolveAuth(
         req,
-        args.fileInput.root !== undefined ? 'create:file' : undefined
+        args.uploadInput.root !== undefined ? 'create:file' : undefined
       );
 
       if (!authed) return error;
@@ -98,20 +103,22 @@ const gqlResolvers = {
       }
 
       const root =
-        args.fileInput.root ?? `${req.body.username}-${req.body.userId}`;
+        args.uploadInput.root ?? `${req.body.username}-${req.body.userId}`;
 
-      const [failure, url] = await getUploadUrl({
+      const [failure, signedPost] = await getUploadUrl({
         req,
-        fileName: args.fileInput.fileName,
+        fileName: args.uploadInput.fileName,
+        fileType: <FileType>args.uploadInput.fileType,
         root,
-        path: args.fileInput.path,
+        path: args.uploadInput.path,
       });
 
       if (failure !== undefined) throw failure;
 
       return {
-        __typename: 'SignedUrl',
-        url,
+        __typename: 'SignedPost',
+        url: signedPost.url,
+        fields: signedPost.fields,
       };
     } catch (err) {
       return {
