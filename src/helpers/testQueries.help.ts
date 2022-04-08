@@ -65,20 +65,21 @@ export const fetchDlUrlQuery = {
 
 export const fetchUpUrlQuery = {
   query: `
-    query GetUploadUrl($fileName: String!, $path: String!, $root: String) {
-      getUploadUrl(fileInput: {fileName: $fileName, path: $path, root: $root}) {
+    query GetUploadUrl($fileName: String!, $fileType: String!, $path: String!, $root: String) {
+      getUploadUrl(uploadInput: {fileName: $fileName, fileType: $fileType, path: $path, root: $root}) {
         __typename
-        ... on SignedUrl {
+        ... on SignedPost {
           url
         }
         ${errorSpreads}
       }
     }
   `,
-  variables: <FileInput>{
+  variables: <UploadInput>{
     fileName: '',
+    fileType: '',
     path: '',
-    root: undefined,
+    root: '',
   },
 };
 
@@ -177,6 +178,13 @@ interface FilesInput {
   fileNames: string[];
   path: string;
   versionIds?: string[];
+  root?: string;
+}
+
+interface UploadInput {
+  fileName: string;
+  fileType: string;
+  path: string;
   root?: string;
 }
 
