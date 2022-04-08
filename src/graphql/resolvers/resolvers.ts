@@ -361,7 +361,7 @@ const gqlResolvers = {
 
       const message = done
         ? `Successfully removed last version of ${args.versionControlInput.fileName}.`
-        : `${args.versionControlInput.fileName} hasn't reach its maximum versions quota.`;
+        : `${args.versionControlInput.fileName} hasn't reach its maximum versions quota or doesn't exist.`;
 
       return {
         __typename: 'VersionControlSuccess',
