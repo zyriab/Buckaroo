@@ -867,14 +867,14 @@
             "description": null,
             "args": [
               {
-                "name": "fileInput",
+                "name": "uploadInput",
                 "description": null,
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
                   "ofType": {
                     "kind": "INPUT_OBJECT",
-                    "name": "FileInput",
+                    "name": "UploadInput",
                     "ofType": null
                   }
                 },

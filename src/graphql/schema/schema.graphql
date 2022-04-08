@@ -155,7 +155,7 @@ union VersionControlResult =
 
 type Queries {
   listBucketContent(listInput: ListInput!): ListBucketResult!
-  getUploadUrl(fileInput: FileInput!): SignedUrlResult!
+  getUploadUrl(uploadInput: UploadInput!): SignedUrlResult!
   getDownloadUrl(fileInput: FileInput!): SignedUrlResult!
 }
 

@@ -128,7 +128,7 @@ export type QueriesGetDownloadUrlArgs = {
 
 
 export type QueriesGetUploadUrlArgs = {
-  fileInput: FileInput;
+  uploadInput: UploadInput;
 };
 
 
@@ -406,7 +406,7 @@ export interface PostFieldsScalarConfig extends GraphQLScalarTypeConfig<Resolver
 
 export type QueriesResolvers<ContextType = any, ParentType extends ResolversParentTypes['Queries'] = ResolversParentTypes['Queries']> = {
   getDownloadUrl?: Resolver<ResolversTypes['SignedUrlResult'], ParentType, ContextType, RequireFields<QueriesGetDownloadUrlArgs, 'fileInput'>>;
-  getUploadUrl?: Resolver<ResolversTypes['SignedUrlResult'], ParentType, ContextType, RequireFields<QueriesGetUploadUrlArgs, 'fileInput'>>;
+  getUploadUrl?: Resolver<ResolversTypes['SignedUrlResult'], ParentType, ContextType, RequireFields<QueriesGetUploadUrlArgs, 'uploadInput'>>;
   listBucketContent?: Resolver<ResolversTypes['ListBucketResult'], ParentType, ContextType, RequireFields<QueriesListBucketContentArgs, 'listInput'>>;
 };
 
