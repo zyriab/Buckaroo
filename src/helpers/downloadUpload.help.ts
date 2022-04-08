@@ -29,7 +29,7 @@ export async function downloadFileLocally(
   return res;
 }
 
-export async function uploadFileToS3(
+export function uploadFileToS3(
   url: string,
   fields: {},
   localPath: string,
