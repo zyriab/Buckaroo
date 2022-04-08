@@ -35,6 +35,7 @@ export function uploadFileToS3(
   localPath: string,
   fileName: string
 ) {
+  console.log(url);
   const targetUrl = new URL(url);
   const filePath = `${normalize(localPath)}/${sanitize(fileName)}`;
   const form = new FormData();

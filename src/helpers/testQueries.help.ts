@@ -70,6 +70,7 @@ export const fetchUpUrlQuery = {
         __typename
         ... on SignedPost {
           url
+          fields
         }
         ${errorSpreads}
       }

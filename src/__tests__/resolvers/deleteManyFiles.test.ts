@@ -13,8 +13,6 @@ let err1: any;
 let err2: any;
 let url1: any;
 let url2: any;
-let res1: any;
-let res2: any;
 beforeAll(async () => {
   process.env.NODE_ENV = 'test';
   process.env.TEST_AUTH = 'true';
@@ -22,18 +20,20 @@ beforeAll(async () => {
   [err1, url1] = await getUploadUrl({
     req: fakeReq,
     fileName: 'example.txt',
+    fileType: 'text',
     path: 'translations',
     root: 'test-user-1234abcd',
   });
   [err2, url2] = await getUploadUrl({
     req: fakeReq,
     fileName: 'example2.txt',
+    fileType: 'text',
     path: 'translations',
     root: 'test-user-1234abcd',
   });
   if (!err1 && !err2) {
-    res1 = await uploadFileToS3(url1!, './src/pseudo/', 'example.txt');
-    res2 = await uploadFileToS3(url2!, './src/pseudo/', 'example2.txt');
+    uploadFileToS3(url1.url, url1.fields, './src/pseudo/', 'example.txt');
+    uploadFileToS3(url2.url!, url2.fields, './src/pseudo/', 'example2.txt');
   }
 });
 
@@ -44,8 +44,6 @@ afterAll(() => {
 test('Should delete files example.txt & example2.txt', (done) => {
   expect(err1).toBeUndefined();
   expect(err2).toBeUndefined();
-  expect(res1.status).toBe(200);
-  expect(res2.status).toBe(200);
 
   const query = deleteManyFileQuery;
   query.variables.fileNames = ['example.txt', 'example2.txt'];
@@ -72,8 +70,6 @@ test('Should delete files example.txt & example2.txt', (done) => {
 test('Should be blocked when trying to delete files example.txt & example2.txt from root (Unauthorized)', (done) => {
   expect(err1).toBeUndefined();
   expect(err2).toBeUndefined();
-  expect(res1.status).toBe(200);
-  expect(res2.status).toBe(200);
 
   const query = deleteManyFileQuery;
   query.variables.fileNames = ['example.txt', 'example2.txt'];

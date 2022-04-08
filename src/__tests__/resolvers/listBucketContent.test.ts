@@ -21,12 +21,13 @@ beforeAll(async () => {
   [err, url] = await getUploadUrl({
     req: fakeReq,
     fileName,
+    fileType: 'text',
     path,
     root: 'test-user-1234abcd',
   });
 
   if (!err) {
-    await uploadFileToS3(url!, './src/pseudo/', fileName);
+    uploadFileToS3(url.url!, url.fields, './src/pseudo/', fileName);
   }
 });
 

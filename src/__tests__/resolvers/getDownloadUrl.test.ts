@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable consistent-return */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable @typescript-eslint/no-shadow */
@@ -8,8 +9,8 @@ import {
   downloadFileLocally,
   uploadFileToS3,
 } from '../../helpers/downloadUpload.help';
-import { getUploadUrl } from '../../utils/s3.utils';
-import fakeReq from '../../helpers/mockRequest.help';
+import { getUploadUrl, deleteOneFile } from '../../utils/s3.utils';
+import req from '../../helpers/mockRequest.help';
 
 const request = supertest(app);
 
@@ -23,18 +24,28 @@ beforeAll(async () => {
   process.env.TEST_AUTH = 'true';
 
   [err, url] = await getUploadUrl({
-    req: fakeReq,
+    req,
     fileName,
+    fileType: 'text',
     path,
     root: 'test-user-1234abcd',
   });
 
   if (!err) {
-    await uploadFileToS3(url!, './src/pseudo/', 'example.txt');
+    uploadFileToS3(url.url!, url.fields, './src/pseudo/', 'example.txt');
   }
 });
 
-afterAll(() => {
+afterAll(async () => {
+  const [err] = await deleteOneFile({
+    req,
+    fileName,
+    root: 'test-user-1234abcd',
+    path,
+  });
+
+  if (err) console.error(err);
+
   process.env.TEST_AUTH = 'false';
 });
 

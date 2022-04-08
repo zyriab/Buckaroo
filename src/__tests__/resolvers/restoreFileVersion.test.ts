@@ -15,7 +15,6 @@ let e: any;
 let v: any;
 let errors: any[];
 let urls: any[];
-let res: any[];
 const fileName = 'example3.txt';
 const path = 'translations';
 
@@ -25,24 +24,23 @@ beforeAll(async () => {
 
   errors = [];
   urls = ([] as string[]) || undefined;
-  res = [];
 
-  for (let i = 0; i < 3; i+=1) {
+  for (let i = 0; i < 3; i += 1) {
     // eslint-disable-next-line no-await-in-loop
     const [err, url] = await getUploadUrl({
       req: fakeReq,
       fileName,
+      fileType: 'text',
       path,
       root: 'test-user-1234abcd',
     });
     errors.push(err);
-    urls.push(`${url}`);
+    urls.push(url);
   }
 
   if (!urls.includes('undefined')) {
     for (const u of urls)
-      // eslint-disable-next-line no-await-in-loop
-      res.push(await uploadFileToS3(u, './src/pseudo/', fileName));
+      uploadFileToS3(u.url, u.fields, './src/pseudo/', fileName);
   }
 
   [e, v] = await getOneFileVersionsIds({

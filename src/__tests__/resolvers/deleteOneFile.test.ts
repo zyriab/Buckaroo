@@ -12,7 +12,6 @@ const request = supertest(app);
 
 let err: any;
 let url: any;
-let res: any;
 const fileName = 'example.txt';
 const path = 'translations';
 beforeAll(async () => {
@@ -22,12 +21,13 @@ beforeAll(async () => {
   [err, url] = await getUploadUrl({
     req: fakeReq,
     fileName,
+    fileType: 'text',
     path,
     root: 'test-user-1234abcd',
   });
 
   if (!err) {
-    res = await uploadFileToS3(url!, './src/pseudo/', fileName);
+    uploadFileToS3(url.url!, url.fields, './src/pseudo/', fileName);
   }
 });
 
@@ -37,7 +37,6 @@ afterAll(() => {
 
 test('Should delete specified file', (done) => {
   expect(err).toBeUndefined();
-  expect(res.status).toBe(200);
 
   const query = deleteFileQuery;
   query.variables.fileName = fileName;
@@ -61,7 +60,6 @@ test('Should delete specified file', (done) => {
 
 test('Should be blocked when deleting specified file from root (Unauthorized)', (done) => {
   expect(err).toBeUndefined();
-  expect(res.status).toBe(200);
 
   const query = deleteFileQuery;
   query.variables.fileName = fileName;

@@ -10,6 +10,7 @@ import fakeReq from '../../helpers/mockRequest.help';
 const request = supertest(app);
 
 let uploadUrl: string;
+let uploadFields: Object;
 const fileName = 'example.txt';
 const path = 'translations';
 beforeAll(() => {
@@ -26,6 +27,7 @@ test('Should fetch pre-signed upload URL for <user-folder>/translations/example.
   const query = fetchUpUrlQuery;
   query.variables.fileName = fileName;
   query.variables.path = path;
+  query.variables.fileType = 'text';
 
   request
     .post('/gql')
@@ -37,14 +39,14 @@ test('Should fetch pre-signed upload URL for <user-folder>/translations/example.
       if (err) return done(err);
       expect(res.body).toBeInstanceOf(Object);
       expect(res.body.data.getUploadUrl).not.toBeUndefined();
-      expect(res.body.data.getUploadUrl.__typename).toBe('SignedUrl');
+      expect(res.body.data.getUploadUrl.__typename).toBe('SignedPost');
       expect(res.body.data.getUploadUrl.url).not.toBeUndefined();
       uploadUrl = res.body.data.getUploadUrl.url;
+      uploadFields = res.body.data.getUploadUrl.fields;
       done();
     });
 });
 
 test('Should upload example.txt with pre-signed URL', async () => {
-  const res = await uploadFileToS3(uploadUrl, './src/pseudo/', fileName);
-  expect(res.status).toBe(200);
+  uploadFileToS3(uploadUrl, uploadFields, './src/pseudo/', fileName);
 });
