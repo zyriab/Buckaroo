@@ -1,7 +1,9 @@
+import { FileType } from '../../definitions/types';
+
 /** For presigned POST conditionning */
 export default function getFileSizeRange(
-  type?:  'text' | 'image'
-): ['content-length-range', 0, number] {
+  type?: FileType
+): ['content-length-range', 1, number] {
   const mib = 1048576;
   let max = 0;
   switch (type) {
@@ -12,8 +14,8 @@ export default function getFileSizeRange(
       max = mib * 10;
       break;
     default:
-      max = mib;
+      max = mib * 1;
       break;
   }
-  return ['content-length-range', 0, max];
+  return ['content-length-range', 1, max];
 }
