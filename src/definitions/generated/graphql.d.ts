@@ -82,10 +82,16 @@ export type ListInput = {
 
 export type Mutations = {
   __typename?: 'Mutations';
+  controlVersions?: Maybe<VersionControlResult>;
   deleteDirectory?: Maybe<DeleteDirectoryResult>;
   deleteManyFiles?: Maybe<DeleteFileResult>;
   deleteOneFile?: Maybe<DeleteFileResult>;
   restoreFileVersion?: Maybe<RestoreFileResult>;
+};
+
+
+export type MutationsControlVersionsArgs = {
+  versionControlInput: VersionControlInput;
 };
 
 
@@ -180,6 +186,20 @@ export type Version = {
   name: Scalars['String'];
   path: Scalars['String'];
   size: Scalars['Int'];
+};
+
+export type VersionControlInput = {
+  bucketName: Scalars['String'];
+  fileName: Scalars['String'];
+  maxNumberOfVersions: Scalars['Int'];
+  root: Scalars['String'];
+};
+
+export type VersionControlResult = ServerError | StorageNotFound | Unauthenticated | VersionControlSuccess;
+
+export type VersionControlSuccess = {
+  __typename?: 'VersionControlSuccess';
+  message: Scalars['String'];
 };
 
 export type VersionId = {
@@ -285,6 +305,9 @@ export type ResolversTypes = {
   Unauthorized: ResolverTypeWrapper<Unauthorized>;
   UploadInput: UploadInput;
   Version: ResolverTypeWrapper<Version>;
+  VersionControlInput: VersionControlInput;
+  VersionControlResult: ResolversTypes['ServerError'] | ResolversTypes['StorageNotFound'] | ResolversTypes['Unauthenticated'] | ResolversTypes['VersionControlSuccess'];
+  VersionControlSuccess: ResolverTypeWrapper<VersionControlSuccess>;
   VersionId: ResolverTypeWrapper<VersionId>;
 };
 
@@ -319,6 +342,9 @@ export type ResolversParentTypes = {
   Unauthorized: Unauthorized;
   UploadInput: UploadInput;
   Version: Version;
+  VersionControlInput: VersionControlInput;
+  VersionControlResult: ResolversParentTypes['ServerError'] | ResolversParentTypes['StorageNotFound'] | ResolversParentTypes['Unauthenticated'] | ResolversParentTypes['VersionControlSuccess'];
+  VersionControlSuccess: VersionControlSuccess;
   VersionId: VersionId;
 };
 
@@ -367,6 +393,7 @@ export type ListBucketResultResolvers<ContextType = any, ParentType extends Reso
 };
 
 export type MutationsResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutations'] = ResolversParentTypes['Mutations']> = {
+  controlVersions?: Resolver<Maybe<ResolversTypes['VersionControlResult']>, ParentType, ContextType, RequireFields<MutationsControlVersionsArgs, 'versionControlInput'>>;
   deleteDirectory?: Resolver<Maybe<ResolversTypes['DeleteDirectoryResult']>, ParentType, ContextType, Partial<MutationsDeleteDirectoryArgs>>;
   deleteManyFiles?: Resolver<Maybe<ResolversTypes['DeleteFileResult']>, ParentType, ContextType, RequireFields<MutationsDeleteManyFilesArgs, 'filesInput'>>;
   deleteOneFile?: Resolver<Maybe<ResolversTypes['DeleteFileResult']>, ParentType, ContextType, RequireFields<MutationsDeleteOneFileArgs, 'fileInput'>>;
@@ -431,6 +458,15 @@ export type VersionResolvers<ContextType = any, ParentType extends ResolversPare
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type VersionControlResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['VersionControlResult'] = ResolversParentTypes['VersionControlResult']> = {
+  __resolveType: TypeResolveFn<'ServerError' | 'StorageNotFound' | 'Unauthenticated' | 'VersionControlSuccess', ParentType, ContextType>;
+};
+
+export type VersionControlSuccessResolvers<ContextType = any, ParentType extends ResolversParentTypes['VersionControlSuccess'] = ResolversParentTypes['VersionControlSuccess']> = {
+  message?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type VersionIdResolvers<ContextType = any, ParentType extends ResolversParentTypes['VersionId'] = ResolversParentTypes['VersionId']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -457,6 +493,8 @@ export type Resolvers<ContextType = any> = {
   Unauthenticated?: UnauthenticatedResolvers<ContextType>;
   Unauthorized?: UnauthorizedResolvers<ContextType>;
   Version?: VersionResolvers<ContextType>;
+  VersionControlResult?: VersionControlResultResolvers<ContextType>;
+  VersionControlSuccess?: VersionControlSuccessResolvers<ContextType>;
   VersionId?: VersionIdResolvers<ContextType>;
 };
 

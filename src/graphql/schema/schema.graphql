@@ -48,6 +48,10 @@ type Directory {
   bucketName: String
 }
 
+type VersionControlSuccess {
+  message: String!
+}
+
 "ERROR TYPES"
 type Unauthenticated {
   message: String!
@@ -99,6 +103,13 @@ input DirectoryInput {
   bucketName: String
 }
 
+input VersionControlInput {
+  bucketName: String!
+  fileName: String!
+  root: String!
+  maxNumberOfVersions: Int!
+}
+
 union ListBucketResult =
     FileList
   | Unauthenticated
@@ -136,6 +147,12 @@ union RestoreFileResult =
   | StorageNotFound
   | ServerError
 
+union VersionControlResult =
+    VersionControlSuccess
+  | Unauthenticated
+  | StorageNotFound
+  | ServerError
+
 type Queries {
   listBucketContent(listInput: ListInput!): ListBucketResult!
   getUploadUrl(fileInput: FileInput!): SignedUrlResult!
@@ -147,6 +164,7 @@ type Mutations {
   deleteManyFiles(filesInput: FilesInput!): DeleteFileResult
   deleteDirectory(directoryInput: DirectoryInput): DeleteDirectoryResult
   restoreFileVersion(fileInput: FileInput!): RestoreFileResult
+  controlVersions(versionControlInput: VersionControlInput!): VersionControlResult
 }
 schema {
   query: Queries
