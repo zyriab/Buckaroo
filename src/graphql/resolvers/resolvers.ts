@@ -5,6 +5,7 @@ import {
   FilesInput,
   DirectoryInput,
   UploadInput,
+  VersionControlInput,
 } from '../../definitions/generated/graphql';
 import { RequestBody } from '../../definitions/root';
 import {
@@ -17,6 +18,7 @@ import {
   getDownloadUrl,
   getUploadUrl,
   listBucketContent,
+  controlVersions,
 } from '../../utils/s3.utils';
 import { resolveAuth } from '../../utils/auth.utils';
 import formatPath from '../../utils/tools/formatPath.utils';
@@ -41,17 +43,19 @@ const gqlResolvers = {
 
       if (!authed) return error;
 
-      const [storageError, exists] = await isBucketExisting(
-        args.listInput.bucketName || req.body.tenant.bucket.name
-      );
+      if (args.listInput.bucketName) {
+        const [storageError, exists] = await isBucketExisting(
+          args.listInput.bucketName
+        );
 
-      if (storageError) throw storageError;
+        if (storageError) throw storageError;
 
-      if (!exists) {
-        return {
-          __typename: 'StorageNotFound',
-          message: 'The requested bucket could not be found',
-        };
+        if (!exists) {
+          return {
+            __typename: 'StorageNotFound',
+            message: 'The requested bucket could not be found',
+          };
+        }
       }
 
       const root =
@@ -89,19 +93,6 @@ const gqlResolvers = {
 
       if (!authed) return error;
 
-      const [storageError, exists] = await isBucketExisting(
-        req.body.tenant.bucket.name
-      );
-
-      if (storageError) throw storageError;
-
-      if (!exists) {
-        return {
-          __typename: 'StorageNotFound',
-          message: 'The requested bucket could not be found',
-        };
-      }
-
       const root =
         args.uploadInput.root ?? `${req.body.username}-${req.body.userId}`;
 
@@ -136,19 +127,6 @@ const gqlResolvers = {
 
       if (!authed) return error;
 
-      const [storageError, exists] = await isBucketExisting(
-        req.body.tenant.bucket.name
-      );
-
-      if (storageError) throw storageError;
-
-      if (!exists) {
-        return {
-          __typename: 'StorageNotFound',
-          message: 'The requested bucket could not be found',
-        };
-      }
-
       const root =
         args.fileInput.root ?? `${req.body.username}-${req.body.userId}`;
 
@@ -181,19 +159,6 @@ const gqlResolvers = {
       );
 
       if (!authed) return error;
-
-      const [storageError, exists] = await isBucketExisting(
-        req.body.tenant.bucket.name
-      );
-
-      if (storageError) throw storageError;
-
-      if (!exists) {
-        return {
-          __typename: 'StorageNotFound',
-          message: 'The requested bucket could not be found',
-        };
-      }
 
       const root =
         args.fileInput.root ?? `${req.body.username}-${req.body.userId}`;
@@ -229,19 +194,6 @@ const gqlResolvers = {
       );
 
       if (!authed) return error;
-
-      const [storageError, exists] = await isBucketExisting(
-        req.body.tenant.bucket.name
-      );
-
-      if (storageError) throw storageError;
-
-      if (!exists) {
-        return {
-          __typename: 'StorageNotFound',
-          message: 'The requested bucket could not be found',
-        };
-      }
 
       const root =
         args.filesInput.root ?? `${req.body.username}-${req.body.userId}`;
@@ -284,17 +236,19 @@ const gqlResolvers = {
 
       if (!authed) return error;
 
-      const [storageError, exists] = await isBucketExisting(
-        args.directoryInput.bucketName || req.body.tenant.bucket.name
-      );
+      if (args.directoryInput.bucketName) {
+        const [storageError, exists] = await isBucketExisting(
+          args.directoryInput.bucketName
+        );
 
-      if (storageError) throw storageError;
+        if (storageError) throw storageError;
 
-      if (!exists) {
-        return {
-          __typename: 'StorageNotFound',
-          message: 'The requested bucket could not be found',
-        };
+        if (!exists) {
+          return {
+            __typename: 'StorageNotFound',
+            message: 'The requested bucket could not be found',
+          };
+        }
       }
 
       const [failure, done] = await deleteDirectory({
@@ -337,20 +291,7 @@ const gqlResolvers = {
 
       if (!authed) return error;
 
-      const [storageError, exists] = await isBucketExisting(
-        req.body.tenant.bucket.name
-      );
-
-      if (storageError) throw storageError;
-
-      if (!exists) {
-        return {
-          __typename: 'StorageNotFound',
-          message: 'The requested bucket could not be found',
-        };
-      }
-
-      if (!(await isBucketVersioned(req.body.tenant.bucket.name))) {
+      if (!req.body.tenant.bucket.isVersioned) {
         throw new Error('The requested file is not on a versioned storage.');
       }
 
@@ -374,6 +315,57 @@ const gqlResolvers = {
       return {
         __typename: 'VersionId',
         id: newId,
+      };
+    } catch (err) {
+      return {
+        __typename: 'ServerError',
+        message: `${err}`,
+      };
+    }
+  },
+  controlVersions: async (
+    args: { versionControlInput: VersionControlInput },
+    req: RequestBody
+  ) => {
+    try {
+      const [authed, error] = resolveAuth(req, 'update:file');
+
+      if (!authed) return error;
+
+      const [storageError, exists] = await isBucketExisting(
+        args.versionControlInput.bucketName
+      );
+
+      if (storageError) throw storageError;
+
+      if (!exists) {
+        return {
+          __typename: 'StorageNotFound',
+          message: 'The requested bucket could not be found',
+        };
+      }
+
+      if (!(await isBucketVersioned(args.versionControlInput.bucketName))) {
+        throw new Error('The requested file is not on a versioned storage.');
+      }
+
+      const [failure, done] = await controlVersions({
+        req,
+        bucketName: args.versionControlInput.bucketName,
+        fileName: args.versionControlInput.fileName,
+        root: args.versionControlInput.root,
+        maxNumberOfVersions: args.versionControlInput.maxNumberOfVersions,
+      });
+
+      if (failure) throw failure;
+
+      const message = done
+        ? `Successfully removed last version of ${args.versionControlInput.fileName}.`
+        : `${args.versionControlInput.fileName} hasn't reach its maximum versions quota.`;
+
+      return {
+        __typename: 'VersionControlSuccess',
+        message,
       };
     } catch (err) {
       return {
