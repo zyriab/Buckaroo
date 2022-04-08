@@ -9,6 +9,7 @@ import isBucketExisting from './s3/isBucketExisting';
 import isBucketVersioned from './s3/isBucketVersioned';
 import getOneFileVersionsIds from './s3/getOneFileVersionsIds';
 import getManyFilesVersionsIds from './s3/getManyFilesVersionsIds';
+import controlVersions from './s3/controlVersions';
 import s3Client from './s3/s3Client';
 
 export { getDownloadUrl };
@@ -22,4 +23,5 @@ export { isBucketExisting };
 export { isBucketVersioned };
 export { getOneFileVersionsIds };
 export { getManyFilesVersionsIds };
+export { controlVersions };
 export { s3Client };
