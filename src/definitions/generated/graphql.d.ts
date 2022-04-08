@@ -1,4 +1,4 @@
-import { GraphQLResolveInfo } from 'graphql';
+import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -12,6 +12,7 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  PostFields: any;
 };
 
 export type DeleteDirectoryResult = Directory | ServerError | StorageNotFound | Unauthenticated | Unauthorized;
@@ -136,12 +137,18 @@ export type ServerError = {
   message: Scalars['String'];
 };
 
+export type SignedPost = {
+  __typename?: 'SignedPost';
+  fields: Scalars['PostFields'];
+  url: Scalars['String'];
+};
+
 export type SignedUrl = {
   __typename?: 'SignedUrl';
   url: Scalars['String'];
 };
 
-export type SignedUrlResult = ServerError | SignedUrl | StorageNotFound | Unauthenticated | Unauthorized;
+export type SignedUrlResult = ServerError | SignedPost | SignedUrl | StorageNotFound | Unauthenticated | Unauthorized;
 
 export type StorageNotFound = {
   __typename?: 'StorageNotFound';
@@ -157,6 +164,13 @@ export type Unauthenticated = {
 export type Unauthorized = {
   __typename?: 'Unauthorized';
   message: Scalars['String'];
+};
+
+export type UploadInput = {
+  fileName: Scalars['String'];
+  fileType: Scalars['String'];
+  path: Scalars['String'];
+  root?: InputMaybe<Scalars['String']>;
 };
 
 export type Version = {
@@ -258,15 +272,18 @@ export type ResolversTypes = {
   ListBucketResult: ResolversTypes['FileList'] | ResolversTypes['ServerError'] | ResolversTypes['StorageNotFound'] | ResolversTypes['Unauthenticated'] | ResolversTypes['Unauthorized'];
   ListInput: ListInput;
   Mutations: ResolverTypeWrapper<{}>;
+  PostFields: ResolverTypeWrapper<Scalars['PostFields']>;
   Queries: ResolverTypeWrapper<{}>;
   RestoreFileResult: ResolversTypes['ServerError'] | ResolversTypes['StorageNotFound'] | ResolversTypes['Unauthenticated'] | ResolversTypes['Unauthorized'] | ResolversTypes['VersionId'];
   ServerError: ResolverTypeWrapper<ServerError>;
+  SignedPost: ResolverTypeWrapper<SignedPost>;
   SignedUrl: ResolverTypeWrapper<SignedUrl>;
-  SignedUrlResult: ResolversTypes['ServerError'] | ResolversTypes['SignedUrl'] | ResolversTypes['StorageNotFound'] | ResolversTypes['Unauthenticated'] | ResolversTypes['Unauthorized'];
+  SignedUrlResult: ResolversTypes['ServerError'] | ResolversTypes['SignedPost'] | ResolversTypes['SignedUrl'] | ResolversTypes['StorageNotFound'] | ResolversTypes['Unauthenticated'] | ResolversTypes['Unauthorized'];
   StorageNotFound: ResolverTypeWrapper<StorageNotFound>;
   String: ResolverTypeWrapper<Scalars['String']>;
   Unauthenticated: ResolverTypeWrapper<Unauthenticated>;
   Unauthorized: ResolverTypeWrapper<Unauthorized>;
+  UploadInput: UploadInput;
   Version: ResolverTypeWrapper<Version>;
   VersionId: ResolverTypeWrapper<VersionId>;
 };
@@ -289,15 +306,18 @@ export type ResolversParentTypes = {
   ListBucketResult: ResolversParentTypes['FileList'] | ResolversParentTypes['ServerError'] | ResolversParentTypes['StorageNotFound'] | ResolversParentTypes['Unauthenticated'] | ResolversParentTypes['Unauthorized'];
   ListInput: ListInput;
   Mutations: {};
+  PostFields: Scalars['PostFields'];
   Queries: {};
   RestoreFileResult: ResolversParentTypes['ServerError'] | ResolversParentTypes['StorageNotFound'] | ResolversParentTypes['Unauthenticated'] | ResolversParentTypes['Unauthorized'] | ResolversParentTypes['VersionId'];
   ServerError: ServerError;
+  SignedPost: SignedPost;
   SignedUrl: SignedUrl;
-  SignedUrlResult: ResolversParentTypes['ServerError'] | ResolversParentTypes['SignedUrl'] | ResolversParentTypes['StorageNotFound'] | ResolversParentTypes['Unauthenticated'] | ResolversParentTypes['Unauthorized'];
+  SignedUrlResult: ResolversParentTypes['ServerError'] | ResolversParentTypes['SignedPost'] | ResolversParentTypes['SignedUrl'] | ResolversParentTypes['StorageNotFound'] | ResolversParentTypes['Unauthenticated'] | ResolversParentTypes['Unauthorized'];
   StorageNotFound: StorageNotFound;
   String: Scalars['String'];
   Unauthenticated: Unauthenticated;
   Unauthorized: Unauthorized;
+  UploadInput: UploadInput;
   Version: Version;
   VersionId: VersionId;
 };
@@ -353,6 +373,10 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   restoreFileVersion?: Resolver<Maybe<ResolversTypes['RestoreFileResult']>, ParentType, ContextType, RequireFields<MutationsRestoreFileVersionArgs, 'fileInput'>>;
 };
 
+export interface PostFieldsScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['PostFields'], any> {
+  name: 'PostFields';
+}
+
 export type QueriesResolvers<ContextType = any, ParentType extends ResolversParentTypes['Queries'] = ResolversParentTypes['Queries']> = {
   getDownloadUrl?: Resolver<ResolversTypes['SignedUrlResult'], ParentType, ContextType, RequireFields<QueriesGetDownloadUrlArgs, 'fileInput'>>;
   getUploadUrl?: Resolver<ResolversTypes['SignedUrlResult'], ParentType, ContextType, RequireFields<QueriesGetUploadUrlArgs, 'fileInput'>>;
@@ -368,13 +392,19 @@ export type ServerErrorResolvers<ContextType = any, ParentType extends Resolvers
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type SignedPostResolvers<ContextType = any, ParentType extends ResolversParentTypes['SignedPost'] = ResolversParentTypes['SignedPost']> = {
+  fields?: Resolver<ResolversTypes['PostFields'], ParentType, ContextType>;
+  url?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type SignedUrlResolvers<ContextType = any, ParentType extends ResolversParentTypes['SignedUrl'] = ResolversParentTypes['SignedUrl']> = {
   url?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type SignedUrlResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['SignedUrlResult'] = ResolversParentTypes['SignedUrlResult']> = {
-  __resolveType: TypeResolveFn<'ServerError' | 'SignedUrl' | 'StorageNotFound' | 'Unauthenticated' | 'Unauthorized', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'ServerError' | 'SignedPost' | 'SignedUrl' | 'StorageNotFound' | 'Unauthenticated' | 'Unauthorized', ParentType, ContextType>;
 };
 
 export type StorageNotFoundResolvers<ContextType = any, ParentType extends ResolversParentTypes['StorageNotFound'] = ResolversParentTypes['StorageNotFound']> = {
@@ -416,9 +446,11 @@ export type Resolvers<ContextType = any> = {
   FileNameList?: FileNameListResolvers<ContextType>;
   ListBucketResult?: ListBucketResultResolvers<ContextType>;
   Mutations?: MutationsResolvers<ContextType>;
+  PostFields?: GraphQLScalarType;
   Queries?: QueriesResolvers<ContextType>;
   RestoreFileResult?: RestoreFileResultResolvers<ContextType>;
   ServerError?: ServerErrorResolvers<ContextType>;
+  SignedPost?: SignedPostResolvers<ContextType>;
   SignedUrl?: SignedUrlResolvers<ContextType>;
   SignedUrlResult?: SignedUrlResultResolvers<ContextType>;
   StorageNotFound?: StorageNotFoundResolvers<ContextType>;

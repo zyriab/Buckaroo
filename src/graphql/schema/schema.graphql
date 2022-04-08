@@ -1,3 +1,5 @@
+scalar PostFields
+
 type Version {
   id: ID!
   name: String!
@@ -21,6 +23,11 @@ type FileList {
 
 type SignedUrl {
   url: String!
+}
+
+type SignedPost {
+  url: String!
+  fields: PostFields!
 }
 
 type FileName {
@@ -65,6 +72,13 @@ input ListInput {
   bucketName: String
 }
 
+input UploadInput {
+  fileName: String!
+  fileType: String!
+  path: String!
+  root: String
+}
+
 input FileInput {
   fileName: String!
   path: String!
@@ -94,6 +108,7 @@ union ListBucketResult =
 
 union SignedUrlResult =
     SignedUrl
+  | SignedPost
   | Unauthenticated
   | Unauthorized
   | StorageNotFound
