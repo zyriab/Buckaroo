@@ -6,6 +6,7 @@ import s3Client from './s3Client';
 import { File, Version } from '../../definitions/generated/graphql';
 import { RequestBody } from '../../definitions/root';
 import { DeleteMarker, Directory } from '../../definitions/s3';
+import isDirectory from '../tools/isDirectory.utils';
 
 interface InputArgs {
   req: RequestBody;
@@ -50,15 +51,9 @@ export default async function listBucketContent(
 
       const dirSet = [
         ...new Set<Directory>(
-          res.Versions?.map((v: ObjectVersion) => {
-            const a = v.Key!.split('/');
-            
-            if (getFileExtension(a[a.length - 1])) {
-              a.pop();
-            }
-
-            return { path: a.join('/'), id: v.VersionId! };
-          })
+          res.Versions?.filter((v: ObjectVersion) => isDirectory(v.Key!)).map(
+            (d) => ({ path: d.Key!, id: d.VersionId! })
+          )
         ),
       ];
 
@@ -104,15 +99,15 @@ export default async function listBucketContent(
       if (args.req.body.tenant.bucket.isVersioned)
         for (const f of fileList) {
           f.versions = versions!
-            .filter((v) => v.Key!.replace(fullPath, '') === f.name)
+            .filter((v) => normalize(v.Key!).split('/').pop() === f.name)
             .map(
               (v) =>
                 ({
                   id: v.VersionId,
-                  name: v.Key!.replace(fullPath, ''),
+                  name: normalize(v.Key!).split('/').pop(),
                   lastModified: v.LastModified!.toISOString(),
                   size: v.Size,
-                  path: fullPath,
+                  path: v.Key!.replace(normalize(v.Key!).split('/').pop()!, ''),
                 } as Version)
             );
         }
