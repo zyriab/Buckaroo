@@ -23,6 +23,7 @@ import {
 import { resolveAuth } from '../../utils/auth.utils';
 import formatPath from '../../utils/tools/formatPath.utils';
 import { FileType } from '../../definitions/types';
+import handleErrorResponse from '../../utils/tools/handleErrorResponse.utils';
 
 const gqlResolvers = {
   listBucketContent: async (
@@ -75,10 +76,7 @@ const gqlResolvers = {
         list: content,
       };
     } catch (err) {
-      return {
-        __typename: 'ServerError',
-        message: `${err}`,
-      };
+      return handleErrorResponse(err as Error);
     }
   },
   getUploadUrl: async (
@@ -112,10 +110,7 @@ const gqlResolvers = {
         fields: signedPost.fields,
       };
     } catch (err) {
-      return {
-        __typename: 'ServerError',
-        message: `${err}`,
-      };
+      return handleErrorResponse(err as Error);
     }
   },
   getDownloadUrl: async (args: { fileInput: FileInput }, req: RequestBody) => {
@@ -145,10 +140,7 @@ const gqlResolvers = {
         url,
       };
     } catch (err) {
-      return {
-        __typename: 'ServerError',
-        message: `${err}`,
-      };
+      return handleErrorResponse(err as Error);
     }
   },
   deleteOneFile: async (args: { fileInput: FileInput }, req: RequestBody) => {
@@ -177,10 +169,7 @@ const gqlResolvers = {
         name: fileName,
       };
     } catch (err) {
-      return {
-        __typename: 'ServerError',
-        message: `${err}`,
-      };
+      return handleErrorResponse(err as Error);
     }
   },
   deleteManyFiles: async (
@@ -212,10 +201,7 @@ const gqlResolvers = {
         names: fileNames,
       };
     } catch (err) {
-      return {
-        __typename: 'ServerError',
-        message: `${err}`,
-      };
+      return handleErrorResponse(err as Error);
     }
   },
   deleteDirectory: async (
@@ -273,10 +259,7 @@ const gqlResolvers = {
           args.directoryInput.bucketName || req.body.tenant.bucket.name,
       };
     } catch (err) {
-      return {
-        __typename: 'ServerError',
-        message: `${err}`,
-      };
+      return handleErrorResponse(err as Error);
     }
   },
   restoreFileVersion: async (
@@ -317,10 +300,7 @@ const gqlResolvers = {
         id: newId,
       };
     } catch (err) {
-      return {
-        __typename: 'ServerError',
-        message: `${err}`,
-      };
+      return handleErrorResponse(err as Error);
     }
   },
   controlVersions: async (
@@ -368,10 +348,7 @@ const gqlResolvers = {
         message,
       };
     } catch (err) {
-      return {
-        __typename: 'ServerError',
-        message: `${err}`,
-      };
+      return handleErrorResponse(err as Error);
     }
   },
 };
