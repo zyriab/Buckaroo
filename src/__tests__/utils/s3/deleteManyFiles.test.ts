@@ -1,6 +1,7 @@
-import { deleteOneFile, getUploadUrl } from '../../../utils/s3.utils';
-import req from '../../../helpers/mockRequest.help';
+/* eslint-disable no-console */
+import { deleteManyFiles, getUploadUrl } from '../../../utils/s3.utils';
 import { uploadFileToS3 } from '../../../helpers/downloadUpload.help';
+import req from '../../../helpers/mockRequest.help';
 
 const fileName = 'example.txt';
 let err: any;
@@ -23,13 +24,15 @@ beforeAll(async () => {
 });
 
 test('Should delete example3.txt and all its versions', async () => {
-  const [error, file] = await deleteOneFile({
+  expect(err).toBeUndefined();
+
+  const [error, fileNames] = await deleteManyFiles({
     req,
-    fileName,
+    fileNames: [fileName],
     root: 'test-user-1234abcd',
     path: 'translations',
   });
 
   expect(error).toBeUndefined();
-  expect(file).toBe(fileName);
+  expect(fileNames![0]).toBe(fileName);
 });
