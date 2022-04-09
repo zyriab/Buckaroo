@@ -5,7 +5,7 @@ import supertest from 'supertest';
 import app from '../../app';
 import { restoreFileVersionQuery } from '../../helpers/testQueries.help';
 import getOneFileVersionsIds from '../../utils/s3/getOneFileVersionsIds';
-import fakeReq from '../../helpers/mockRequest.help';
+import req from '../../helpers/mockRequest.help';
 import { deleteOneFile, getUploadUrl } from '../../utils/s3.utils';
 import { uploadFileToS3 } from '../../helpers/downloadUpload.help';
 
@@ -28,7 +28,7 @@ beforeAll(async () => {
   for (let i = 0; i < 3; i += 1) {
     // eslint-disable-next-line no-await-in-loop
     const [err, url] = await getUploadUrl({
-      req: fakeReq,
+      req,
       fileName,
       fileType: 'text',
       path,
@@ -44,7 +44,7 @@ beforeAll(async () => {
   }
 
   [e, v] = await getOneFileVersionsIds({
-    req: fakeReq,
+    req,
     fileName,
     path,
     root: 'test-user-1234abcd',
@@ -54,7 +54,7 @@ beforeAll(async () => {
 afterAll(async () => {
   if (process.env.TEST_AUTH === 'true')
     await deleteOneFile({
-      req: fakeReq,
+      req,
       fileName,
       path,
       root: 'test-user-1234abcd',
@@ -87,7 +87,7 @@ test('Should restore older version of file', (done) => {
       expect(res.body.data.restoreFileVersion.id).not.toBeUndefined();
 
       getOneFileVersionsIds({
-        req: fakeReq,
+        req,
         fileName,
         path,
         root: 'test-user-1234abcd',

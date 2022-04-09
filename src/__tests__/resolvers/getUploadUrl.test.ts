@@ -5,7 +5,7 @@ import app from '../../app';
 import { fetchUpUrlQuery } from '../../helpers/testQueries.help';
 import { uploadFileToS3 } from '../../helpers/downloadUpload.help';
 import { deleteOneFile } from '../../utils/s3.utils';
-import fakeReq from '../../helpers/mockRequest.help';
+import req from '../../helpers/mockRequest.help';
 
 const request = supertest(app);
 
@@ -19,7 +19,7 @@ beforeAll(() => {
 });
 
 afterAll(() => {
-  deleteOneFile({ req: fakeReq, fileName, path, root: 'test-user-1234abcd' });
+  deleteOneFile({ req, fileName, path, root: 'test-user-1234abcd' });
   process.env.TEST_AUTH = 'false';
 });
 

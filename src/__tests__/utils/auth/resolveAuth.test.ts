@@ -1,6 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import resolveAuth from '../../../utils/auth/resolveAuth';
-import fakeReq from '../../../helpers/mockRequest.help';
+import req from '../../../helpers/mockRequest.help';
 import 'dotenv/config';
 
 beforeAll(() => {
@@ -12,7 +12,6 @@ afterAll(() => {
 });
 
 test('Should resolve as authenticated', () => {
-  const req: any = { ...fakeReq };
   req.body.permissions = [
     'read:bucket',
     'delete:directory',
@@ -42,7 +41,6 @@ test('Should resolve as authenticated', () => {
 });
 
 test('Should resolve as NOT authenticated', () => {
-  const req: any = { ...fakeReq };
   req.body.isAuth = false;
 
   const [authed, gqlerror] = resolveAuth(req);
@@ -51,7 +49,6 @@ test('Should resolve as NOT authenticated', () => {
 });
 
 test("Should resolve as NOT authenticated and __typename: 'Unauthorized'", () => {
-  const req: any = { ...fakeReq };
   req.body.isAuth = true;
   req.body.permissions = [];
 
@@ -73,7 +70,6 @@ test("Should resolve as NOT authenticated and __typename: 'Unauthorized'", () =>
 });
 
 test("Should resolve as NOT authenticated and __typename: 'StorageNotFound'", () => {
-  const req: any = { ...fakeReq };
   req.body.tenant.bucket.exists = false;
 
   const [authed, gqlerror] = resolveAuth(req);

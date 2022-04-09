@@ -6,7 +6,7 @@ import app from '../../app';
 import { listQuery } from '../../helpers/testQueries.help';
 import { uploadFileToS3 } from '../../helpers/downloadUpload.help';
 import { getUploadUrl } from '../../utils/s3.utils';
-import fakeReq from '../../helpers/mockRequest.help';
+import req from '../../helpers/mockRequest.help';
 
 const request = supertest(app);
 
@@ -19,7 +19,7 @@ beforeAll(async () => {
   process.env.TEST_AUTH = 'true';
 
   [err, url] = await getUploadUrl({
-    req: fakeReq,
+    req,
     fileName,
     fileType: 'text',
     path,

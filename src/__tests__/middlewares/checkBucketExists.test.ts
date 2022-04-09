@@ -1,8 +1,7 @@
 import checkBucketExists from '../../middlewares/checkBucketExists';
-import fakeReq from '../../helpers/mockRequest.help';
+import req from '../../helpers/mockRequest.help';
 import 'dotenv/config';
 
-const req = fakeReq;
 const res: any = { status: 200 };
 
 beforeAll(() => {

@@ -4,7 +4,7 @@ import supertest from 'supertest';
 import app from '../../app';
 import { deleteManyFileQuery } from '../../helpers/testQueries.help';
 import { getUploadUrl } from '../../utils/s3.utils';
-import fakeReq from '../../helpers/mockRequest.help';
+import req from '../../helpers/mockRequest.help';
 import { uploadFileToS3 } from '../../helpers/downloadUpload.help';
 
 const request = supertest(app);
@@ -18,14 +18,14 @@ beforeAll(async () => {
   process.env.TEST_AUTH = 'true';
 
   [err1, url1] = await getUploadUrl({
-    req: fakeReq,
+    req,
     fileName: 'example.txt',
     fileType: 'text',
     path: 'translations',
     root: 'test-user-1234abcd',
   });
   [err2, url2] = await getUploadUrl({
-    req: fakeReq,
+    req,
     fileName: 'example2.txt',
     fileType: 'text',
     path: 'translations',
