@@ -80,7 +80,7 @@ export const fetchUpUrlQuery = {
     fileName: '',
     fileType: '',
     path: '',
-    root: '',
+    root: undefined,
   },
 };
 
