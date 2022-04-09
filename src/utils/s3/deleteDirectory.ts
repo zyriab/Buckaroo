@@ -73,6 +73,7 @@ export default async function deleteDirectory(
       }
     }
 
+    // FIXME: deleting markers might generate new files, need to recall the function
     if (markers!.length > 0) {
       markers!.sort(
         (a, b) =>
