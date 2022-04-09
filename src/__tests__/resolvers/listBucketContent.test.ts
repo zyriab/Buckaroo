@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable consistent-return */
 /* eslint-disable @typescript-eslint/no-shadow */
@@ -5,7 +6,7 @@ import supertest from 'supertest';
 import app from '../../app';
 import { listQuery } from '../../helpers/testQueries.help';
 import { uploadFileToS3 } from '../../helpers/downloadUpload.help';
-import { getUploadUrl } from '../../utils/s3.utils';
+import { deleteOneFile, getUploadUrl } from '../../utils/s3.utils';
 import req from '../../helpers/mockRequest.help';
 
 const request = supertest(app);
@@ -31,7 +32,16 @@ beforeAll(async () => {
   }
 });
 
-afterAll(() => {
+afterAll(async () => {
+  const [err] = await deleteOneFile({
+    req,
+    fileName,
+    path,
+    root: 'test-user-1234abcd',
+  });
+
+  if (err) console.error(err);
+
   process.env.TEST_AUTH = 'false';
 });
 

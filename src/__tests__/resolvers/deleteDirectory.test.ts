@@ -1,17 +1,44 @@
+/* eslint-disable no-console */
 /* eslint-disable consistent-return */
 /* eslint-disable no-underscore-dangle */
 import supertest from 'supertest';
 import app from '../../app';
+import req from '../../helpers/mockRequest.help';
 import { deleteDirectoryQuery } from '../../helpers/testQueries.help';
 import 'dotenv/config';
+import { getUploadUrl } from '../../utils/s3.utils';
+import { uploadFileToS3 } from '../../helpers/downloadUpload.help';
 
 const request = supertest(app);
 
 const dirPath = 'some-user/';
 const bucketName = '';
-beforeAll(() => {
+beforeAll(async () => {
   process.env.NODE_ENV = 'test';
   process.env.TEST_AUTH = 'true';
+
+  const [err, post] = await getUploadUrl({
+    req,
+    fileName: 'example.txt',
+    fileType: 'text',
+    path: 'translations',
+    root: 'another-user',
+  });
+
+  const [err2, post2] = await getUploadUrl({
+    req,
+    fileName: 'example.txt',
+    fileType: 'text',
+    path: 'products',
+    root: 'another-user',
+  });
+
+  if (err) console.error(err);
+  else if (err2) console.error(err2);
+  else {
+    uploadFileToS3(post.url, post.fields, './src/pseudo/', 'example.txt');
+    uploadFileToS3(post2.url, post2.fields, './src/pseudo/', 'example.txt');
+  }
 });
 
 afterAll(() => {
