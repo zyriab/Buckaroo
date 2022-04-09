@@ -141,6 +141,7 @@ export type RestoreFileResult = ServerError | StorageNotFound | Unauthenticated 
 export type ServerError = {
   __typename?: 'ServerError';
   message: Scalars['String'];
+  stack?: Maybe<Scalars['String']>;
 };
 
 export type SignedPost = {
@@ -416,6 +417,7 @@ export type RestoreFileResultResolvers<ContextType = any, ParentType extends Res
 
 export type ServerErrorResolvers<ContextType = any, ParentType extends ResolversParentTypes['ServerError'] = ResolversParentTypes['ServerError']> = {
   message?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  stack?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

@@ -63,6 +63,7 @@ type StorageNotFound {
 
 type ServerError {
   message: String!
+  stack: String
 }
 
 type Unauthorized {
