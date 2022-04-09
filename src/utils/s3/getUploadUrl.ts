@@ -19,7 +19,6 @@ interface InputArgs {
   path: string;
 }
 
-// TODO: need to use a webhook to remove oldest version once the upload succeded (if + than n versions already exist)
 export default async function getUploadUrl(
   args: InputArgs
 ): Promise<[undefined, PresignedPost] | [Error]> {
