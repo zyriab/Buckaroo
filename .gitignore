@@ -2,6 +2,7 @@
 build/
 pseudo/
 .vscode/
+sam_app/
 
 # Logs
 logs
