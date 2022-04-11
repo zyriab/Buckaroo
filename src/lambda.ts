@@ -7,5 +7,6 @@ require('source-map-support').install();
 const server = awsServerlessExpress.createServer(app);
 
 exports.handler = (event: any, context: any): any => {
+  console.log('Testing handler')
   awsServerlessExpress.proxy(server, event, context);
 };
