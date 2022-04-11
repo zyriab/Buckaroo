@@ -18,8 +18,7 @@ Resources:
   # Each Lambda function is defined by properties:
   # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
 
-  # This is a Lambda function config associated with the source code: hello-from-lambda.js
-  helloFromLambdaFunction:
+  handler:
     Type: AWS::Serverless::Function
     Properties:
       Handler: index.handler
@@ -28,7 +27,6 @@ Resources:
         - x86_64
       MemorySize: 128
       Timeout: 100
-      Description: A Lambda function that returns a static string.
+      Description: Entry point of the API.
       Policies:
-        # Give Lambda basic execution Permission to the helloFromLambda
-        - AWSLambdaBasicExecutionRole
+        - AWSLambdaFullAccess
