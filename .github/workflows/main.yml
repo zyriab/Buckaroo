@@ -27,6 +27,6 @@ jobs:
       # TODO: add testing
       - name: 'deploy'
         run: |
-          npx ncc build src/app.ts
+          npx ncc build src/lambda.ts
           zip -j deploy.zip ./dist/*
           aws lambda update-function-code --function-name=buckaroo --zip-file=fileb://deploy.zip
