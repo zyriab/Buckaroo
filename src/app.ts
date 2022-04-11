@@ -13,15 +13,15 @@ import checkBucketVersioning from './middlewares/checkBucketVersioning';
 import setReqMetadata from './middlewares/setReqMetadata';
 import setTestingData from './middlewares/setTestingData';
 
-const IS_DEV = process.env.NODE_ENV !== 'production';
+const IS_DEV = process.env.NODE_ENV === 'development';
+const IS_TEST = process.env.NODE_ENV === 'test';
 
 if (IS_DEV) dotenv.config();
 
 const app = express();
 
-if (!IS_DEV) {
+if (!IS_DEV)
   app.use(helmet());
-}
 
 app.use(bodyParser.json());
 
@@ -36,7 +36,7 @@ app.use((req: RequestBody, res: ResponseBody<any>, next: any) => {
   next();
 });
 
-if (process.env.NODE_ENV !== 'test') {
+if (!IS_TEST) {
   app.use(checkAuth);
   app.use(setReqMetadata);
   app.use(checkBucketExists);
@@ -44,6 +44,10 @@ if (process.env.NODE_ENV !== 'test') {
 } else {
   app.use(setTestingData);
 }
+
+app.get('/health', async function (req, res) {
+    res.status(200).json({ response: 'working successfully' });
+});
 
 app.use(
   '/gql',
