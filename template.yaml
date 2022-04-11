@@ -21,7 +21,7 @@ Resources:
   handler:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: index.handler
+      Handler: lambda.handler
       Runtime: nodejs14.x
       Architectures:
         - x86_64
