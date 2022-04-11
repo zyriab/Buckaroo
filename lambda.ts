@@ -1,6 +1,6 @@
 /* eslint-disable import/no-import-module-exports */
 import awsServerlessExpress from 'aws-serverless-express';
-import app from './app';
+import app from './src/app';
 // eslint-disable-next-line import/no-extraneous-dependencies
 require('source-map-support').install();
 
