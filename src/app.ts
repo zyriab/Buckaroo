@@ -16,7 +16,8 @@ import setTestingData from './middlewares/setTestingData';
 const IS_DEV = process.env.NODE_ENV === 'development';
 const IS_TEST = process.env.NODE_ENV === 'test';
 
-if (IS_DEV) dotenv.config();
+// if (IS_DEV) dotenv.config();
+dotenv.config();
 
 const app = express();
 
