@@ -5,13 +5,12 @@
   "private": true,
   "main": "index.ts",
   "scripts": {
-    "dev": "ts-node-dev --respawn --pretty --transpile-only src/index.ts",
+    "dev": "ts-node-dev --respawn --pretty --transpile-only src/server.ts",
     "build": "tsc -p .",
-    "bundle": "ncc build src/app.ts",
+    "bundle": "ncc build src/index.ts",
     "check": "tsc --noEmit",
     "test": "npx jest --coverage",
     "gqlgen": "graphql-codegen --config codegen.yml",
-    "checkerr": "tsc --noEmit",
     "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "author": "Arthur Wallendorff - Metaoist Dsgn",
