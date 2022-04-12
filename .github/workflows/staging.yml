@@ -28,8 +28,10 @@ jobs:
         env:
           CI: true
         run: npm ci
+      - name: 'Linting code'
+        run: npm run lint
       - name: 'Running tests'
-        run: jest
+        run: npm run test
       - name: 'Bundling files'
         run: npx ncc build src/index.ts
       - name: 'Zipping bundled file'
