@@ -1,26 +1,25 @@
-const express = require('express');
-const { graphqlHTTP } = require('express-graphql');
-const schema = require('./graphql/schema/gqlSchema');
-const resolvers = require('./graphql/resolvers/resolvers');
-
-require('dotent').config();
+import express from 'express';
+import { graphqlHTTP } from 'express-graphql';
+import schema from './graphql/schema/gqlSchema';
+import resolvers from './graphql/resolvers/resolvers';
+import 'dotenv/config';
 
 const app = express();
 
-app.get('/health', async (req, res) =>
+app.get('/health', async (req: any, res: any) =>
   res.status(200).json({ response: 'working successfully' })
 );
 
 app.use(
   '/gql',
   graphqlHTTP(async () => ({
-    schema: schema,
+    schema,
     rootValue: resolvers,
     graphiql: true,
   }))
 );
 
-module.exports = app;
+export default app;
 
 // import express from 'express';
 // import bodyParser from 'body-parser';
