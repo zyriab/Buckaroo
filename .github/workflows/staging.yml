@@ -28,6 +28,8 @@ jobs:
         env:
           CI: true
         run: npm ci
+      - name: 'Checking TS'
+        run: npm run check
       - name: 'Linting code'
         run: npm run lint
       - name: 'Running tests'
