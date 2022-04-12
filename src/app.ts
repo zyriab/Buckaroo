@@ -6,7 +6,7 @@ import 'dotenv/config';
 
 const app = express();
 
-app.get('/health', async (req: any, res: any) =>
+app.get('/', async (req: any, res: any) =>
   res.status(200).json({ response: 'working successfully' })
 );
 
