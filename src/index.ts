@@ -1,8 +1,8 @@
-// /* eslint-disable no-console */
-// import app from './app';
+require('source-map-support').install();
+import awsServerlessExpress from 'aws-serverless-express';
+import app from './app';
 
-// const server = app.listen(process.env.PORT, () =>
-//   console.log(`Listening on port ${process.env.PORT}...`)
-// );
+const server = awsServerlessExpress.createServer(app);
 
-// export default server;
+exports.handler = (event: any, context: any): any =>
+  awsServerlessExpress.proxy(server, event, context);
