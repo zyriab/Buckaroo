@@ -1,11 +1,16 @@
 const express = require('express');
 const { graphqlHTTP } = require('express-graphql');
-const cors = require('cors');
 const schema = require('./graphql/schema/gqlSchema');
 const resolvers = require('./graphql/resolvers/resolvers');
 
+require('dotent').config();
+
 const app = express();
-app.use(cors());
+
+app.get('/health', async (req, res) =>
+  res.status(200).json({ response: 'working successfully' })
+);
+
 app.use(
   '/gql',
   graphqlHTTP(async () => ({
