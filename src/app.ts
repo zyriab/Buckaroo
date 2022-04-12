@@ -6,12 +6,8 @@ import 'dotenv/config';
 
 const app = express();
 
-app.get('/', async (req: any, res: any) =>
-  res.status(200).json({ response: 'working successfully' })
-);
-
 app.use(
-  '/gql',
+  '/',
   graphqlHTTP(async () => ({
     schema,
     rootValue: resolvers,
