@@ -33,9 +33,7 @@ jobs:
       - name: 'Linting code'
         run: npm run lint
       - name: 'Running tests'
-        uses: raulanatol/jest-coverage-comment-action@main
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}'
+        run: jest
       - name: 'Bundling files'
         run: npx ncc build src/index.ts
       - name: 'Zipping bundled file'
