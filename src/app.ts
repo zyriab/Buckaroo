@@ -21,8 +21,7 @@ dotenv.config();
 
 const app = express();
 
-if (!IS_DEV)
-  app.use(helmet());
+if (!IS_DEV) app.use(helmet());
 
 app.use(bodyParser.json());
 
@@ -37,18 +36,18 @@ app.use((req: RequestBody, res: ResponseBody<any>, next: any) => {
   next();
 });
 
-if (!IS_TEST) {
-  app.use(checkAuth);
-  app.use(setReqMetadata);
-  app.use(checkBucketExists);
-  app.use(checkBucketVersioning);
-} else {
-  app.use(setTestingData);
-}
+// if (!IS_TEST) {
+//   app.use(checkAuth);
+//   app.use(setReqMetadata);
+//   app.use(checkBucketExists);
+//   app.use(checkBucketVersioning);
+// } else {
+//   app.use(setTestingData);
+// }
 
-app.get('/health', async function (req, res) {
-    res.status(200).json({ response: 'working successfully' });
-});
+app.get('/health', async (req, res) =>
+  res.status(200).json({ response: 'working successfully' })
+);
 
 app.use(
   '/gql',
