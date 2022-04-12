@@ -1,6 +1,6 @@
 require('source-map-support').install();
 import awsServerlessExpress from 'aws-serverless-express';
-import app from './app';
+import app from './src/app';
 
 const server = awsServerlessExpress.createServer(app);
 
