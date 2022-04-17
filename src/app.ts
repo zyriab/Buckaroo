@@ -1,7 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import helmet from 'helmet';
-import dotenv from 'dotenv';
 import { graphqlHTTP } from 'express-graphql';
 import { NoSchemaIntrospectionCustomRule } from 'graphql';
 import { RequestBody, ResponseBody } from './definitions/root';
@@ -12,12 +11,10 @@ import checkBucketExists from './middlewares/checkBucketExists';
 import checkBucketVersioning from './middlewares/checkBucketVersioning';
 import setReqMetadata from './middlewares/setReqMetadata';
 import setTestingData from './middlewares/setTestingData';
+import 'dotenv/config';
 
 const IS_DEV = process.env.NODE_ENV === 'development';
 const IS_TEST = process.env.NODE_ENV === 'test';
-
-// if (IS_DEV) dotenv.config();
-dotenv.config();
 
 const app = express();
 
