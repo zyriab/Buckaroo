@@ -25,6 +25,11 @@ import formatPath from '../../utils/tools/formatPath.utils';
 import { FileType } from '../../definitions/types';
 import handleErrorResponse from '../../utils/tools/handleErrorResponse.utils';
 
+// FIXME: fix auto versioning to make it version useful files and not on every save...
+// New version on DL ?
+// New version based on current every X hours ?
+// New version based on number of different bytes between files ?
+
 const gqlResolvers = {
   listBucketContent: async (
     args: { listInput: ListInput },
@@ -155,6 +160,8 @@ const gqlResolvers = {
       const root =
         args.fileInput.root ?? `${req.body.username}-${req.body.userId}`;
 
+      // TODO: verify that the file exists
+
       const [failure, fileName] = await deleteOneFile({
         req,
         fileName: args.fileInput.fileName,
@@ -186,6 +193,8 @@ const gqlResolvers = {
 
       const root =
         args.filesInput.root ?? `${req.body.username}-${req.body.userId}`;
+
+      // TODO: verify that the files exist
 
       const [failure, fileNames] = await deleteManyFiles({
         req,
@@ -221,6 +230,8 @@ const gqlResolvers = {
       );
 
       if (!authed) return error;
+
+      // TODO: verify that folder exists
 
       if (args.directoryInput.bucketName) {
         const [storageError, exists] = await isBucketExisting(
@@ -284,6 +295,8 @@ const gqlResolvers = {
 
       const root =
         args.fileInput.root ?? `${req.body.username}-${req.body.userId}`;
+
+      // TODO: verify that version does not already exists
 
       const [failure, newId] = await restoreFileVersion({
         req,
