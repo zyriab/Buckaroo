@@ -10,11 +10,11 @@ import isDirectory from '../tools/isDirectory.utils';
 
 interface InputArgs {
   req: RequestBody;
+  bucketName: string;
   root: string;
   path?: string;
   getDeleteMarkers?: boolean;
   getDirs?: boolean;
-  bucketName?: string;
 }
 
 export default async function listBucketContent(
@@ -33,7 +33,7 @@ export default async function listBucketContent(
     const data: any = [];
 
     const params = {
-      Bucket: args.bucketName || args.req.body.tenant.bucket.name,
+      Bucket: args.bucketName,
       Prefix: fullPath,
     };
 

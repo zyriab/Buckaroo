@@ -11,7 +11,7 @@ interface InputArgs {
   req: RequestBody;
   path: string;
   root: string;
-  bucketName?: string;
+  bucketName: string;
 }
 
 export default async function deleteDirectory(
@@ -20,11 +20,11 @@ export default async function deleteDirectory(
   try {
     const path = normalize(args.path);
     const root = normalize(args.root);
-    const bucketName = args.bucketName || args.req.body.tenant.bucket.name;
 
     // eslint-disable-next-line prefer-const
     let [fail, files, markers, dirs] = await listBucketContent({
       req: args.req,
+      bucketName: args.bucketName,
       root,
       path,
       getDirs: true,
@@ -49,6 +49,7 @@ export default async function deleteDirectory(
             fileNames: f.versions!.map((v) => v.name),
             root,
             path: f.path.replace(root, ''),
+            bucketName: args.bucketName,
             versionIds: args.req.body.tenant.bucket.isVersioned
               ? f.versions!.map((v) => v.id)
               : undefined,
@@ -64,6 +65,7 @@ export default async function deleteDirectory(
           fileName: f.name,
           root,
           path: f.path.replace(root, ''),
+          bucketName: args.bucketName,
           versionId: args.req.body.tenant.bucket.isVersioned
             ? f.id!
             : undefined,
@@ -89,6 +91,7 @@ export default async function deleteDirectory(
           fileName: m.name,
           root,
           path: m.path.replace(root, ''),
+          bucketName: args.bucketName,
           versionId: args.req.body.tenant.bucket.isVersioned
             ? m.id!
             : undefined,
@@ -108,7 +111,7 @@ export default async function deleteDirectory(
 
       const res = await s3Client().send(
         new DeleteObjectsCommand({
-          Bucket: bucketName,
+          Bucket: args.bucketName,
           Delete: {
             Objects: dirs!.map((d) => ({
               Key: normalize(`${root}/${d.path}`, false),

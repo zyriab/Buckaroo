@@ -14,8 +14,8 @@ interface InputArgs {
   fileName: string;
   root: string;
   path: string;
+  bucketName: string;
   versionId?: string;
-  bucketName?: string;
 }
 
 export default async function deleteOneFile(
@@ -30,7 +30,7 @@ export default async function deleteOneFile(
     const { isVersioned } = args.req.body.tenant.bucket;
 
     const params: any = {
-      Bucket: args.bucketName || args.req.body.tenant.bucket.name,
+      Bucket: args.bucketName,
       Key: `${fullPath}${fileName}`,
       VersionId: isVersioned ? args.versionId : 'null',
     };
@@ -45,6 +45,7 @@ export default async function deleteOneFile(
         fileNames: [args.fileName],
         root: args.root,
         path: args.path,
+        bucketName: args.bucketName,
       });
 
       if (error) return [error];
