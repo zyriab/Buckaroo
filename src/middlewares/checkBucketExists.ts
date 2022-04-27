@@ -13,6 +13,8 @@ export default async function checkBucketExists(
       return next();
     }
 
+    // This is a webhook and doesn't need to have a bucket
+    // (property is irrelevant ans is only used in automatic safeguard checks later on)
     if (req.body.tenant.name === 's3-versioning-control') {
       req.body.tenant.bucket.exists = true;
       return next();
