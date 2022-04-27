@@ -25,11 +25,6 @@ import formatPath from '../../utils/tools/formatPath.utils';
 import { FileType } from '../../definitions/types';
 import handleErrorResponse from '../../utils/tools/handleErrorResponse.utils';
 
-// FIXME: fix auto versioning to make it version useful files and not on every save...
-// New version on DL ?
-// New version based on current every X hours ?
-// New version based on number of different bytes between files ?
-
 const gqlResolvers = {
   listBucketContent: async (
     args: { listInput: ListInput },
