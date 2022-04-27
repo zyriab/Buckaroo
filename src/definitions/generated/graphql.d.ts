@@ -43,6 +43,7 @@ export type File = {
 };
 
 export type FileInput = {
+  bucketName?: InputMaybe<Scalars['String']>;
   fileName: Scalars['String'];
   path: Scalars['String'];
   root?: InputMaybe<Scalars['String']>;
@@ -65,6 +66,7 @@ export type FileNameList = {
 };
 
 export type FilesInput = {
+  bucketName?: InputMaybe<Scalars['String']>;
   fileNames: Array<Scalars['String']>;
   path: Scalars['String'];
   root?: InputMaybe<Scalars['String']>;
@@ -174,6 +176,7 @@ export type Unauthorized = {
 };
 
 export type UploadInput = {
+  bucketName?: InputMaybe<Scalars['String']>;
   fileName: Scalars['String'];
   fileType: Scalars['String'];
   path: Scalars['String'];

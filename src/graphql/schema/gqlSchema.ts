@@ -70,6 +70,10 @@ type StorageNotFound {
   message: String!
 }
 
+type FileNotFound {
+  message: String!
+}
+
 type ServerError {
   message: String!
   stack: String
@@ -91,6 +95,7 @@ input UploadInput {
   fileType: String!
   path: String!
   root: String
+  bucketName: String
 }
 
 input FileInput {
@@ -98,6 +103,7 @@ input FileInput {
   path: String!
   root: String
   versionId: String
+  bucketName: String
 }
 
 input FilesInput {
@@ -105,6 +111,7 @@ input FilesInput {
   path: String!
   root: String
   versionIds: [String!]
+  bucketName: String
 }
 
 input DirectoryInput {
@@ -133,6 +140,7 @@ union SignedUrlResult =
   | Unauthenticated
   | Unauthorized
   | StorageNotFound
+  | FileNotFound
   | ServerError
 
 union DeleteFileResult =
@@ -141,6 +149,7 @@ union DeleteFileResult =
   | Unauthenticated
   | Unauthorized
   | StorageNotFound
+  | FileNotFound
   | ServerError
 
 union DeleteDirectoryResult =
@@ -148,6 +157,7 @@ union DeleteDirectoryResult =
   | Unauthenticated
   | Unauthorized
   | StorageNotFound
+  | FileNotFound
   | ServerError
 
 union RestoreFileResult =
@@ -155,12 +165,14 @@ union RestoreFileResult =
   | Unauthenticated
   | Unauthorized
   | StorageNotFound
+  | FileNotFound
   | ServerError
 
 union VersionControlResult =
     VersionControlSuccess
   | Unauthenticated
   | StorageNotFound
+  | FileNotFound
   | ServerError
 
 type Queries {
