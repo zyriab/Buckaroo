@@ -17,6 +17,7 @@ interface InputArgs {
   fileType: FileType;
   root: string;
   path: string;
+  bucketName: string;
 }
 
 export default async function getUploadUrl(
@@ -30,7 +31,7 @@ export default async function getUploadUrl(
     const expirationTime = 60 * 0.5;
 
     const params: PresignedPostOptions = {
-      Bucket: args.req.body.tenant.bucket.name,
+      Bucket: args.bucketName,
       Key: `${fullPath}${fileName}`,
       Expires: expirationTime,
       Conditions: [getFileSizeRange(args.fileType)],

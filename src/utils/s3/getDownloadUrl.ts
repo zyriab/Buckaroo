@@ -10,6 +10,7 @@ interface InputArgs {
   fileName: string;
   root: string;
   path: string;
+  bucketName: string;
   versionId?: string;
 }
 
@@ -23,7 +24,7 @@ export default async function getDownloadUrl(
     const expirationTime = 60 * 1;
 
     const params = {
-      Bucket: args.req.body.tenant.bucket.name,
+      Bucket: args.bucketName,
       Key: `${root}/${normalize(args.path)}/${fileName}`,
     };
 

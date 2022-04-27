@@ -11,6 +11,7 @@ interface InputArgs {
   fileNames: string[];
   root: string;
   path: string;
+  bucketName: string;
   versionIds?: string[];
 }
 
@@ -24,7 +25,7 @@ export default async function deleteManyFiles(
     const fullPath = formatPath(`${root}/${path}/`, { stripTrailing: false });
 
     const params = {
-      Bucket: args.req.body.tenant.bucket.name,
+      Bucket: args.bucketName,
       Delete: {
         Objects: [] as any,
       },

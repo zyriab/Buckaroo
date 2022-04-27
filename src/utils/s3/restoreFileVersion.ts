@@ -11,6 +11,7 @@ interface InputArgs {
   fileName: string;
   root: string;
   path: string;
+  bucketName: string;
   versionId: string;
 }
 
@@ -18,15 +19,14 @@ export default async function restoreFileVersion(
   args: InputArgs
 ): Promise<[undefined, string] | [Error]> {
   try {
-    const bucket = args.req.body.tenant.bucket.name;
     const root = normalize(args.root);
     const fileName = sanitize(args.fileName);
     const path = normalize(args.path);
     const fullPath = formatPath(`${root}/${path}/`, { stripTrailing: false });
 
     const params = {
-      Bucket: bucket,
-      CopySource: `${bucket}/${fullPath}${fileName}?versionId=${args.versionId}`,
+      Bucket: args.bucketName,
+      CopySource: `${args.bucketName}/${fullPath}${fileName}?versionId=${args.versionId}`,
       Key: `${fullPath}${fileName}`,
       MetadataDirective: 'REPLACE',
     };
@@ -48,6 +48,7 @@ export default async function restoreFileVersion(
       fileName,
       root,
       path,
+      bucketName: args.bucketName,
       versionId: args.versionId,
     });
 
