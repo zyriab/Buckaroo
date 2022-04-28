@@ -13,7 +13,7 @@ import controlVersions from './s3/controlVersions';
 import isFileExisting from './s3/isFileExisting';
 import resolveBucket from './s3/resolveBucket';
 import resolveOneFile from './s3/resolveOneFile';
-import resolveManyFiles from '../../utils/s3/resolveManyFiles';
+import resolveManyFiles from './s3/resolveManyFiles';
 import s3Client from './s3/s3Client';
 
 export { getDownloadUrl };
