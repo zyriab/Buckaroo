@@ -12,7 +12,8 @@ import getManyFilesVersionsIds from './s3/getManyFilesVersionsIds';
 import controlVersions from './s3/controlVersions';
 import isFileExisting from './s3/isFileExisting';
 import resolveBucket from './s3/resolveBucket';
-import resolveFile from './s3/resolveFile';
+import resolveOneFile from './s3/resolveOneFile';
+import resolveManyFiles from '../../utils/s3/resolveManyFiles';
 import s3Client from './s3/s3Client';
 
 export { getDownloadUrl };
@@ -29,5 +30,6 @@ export { getManyFilesVersionsIds };
 export { controlVersions };
 export { isFileExisting };
 export { resolveBucket };
-export { resolveFile };
+export { resolveOneFile };
+export { resolveManyFiles };
 export { s3Client };
