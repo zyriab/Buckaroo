@@ -8,6 +8,7 @@ interface InputArgs {
   fileName: string;
   root: string;
   path: string;
+  bucketName: string;
   addDeleteMarkersIds?: boolean;
 }
 
@@ -23,6 +24,7 @@ export default async function getOneFileVersionsIds(
       root,
       path,
       getDeleteMarkers: true,
+      bucketName: args.bucketName,
     });
 
     if (error) return [error];

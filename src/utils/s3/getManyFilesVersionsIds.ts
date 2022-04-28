@@ -8,6 +8,7 @@ interface InputArgs {
   fileNames: string[];
   root: string;
   path: string;
+  bucketName: string;
   addDeleteMarkersIds?: boolean;
 }
 
@@ -24,6 +25,7 @@ export default async function getManyFilesVersionsIds(
       root,
       path,
       getDeleteMarkers: true,
+      bucketName: args.bucketName,
     });
 
     if (error) return [error];
