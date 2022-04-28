@@ -38,6 +38,7 @@ export default async function controlVersions(
       path: fileToUpdate[0].path,
       versionId:
         fileToUpdate[0].versions![fileToUpdate[0].versions!.length - 1].id,
+      bucketName: args.bucketName,
     });
 
     if (fail) throw fail;

@@ -41,6 +41,7 @@ export default async function deleteManyFiles(
         root,
         path,
         addDeleteMarkersIds: true,
+        bucketName: args.bucketName,
       });
 
       if (error) throw error;
