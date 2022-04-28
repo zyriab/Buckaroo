@@ -12,7 +12,6 @@ export default function getTenant(tkn: DecodedToken): Tenant | undefined {
   return {
     name,
     bucket: {
-      exists: false,
       isVersioned: false,
       // i.e.: NAMESPACE-APP_NAME-app-staging
       name: `${process.env.BUCKET_NAMESPACE}${name.toLowerCase()}-app-${

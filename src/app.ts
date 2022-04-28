@@ -7,7 +7,6 @@ import { RequestBody, ResponseBody } from './definitions/root';
 import gqlSchema from './graphql/schema/gqlSchema';
 import gqlResolvers from './graphql/resolvers/resolvers';
 import checkAuth from './middlewares/checkAuth';
-import checkBucketExists from './middlewares/checkBucketExists';
 import checkBucketVersioning from './middlewares/checkBucketVersioning';
 import setReqMetadata from './middlewares/setReqMetadata';
 import setTestingData from './middlewares/setTestingData';
@@ -36,7 +35,6 @@ app.use((req: RequestBody, res: ResponseBody<any>, next: any) => {
 if (!IS_TEST) {
   app.use(checkAuth);
   app.use(setReqMetadata);
-  app.use(checkBucketExists);
   app.use(checkBucketVersioning);
 } else {
   app.use(setTestingData);
