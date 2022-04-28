@@ -1,27 +1,18 @@
 import { Permission } from '../../definitions/auth';
 import { RequestBody } from '../../definitions/root';
+import { GqlError } from '../../definitions/types';
 import hasPermission from './hasPermission';
 
 export default function resolveAuth(
   req: RequestBody,
   permission?: Permission
-): [boolean, undefined] | [boolean, { __typename: string; message: string }] {
+): [boolean, undefined] | [boolean, GqlError] {
   if (!req.body.isAuth) {
     return [
       false,
       {
         __typename: 'Unauthenticated',
         message: 'Error: user must be logged in',
-      },
-    ];
-  }
-
-  if (!req.body.tenant.bucket.exists) {
-    return [
-      false,
-      {
-        __typename: 'StorageNotFound',
-        message: `Error: storage '${req.body.tenant}' could not be found`,
       },
     ];
   }
