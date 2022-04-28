@@ -70,8 +70,6 @@ test("Should resolve as NOT authenticated and __typename: 'Unauthorized'", () =>
 });
 
 test("Should resolve as NOT authenticated and __typename: 'StorageNotFound'", () => {
-  req.body.tenant.bucket.exists = false;
-
   const [authed, gqlerror] = resolveAuth(req);
   expect(authed).toBe(false);
   expect(gqlerror!.__typename).toBe('StorageNotFound');

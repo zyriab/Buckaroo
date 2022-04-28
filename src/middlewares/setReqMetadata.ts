@@ -20,7 +20,6 @@ export default async function setReqMetadata(
 
     if (!tenant) {
       req.body.isAuth = false;
-      req.body.tenant.bucket.exists = false;
       return next();
     }
 
