@@ -1,11 +1,12 @@
 import { RequestBody } from '../../definitions/root';
+import { GqlError } from '../../definitions/types';
 import isBucketExisting from './isBucketExisting';
 
 export default async function resolveBucket(
   req: RequestBody,
   bucketName: string
 ): Promise<
-  [boolean, undefined] | [boolean, { __typename: string; message: string }]
+  [boolean, undefined] | [boolean, GqlError]
 > {
   const [storageError, exists] = await isBucketExisting(bucketName);
 
