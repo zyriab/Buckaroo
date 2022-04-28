@@ -1,4 +1,5 @@
 import { RequestBody } from '../../definitions/root';
+import { GqlError } from '../../definitions/types';
 import isFileExisting from './isFileExisting';
 
 interface InputArgs {
@@ -9,7 +10,9 @@ interface InputArgs {
   bucketName: string;
 }
 
-export default async function resolveFile(args: InputArgs) {
+export default async function resolveOneFile(
+  args: InputArgs
+): Promise<[boolean, undefined] | [boolean, GqlError]> {
   const [fErr, fExists] = await isFileExisting(args);
 
   if (fErr) throw fErr;
