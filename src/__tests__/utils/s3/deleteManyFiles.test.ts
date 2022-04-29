@@ -16,6 +16,7 @@ beforeAll(async () => {
     fileType: 'text',
     path: 'translations',
     root: 'test-user-1234abcd',
+    bucketName: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
   });
 
   if (!err) {
@@ -31,6 +32,7 @@ test('Should delete example3.txt and all its versions', async () => {
     fileNames: [fileName],
     root: 'test-user-1234abcd',
     path: 'translations',
+    bucketName: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
   });
 
   expect(error).toBeUndefined();

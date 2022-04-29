@@ -25,6 +25,7 @@ beforeAll(async () => {
     fileType: 'text',
     path,
     root: 'test-user-1234abcd',
+    bucketName: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
   });
 
   if (!err) {
@@ -38,6 +39,7 @@ afterAll(async () => {
     fileName,
     path,
     root: 'test-user-1234abcd',
+    bucketName: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
   });
 
   if (err) console.error(err);

@@ -29,6 +29,7 @@ beforeAll(async () => {
     fileType: 'text',
     path,
     root: 'test-user-1234abcd',
+    bucketName: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
   });
 
   if (!err) {
@@ -40,8 +41,9 @@ afterAll(async () => {
   const [err] = await deleteOneFile({
     req,
     fileName,
-    root: 'test-user-1234abcd',
     path,
+    root: 'test-user-1234abcd',
+    bucketName: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
   });
 
   if (err) console.error(err);

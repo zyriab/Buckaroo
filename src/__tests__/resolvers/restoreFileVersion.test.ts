@@ -33,6 +33,7 @@ beforeAll(async () => {
       fileType: 'text',
       path,
       root: 'test-user-1234abcd',
+      bucketName: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
     });
     errors.push(err);
     urls.push(url);
@@ -48,6 +49,7 @@ beforeAll(async () => {
     fileName,
     path,
     root: 'test-user-1234abcd',
+    bucketName: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
   });
 });
 
@@ -58,6 +60,7 @@ afterAll(async () => {
       fileName,
       path,
       root: 'test-user-1234abcd',
+      bucketName: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
     });
   process.env.TEST_AUTH = 'false';
 });
@@ -91,6 +94,7 @@ test('Should restore older version of file', (done) => {
         fileName,
         path,
         root: 'test-user-1234abcd',
+        bucketName: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
       }).then((ids) => {
         expect(ids).not.toContain(v[v.length - 1]);
         expect(ids[1]![0]).toBe(res.body.data.restoreFileVersion.id);

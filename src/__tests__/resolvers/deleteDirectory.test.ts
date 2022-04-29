@@ -23,6 +23,7 @@ beforeAll(async () => {
     fileType: 'text',
     path: 'translations',
     root: 'another-user',
+    bucketName: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
   });
 
   const [err2, post2] = await getUploadUrl({
@@ -31,6 +32,7 @@ beforeAll(async () => {
     fileType: 'text',
     path: 'products',
     root: 'another-user',
+    bucketName: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
   });
 
   if (err) console.error(err);

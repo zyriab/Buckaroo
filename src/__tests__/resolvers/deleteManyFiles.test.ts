@@ -23,6 +23,7 @@ beforeAll(async () => {
     fileType: 'text',
     path: 'translations',
     root: 'test-user-1234abcd',
+    bucketName: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
   });
   [err2, url2] = await getUploadUrl({
     req,
@@ -30,6 +31,7 @@ beforeAll(async () => {
     fileType: 'text',
     path: 'translations',
     root: 'test-user-1234abcd',
+    bucketName: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
   });
   if (!err1 && !err2) {
     uploadFileToS3(url1.url, url1.fields, './src/pseudo/', 'example.txt');

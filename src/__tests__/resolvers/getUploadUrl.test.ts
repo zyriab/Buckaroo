@@ -19,7 +19,13 @@ beforeAll(() => {
 });
 
 afterAll(() => {
-  deleteOneFile({ req, fileName, path, root: 'test-user-1234abcd' });
+  deleteOneFile({
+    req,
+    fileName,
+    path,
+    root: 'test-user-1234abcd',
+    bucketName: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
+  });
   process.env.TEST_AUTH = 'false';
 });
 

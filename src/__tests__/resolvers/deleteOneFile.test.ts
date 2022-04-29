@@ -24,6 +24,7 @@ beforeAll(async () => {
     fileType: 'text',
     path,
     root: 'test-user-1234abcd',
+    bucketName: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
   });
 
   if (!err) {
