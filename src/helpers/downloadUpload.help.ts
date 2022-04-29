@@ -44,6 +44,6 @@ export function uploadFileToS3(
 
   form.submit(targetUrl.toString(), (err, res) => {
     if (err) console.error(err);
-    console.log(`${res.statusCode}: ${res.statusMessage}`);
+    console.log(`Upload response ≻ ${res.statusCode}: ${res.statusMessage}`);
   });
 }

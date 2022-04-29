@@ -15,10 +15,11 @@ export default async function isBucketExisting(
 
     return [undefined, false];
   } catch (err) {
+    // 301 etc are thrown as errors by the s3 client
     if ((<any>err).$metadata.httpStatusCode === 301) {
       return [undefined, false];
     }
-    
+
     return [err as Error];
   }
 }

@@ -9,11 +9,11 @@ beforeAll(() => {
 test('Should check for bucket existence and return true', async () => {
   const res = await isBucketExisting(bucketName);
   expect(res[0]).toBeUndefined();
-  expect(res[1]).toBe(true);
+  expect(res[1]).toBeTruthy();
 });
 
 test('Should check for bucket existence and return false', async () => {
   const res = await isBucketExisting('non-existing');
   expect(res[0]).toBeUndefined();
-  expect(res[1]).toBe(false);
+  expect(res[1]).toBeFalsy();
 });

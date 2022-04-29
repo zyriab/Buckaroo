@@ -18,7 +18,7 @@ export default async function getOneFileVersionsIds(
   try {
     const root = normalize(args.root);
     const path = normalize(args.path);
-
+    
     const [error, files, markers] = await listBucketContent({
       req: args.req,
       root,

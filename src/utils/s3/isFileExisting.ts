@@ -29,15 +29,20 @@ export default async function isFileExisting(
       })
     );
 
+    if (data.$metadata.httpStatusCode === 200) {
+      return [undefined, true];
+    }
+
+    return [undefined, false];
+  } catch (err) {
+    // 404 etc are thrown as errors by the s3 client
     if (
-      data.$metadata.httpStatusCode === 403 ||
-      data.$metadata.httpStatusCode === 404
+      (<any>err)?.$metadata.httpStatusCode === 403 ||
+      (<any>err)?.$metadata.httpStatusCode === 404
     ) {
       return [undefined, false];
     }
 
-    return [undefined, true];
-  } catch (err) {
     return [err as Error];
   }
 }
