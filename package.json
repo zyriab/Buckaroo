@@ -1,6 +1,6 @@
 {
   "name": "buckaroo",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "description": "A miniservice to interact with S3 buckets",
   "private": true,
   "main": "index.ts",
