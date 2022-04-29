@@ -32,6 +32,7 @@ const gqlResolvers = {
     req: RequestBody
   ) => {
     try {
+      const { path } = args.listInput;
       const isExternalBucket =
         args.listInput.bucketName &&
         args.listInput.bucketName !== req.body.tenant.bucket.name;
@@ -39,7 +40,6 @@ const gqlResolvers = {
         args.listInput.root ?? `${req.body.username}-${req.body.userId}`;
       const bucketName =
         args.listInput.bucketName || req.body.tenant.bucket.name;
-      const { path } = args.listInput;
 
       const [authed, authError] = resolveAuth(
         req,
@@ -76,11 +76,11 @@ const gqlResolvers = {
     req: RequestBody
   ) => {
     try {
+      const { fileName, fileType, path } = args.uploadInput;
       const root =
         args.uploadInput.root ?? `${req.body.username}-${req.body.userId}`;
       const bucketName =
         args.uploadInput.bucketName || req.body.tenant.bucket.name;
-      const { fileName, fileType, path } = args.uploadInput;
 
       const [authed, authError] = resolveAuth(
         req,
@@ -117,11 +117,12 @@ const gqlResolvers = {
     try {
       let exists: boolean;
       let error: Error | GqlError | undefined;
+
+      const { fileName, path, versionId } = args.fileInput;
       const root =
         args.fileInput.root ?? `${req.body.username}-${req.body.userId}`;
       const bucketName =
         args.fileInput.bucketName || req.body.tenant.bucket.name;
-      const { fileName, path, versionId } = args.fileInput;
 
       const [authed, authError] = resolveAuth(
         req,
@@ -167,11 +168,12 @@ const gqlResolvers = {
     try {
       let exists: boolean;
       let error: Error | GqlError | undefined;
+
+      const { fileName, path } = args.fileInput;
       const root =
         args.fileInput.root ?? `${req.body.username}-${req.body.userId}`;
       const bucketName =
         args.fileInput.bucketName || req.body.tenant.bucket.name;
-      const { fileName, path } = args.fileInput;
 
       const [authed, authError] = resolveAuth(
         req,
@@ -219,11 +221,12 @@ const gqlResolvers = {
     try {
       let exists: boolean;
       let error: Error | GqlError | undefined;
+
+      const { fileNames, path } = args.filesInput;
       const root =
         args.filesInput.root ?? `${req.body.username}-${req.body.userId}`;
       const bucketName =
         args.filesInput.bucketName || req.body.tenant.bucket.name;
-      const { fileNames, path } = args.filesInput;
 
       const [authed, authError] = resolveAuth(
         req,
@@ -269,6 +272,10 @@ const gqlResolvers = {
     req: RequestBody
   ) => {
     try {
+      let exists: boolean;
+      let error: Error | GqlError | undefined;
+
+      const { path } = args.directoryInput;
       const root =
         args.directoryInput.root ?? `${req.body.username}-${req.body.userId}`;
       const bucketName =
@@ -276,7 +283,6 @@ const gqlResolvers = {
       const isOwner = root.startsWith(
         `${req.body.username}-${req.body.userId}`
       );
-      const { path } = args.directoryInput;
 
       const [authed, authError] = resolveAuth(
         req,
@@ -285,11 +291,19 @@ const gqlResolvers = {
 
       if (!authed) return authError;
 
-      const [exists, error] = await resolveBucket(req, bucketName);
+      [exists, error] = await resolveBucket(req, bucketName);
 
       if (!exists) return error;
 
-      // TODO: verify that folder exists
+      [exists, error] = await resolveOneFile({
+        req,
+        fileName: '', // checking for path existence
+        path: args.directoryInput.path,
+        root,
+        bucketName,
+      });
+
+      if (!exists) return error;
 
       const [failure, done] = await deleteDirectory({
         req,
@@ -322,11 +336,12 @@ const gqlResolvers = {
     try {
       let exists: boolean;
       let error: Error | GqlError | undefined;
+
+      const { fileName, path, versionId } = args.fileInput;
       const root =
         args.fileInput.root ?? `${req.body.username}-${req.body.userId}`;
       const bucketName =
         args.fileInput.bucketName || req.body.tenant.bucket.name;
-      const { fileName, path, versionId } = args.fileInput;
 
       const [authed, authError] = resolveAuth(
         req,
@@ -355,9 +370,7 @@ const gqlResolvers = {
         bucketName,
       });
 
-      if(!exists) return error;
-
-      // TODO: verify that version does not already exists
+      if (!exists) return error;
 
       const [failure, newId] = await restoreFileVersion({
         req,
