@@ -10,5 +10,6 @@ beforeAll(() => {
 test('Should return App metadata', () => {
   const token: DecodedToken = { ...mockToken };
   const result = getAppMetadata(token);
+  expect(result).not.toBeUndefined();
   expect(result).toEqual({ tenant: process.env.ENCRYPTED_TEST_TENANT });
 });
