@@ -2,41 +2,22 @@
 /* eslint-disable no-underscore-dangle */
 import supertest from 'supertest';
 import app from '../../app';
+import client from '../../helpers/mockClient.help';
 import { deleteManyFileQuery } from '../../helpers/testQueries.help';
-import { getUploadUrl } from '../../utils/s3.utils';
-import req from '../../helpers/mockRequest.help';
-import { uploadFileToS3 } from '../../helpers/downloadUpload.help';
+import 'dotenv/config';
 
 const request = supertest(app);
 
-let err1: any;
-let err2: any;
-let url1: any;
-let url2: any;
+const s3MockClient = client();
+
 beforeAll(async () => {
   process.env.NODE_ENV = 'test';
   process.env.TEST_AUTH = 'true';
+});
 
-  [err1, url1] = await getUploadUrl({
-    req,
-    fileName: 'example.txt',
-    fileType: 'text',
-    path: 'translations',
-    root: 'test-user-1234abcd',
-    bucketName: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
-  });
-  [err2, url2] = await getUploadUrl({
-    req,
-    fileName: 'example2.txt',
-    fileType: 'text',
-    path: 'translations',
-    root: 'test-user-1234abcd',
-    bucketName: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
-  });
-  if (!err1 && !err2) {
-    uploadFileToS3(url1.url, url1.fields, './src/pseudo/', 'example.txt');
-    uploadFileToS3(url2.url!, url2.fields, './src/pseudo/', 'example2.txt');
-  }
+beforeEach(() => {
+  s3MockClient.client.reset();
+  s3MockClient.setup();
 });
 
 afterAll(() => {
@@ -44,9 +25,6 @@ afterAll(() => {
 });
 
 test('Should delete files example.txt & example2.txt', (done) => {
-  expect(err1).toBeUndefined();
-  expect(err2).toBeUndefined();
-
   const query = deleteManyFileQuery;
   query.variables.fileNames = ['example.txt', 'example2.txt'];
   query.variables.path = 'translations';
@@ -70,9 +48,6 @@ test('Should delete files example.txt & example2.txt', (done) => {
 });
 
 test('Should be blocked when trying to delete files example.txt & example2.txt from root (Unauthorized)', (done) => {
-  expect(err1).toBeUndefined();
-  expect(err2).toBeUndefined();
-
   const query = deleteManyFileQuery;
   query.variables.fileNames = ['example.txt', 'example2.txt'];
   query.variables.path = 'translations';

@@ -5,45 +5,26 @@
 import supertest from 'supertest';
 import app from '../../app';
 import { listQuery } from '../../helpers/testQueries.help';
-import { uploadFileToS3 } from '../../helpers/downloadUpload.help';
-import { deleteOneFile, getUploadUrl } from '../../utils/s3.utils';
-import req from '../../helpers/mockRequest.help';
+import client from '../../helpers/mockClient.help';
+import 'dotenv/config';
 
 const request = supertest(app);
 
-let err: any;
-let url: any;
 const fileName = 'example.txt';
 const path = 'translations';
+const s3MockClient = client();
+
 beforeAll(async () => {
   process.env.NODE_ENV = 'test';
   process.env.TEST_AUTH = 'true';
+});
 
-  [err, url] = await getUploadUrl({
-    req,
-    fileName,
-    fileType: 'text',
-    path,
-    root: 'test-user-1234abcd',
-    bucketName: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
-  });
-
-  if (!err) {
-    uploadFileToS3(url.url!, url.fields, './src/pseudo/', fileName);
-  }
+beforeEach(() => {
+  s3MockClient.client.reset();
+  s3MockClient.setup();
 });
 
 afterAll(async () => {
-  const [err] = await deleteOneFile({
-    req,
-    fileName,
-    path,
-    root: 'test-user-1234abcd',
-    bucketName: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
-  });
-
-  if (err) console.error(err);
-
   process.env.TEST_AUTH = 'false';
 });
 
@@ -61,9 +42,7 @@ test("Should query and list current user's directory content", (done) => {
       if (err) return done(err);
       expect(res.body).toBeInstanceOf(Object);
       expect(res.body.data.listBucketContent.list).not.toBeUndefined();
-      expect(
-        res.body.data.listBucketContent.list.length
-      ).toBeGreaterThanOrEqual(1);
+      expect(res.body.data.listBucketContent.list.length).toBe(2);
       expect(res.body.data.listBucketContent.list[0].name).toBe(fileName);
       done();
     });

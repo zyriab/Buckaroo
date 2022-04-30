@@ -1,7 +1,8 @@
 /* eslint-disable no-underscore-dangle */
 import resolveAuth from '../../../utils/auth/resolveAuth';
-import req from '../../../helpers/mockRequest.help';
+import mockReq from '../../../helpers/mockRequest.help';
 import 'dotenv/config';
+import { RequestBody } from '../../../definitions/root';
 
 beforeAll(() => {
   process.env.TEST_AUTH = 'true';
@@ -12,6 +13,7 @@ afterAll(() => {
 });
 
 test('Should resolve as authenticated', () => {
+  const req = { ...mockReq } as RequestBody;
   req.body.permissions = [
     'read:bucket',
     'delete:directory',
@@ -41,6 +43,7 @@ test('Should resolve as authenticated', () => {
 });
 
 test('Should resolve as NOT authenticated', () => {
+  const req = { ...mockReq } as RequestBody;
   req.body.isAuth = false;
 
   const [authed, gqlerror] = resolveAuth(req);
@@ -49,6 +52,7 @@ test('Should resolve as NOT authenticated', () => {
 });
 
 test("Should resolve as NOT authenticated and __typename: 'Unauthorized'", () => {
+  const req = { ...mockReq } as RequestBody;
   req.body.isAuth = true;
   req.body.permissions = [];
 
@@ -67,10 +71,4 @@ test("Should resolve as NOT authenticated and __typename: 'Unauthorized'", () =>
   [authed, gqlerror] = resolveAuth(req, 'update:file');
   expect(authed).toBe(false);
   expect(gqlerror!.__typename).toBe('Unauthorized');
-});
-
-test("Should resolve as NOT authenticated and __typename: 'StorageNotFound'", () => {
-  const [authed, gqlerror] = resolveAuth(req);
-  expect(authed).toBe(false);
-  expect(gqlerror!.__typename).toBe('StorageNotFound');
 });

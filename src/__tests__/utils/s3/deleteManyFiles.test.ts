@@ -1,32 +1,22 @@
 /* eslint-disable no-console */
-import { deleteManyFiles, getUploadUrl } from '../../../utils/s3.utils';
-import { uploadFileToS3 } from '../../../helpers/downloadUpload.help';
+import { deleteManyFiles } from '../../../utils/s3.utils';
+import client from '../../../helpers/mockClient.help';
 import req from '../../../helpers/mockRequest.help';
+import 'dotenv/config';
 
 const fileName = 'example.txt';
-let err: any;
-let url: any;
+const s3MockClient = client();
 
 beforeAll(async () => {
   process.env.NODE_ENV = 'test';
-
-  [err, url] = await getUploadUrl({
-    req,
-    fileName,
-    fileType: 'text',
-    path: 'translations',
-    root: 'test-user-1234abcd',
-    bucketName: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
-  });
-
-  if (!err) {
-    uploadFileToS3(url.url!, url.fields, './src/pseudo/', fileName);
-  }
 });
 
-test('Should delete example3.txt and all its versions', async () => {
-  expect(err).toBeUndefined();
+beforeEach(() => {
+  s3MockClient.client.reset();
+  s3MockClient.setup();
+});
 
+test('Should delete example.txt and all its versions', async () => {
   const [error, fileNames] = await deleteManyFiles({
     req,
     fileNames: [fileName],

@@ -1,49 +1,26 @@
 /* eslint-disable no-console */
-import req from '../../../helpers/mockRequest.help';
-import { uploadFileToS3 } from '../../../helpers/downloadUpload.help';
-import {
-  deleteOneFile,
-  getUploadUrl,
-  isFileExisting,
-} from '../../../utils/s3.utils';
+import client from '../../../helpers/mockClient.help';
+import { isFileExisting } from '../../../utils/s3.utils';
+import 'dotenv/config';
 
-let err: any;
-let url: any;
+const s3MockClient = client();
 const fileName = 'example.txt';
 const params = {
-  req,
   fileName,
   root: 'test-user-1234abcd',
   path: 'translations',
   bucketName: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
 };
 
-async function uploadFile() {
-  [err, url] = await getUploadUrl({ fileType: 'text', ...params });
-
-  if (!err) {
-    uploadFileToS3(url.url!, url.fields, './src/pseudo/', fileName);
-  }
-}
-
-async function deleteFile() {
-  const [error] = await deleteOneFile(params);
-
-  if (error) {
-    console.error(error);
-  }
-}
+beforeEach(() => {
+  s3MockClient.client.reset();
+  s3MockClient.setup();
+});
 
 test('Should check if file exists and return true', async () => {
-  await uploadFile();
-  expect(err).toBeUndefined();
-
   const response = await isFileExisting(params);
   expect(response[0]).toBeUndefined();
   expect(response[1]).toBeTruthy();
-
-  await deleteFile();
-  expect(err).toBeUndefined();
 });
 
 test('Should check if file exists and return false', async () => {

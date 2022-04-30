@@ -3,33 +3,24 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import supertest from 'supertest';
 import app from '../../app';
+import client from '../../helpers/mockClient.help';
 import { deleteFileQuery } from '../../helpers/testQueries.help';
-import { uploadFileToS3 } from '../../helpers/downloadUpload.help';
-import { getUploadUrl } from '../../utils/s3.utils';
-import req from '../../helpers/mockRequest.help';
+import 'dotenv/config';
 
 const request = supertest(app);
 
-let err: any;
-let url: any;
 const fileName = 'example.txt';
 const path = 'translations';
+const s3MockClient = client();
+
 beforeAll(async () => {
   process.env.NODE_ENV = 'test';
   process.env.TEST_AUTH = 'true';
+});
 
-  [err, url] = await getUploadUrl({
-    req,
-    fileName,
-    fileType: 'text',
-    path,
-    root: 'test-user-1234abcd',
-    bucketName: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
-  });
-
-  if (!err) {
-    uploadFileToS3(url.url!, url.fields, './src/pseudo/', fileName);
-  }
+beforeEach(() => {
+  s3MockClient.client.reset();
+  s3MockClient.setup();
 });
 
 afterAll(() => {
@@ -37,8 +28,6 @@ afterAll(() => {
 });
 
 test('Should delete specified file', (done) => {
-  expect(err).toBeUndefined();
-
   const query = deleteFileQuery;
   query.variables.fileName = fileName;
   query.variables.path = path;
@@ -60,8 +49,6 @@ test('Should delete specified file', (done) => {
 });
 
 test('Should be blocked when deleting specified file from root (Unauthorized)', (done) => {
-  expect(err).toBeUndefined();
-
   const query = deleteFileQuery;
   query.variables.fileName = fileName;
   query.variables.path = path;
