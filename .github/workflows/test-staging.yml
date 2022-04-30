@@ -6,7 +6,7 @@ on:
       - staging
 
 jobs:
-  deploy_lambda:
+  test_code:
     runs-on: ubuntu-latest
     steps:
       - name: 'Checking out code'
@@ -24,4 +24,7 @@ jobs:
       - name: 'Linting code'
         run: npm run lint
       - name: 'Running tests'
+        env:
+          NAMESPACE: ${{ secrets.NAMESPACE }}
+          ENCRYPTED_TEST_TENANT: ${{ secrets.ENCRYPTED_TEST_TENANT }}
         run: npm test
