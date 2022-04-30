@@ -9,14 +9,16 @@ export default async function isBucketExisting(
       new HeadBucketCommand({ Bucket: bucketName })
     );
 
-    if (data.$metadata.httpStatusCode === 200) {
+    const status = data?.$metadata.httpStatusCode || 500;
+
+    if (status >= 200 && status <= 299) {
       return [undefined, true];
     }
 
     return [undefined, false];
   } catch (err) {
     // 301 etc are thrown as errors by the s3 client
-    if ((<any>err).$metadata.httpStatusCode === 301) {
+    if ((<any>err)?.$metadata.httpStatusCode === 301) {
       return [undefined, false];
     }
 

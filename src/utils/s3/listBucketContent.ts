@@ -39,7 +39,7 @@ export default async function listBucketContent(
 
     const res = await s3Client().send(new ListObjectVersionsCommand(params));
 
-    const status = res.$metadata.httpStatusCode || 500;
+    const status = res?.$metadata.httpStatusCode || 500;
 
     if (status >= 200 && status <= 299) {
       const files =

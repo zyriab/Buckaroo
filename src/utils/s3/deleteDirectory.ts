@@ -121,7 +121,7 @@ export default async function deleteDirectory(
         })
       );
 
-      const status = res.$metadata.httpStatusCode || 500;
+      const status = res?.$metadata.httpStatusCode || 500;
 
       if (status < 200 || status > 299) {
         throw new Error(

@@ -3,10 +3,8 @@ import sanitize from 'sanitize-filename';
 import normalize from 'normalize-path';
 import formatPath from '../tools/formatPath.utils';
 import s3Client from './s3Client';
-import { RequestBody } from '../../definitions/root';
 
 interface InputArgs {
-  req: RequestBody;
   fileName: string;
   root: string;
   path: string;
@@ -29,7 +27,9 @@ export default async function isFileExisting(
       })
     );
 
-    if (data.$metadata.httpStatusCode === 200) {
+    const status = data?.$metadata.httpStatusCode || 500;
+
+    if (status >= 200 && status <= 299) {
       return [undefined, true];
     }
 

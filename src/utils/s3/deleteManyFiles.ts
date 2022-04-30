@@ -69,8 +69,8 @@ export default async function deleteManyFiles(
     }
 
     const res = await s3Client().send(new DeleteObjectsCommand(params));
-    
-    const status = res.$metadata.httpStatusCode || 500;
+
+    const status = res?.$metadata.httpStatusCode || 500;
 
     if (status >= 200 && status <= 299) {
       return [undefined, fileNames];
