@@ -16,7 +16,6 @@ export default async function resolveManyFiles(
   const checkedFiles = await Promise.all(
     args.fileNames.map((fileName) =>
       isFileExisting({
-        req: args.req,
         fileName,
         root: args.root,
         path: args.path,
@@ -32,11 +31,15 @@ export default async function resolveManyFiles(
   }
 
   if (checkedFiles.filter(([, exists]) => !exists).length > 0) {
+    const index = checkedFiles.indexOf(
+      checkedFiles.filter(([, exists]) => !exists)[0]
+    );
+
     return [
       false,
       {
         __typename: 'FileNotFound',
-        message: 'The requested file could not be found',
+        message: `The requested file: "${args.fileNames[index]}" could not be found`,
       },
     ];
   }
