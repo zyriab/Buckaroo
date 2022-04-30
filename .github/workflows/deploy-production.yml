@@ -30,6 +30,10 @@ jobs:
       - name: 'Linting code'
         run: npm run lint
       - name: 'Running tests'
+        env:
+          NAMESPACE: ${{ secrets.NAMESPACE }}
+          ENCRYPTED_TEST_TENANT: ${{ secrets.ENCRYPTED_TEST_TENANT }}
+          AES_KEY: ${{ secrets.AES_KEY }}        
         uses: raulanatol/jest-coverage-comment-action@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}'
