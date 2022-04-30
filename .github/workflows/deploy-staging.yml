@@ -30,6 +30,9 @@ jobs:
       - name: 'Linting code'
         run: npm run lint
       - name: 'Running tests'
+        env:
+          NAMESPACE: ${{ secrets.NAMESPACE }}
+          ENCRYPTED_TEST_TENANT: ${{ secrets.ENCRYPTED_TEST_TENANT }}
         run: npm test
       - name: 'Bundling files'
         run: npx ncc build src/index.ts
