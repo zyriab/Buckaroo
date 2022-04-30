@@ -116,7 +116,7 @@ const gqlResolvers = {
   getDownloadUrl: async (args: { fileInput: FileInput }, req: RequestBody) => {
     try {
       let exists: boolean;
-      let error: Error | GqlError | undefined;
+      let error: GqlError | undefined;
 
       const { fileName, path, versionId } = args.fileInput;
       const root =
@@ -167,7 +167,7 @@ const gqlResolvers = {
   deleteOneFile: async (args: { fileInput: FileInput }, req: RequestBody) => {
     try {
       let exists: boolean;
-      let error: Error | GqlError | undefined;
+      let error: GqlError | undefined;
 
       const { fileName, path } = args.fileInput;
       const root =
@@ -220,7 +220,7 @@ const gqlResolvers = {
   ) => {
     try {
       let exists: boolean;
-      let error: Error | GqlError | undefined;
+      let error: GqlError | undefined;
 
       const { fileNames, path } = args.filesInput;
       const root =
@@ -273,7 +273,7 @@ const gqlResolvers = {
   ) => {
     try {
       let exists: boolean;
-      let error: Error | GqlError | undefined;
+      let error: GqlError | undefined;
 
       const { path } = args.directoryInput;
       const root =
@@ -335,7 +335,7 @@ const gqlResolvers = {
   ) => {
     try {
       let exists: boolean;
-      let error: Error | GqlError | undefined;
+      let error: GqlError | undefined;
 
       const { fileName, path, versionId } = args.fileInput;
       const root =
