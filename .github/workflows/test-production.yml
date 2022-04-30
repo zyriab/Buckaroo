@@ -1,3 +1,5 @@
+name: 'Test production'
+
 on:
   pull_request:
     branches:
