@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  deploy_lambda:
+  test_code:
     runs-on: ubuntu-latest
     steps:
       - name: 'Checking out code'
