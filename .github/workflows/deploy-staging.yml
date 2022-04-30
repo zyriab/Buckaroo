@@ -1,0 +1,33 @@
+name: 'Deploy staging'
+
+on:
+  push:
+    branches:
+      - staging
+
+jobs:
+  deploy_lambda:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checking out code'
+        uses: actions/checkout@v2
+      - name: 'Setting up Nodejs environment'
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      - name: 'Installing dependencies'
+        env:
+          CI: true
+        run: npm ci
+      - name: 'Checking TS'
+        run: npm run check
+      - name: 'Linting code'
+        run: npm run lint
+      - name: 'Running tests'
+        run: npm test
+      - name: 'Bundling files'
+        run: npx ncc build src/index.ts
+      - name: 'Zipping bundled file'
+        run: zip -j deploy.zip ./dist/*
+      - name: 'Deploying to AWS Lambda'
+        run: aws lambda update-function-code --function-name=buckaroo-staging --zip-file=fileb://deploy.zip
