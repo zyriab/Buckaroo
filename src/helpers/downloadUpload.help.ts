@@ -1,7 +1,10 @@
-import { createWriteStream, createReadStream, statSync } from 'fs';
+/* eslint-disable no-console */
+import { createWriteStream, createReadStream } from 'fs';
 import normalize from 'normalize-path';
 import sanitize from 'sanitize-filename';
 import fetch from 'cross-fetch';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import FormData from 'form-data';
 import { URL } from 'url';
 
 /** This is only used for testing - hence its location in /helpers/ and not /utils/ */
@@ -26,23 +29,21 @@ export async function downloadFileLocally(
   return res;
 }
 
-export async function uploadFileToS3(
+export function uploadFileToS3(
   url: string,
+  fields: {},
   localPath: string,
   fileName: string
 ) {
   const targetUrl = new URL(url);
   const filePath = `${normalize(localPath)}/${sanitize(fileName)}`;
-  const payload = createReadStream(filePath);
+  const form = new FormData();
 
-  const res = await fetch(targetUrl.toString(), {
-    method: 'PUT',
-    headers: {
-      'Content-Length': `${statSync(filePath).size}`,
-    },
-    // @ts-ignore
-    body: payload,
+  Object.entries(fields).forEach(([field, value]) => form.append(field, value));
+  form.append('file', createReadStream(filePath));
+
+  form.submit(targetUrl.toString(), (err, res) => {
+    if (err) console.error(err);
+    console.log(`Upload response ≻ ${res.statusCode}: ${res.statusMessage}`);
   });
-
-  return res;
 }

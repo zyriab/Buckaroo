@@ -6,7 +6,8 @@ import {
   getUsername,
 } from '../utils/auth.utils';
 
-export async function setReqMetadata(
+// eslint-disable-next-line consistent-return
+export default async function setReqMetadata(
   req: RequestBody,
   res: ResponseBody<any>,
   next: () => void
@@ -14,28 +15,31 @@ export async function setReqMetadata(
   try {
     if (!req.body.isAuth) next();
 
-    let email, username;
     const tkn = req.body.token;
     const tenant = getTenant(tkn);
 
     if (!tenant) {
       req.body.isAuth = false;
-      req.body.tenant.bucket.exists = false;
-      next();
+      return next();
     }
 
-    email = getUserEmail(tkn);
+    if(req.body.tenant.name === 's3-versioning-control') {
+      req.body.permissions = tkn.permissions;
+      return next();
+    }
+
+    const email = getUserEmail(tkn);
 
     if (!email) {
       req.body.isAuth = false;
-      next();
+      return next();
     }
 
-    username = getUsername(tkn);
+    const username = getUsername(tkn);
 
     if (!username) {
       req.body.isAuth = false;
-      next();
+      return next();
     }
 
     req.body.tenant = tenant!;

@@ -1,6 +1,6 @@
 import { RequestBody, ResponseBody } from '../definitions/root';
 
-export function setTestingData(
+export default function setTestingData(
   req: RequestBody,
   res: ResponseBody<any>,
   next: () => void
@@ -9,6 +9,7 @@ export function setTestingData(
     name: 'test-bucket',
     bucket: {
       exists: true,
+      isVersioned: true,
       name: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
     },
   };

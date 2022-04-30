@@ -1,31 +1,23 @@
-import { deleteManyFileQuery } from '../../helpers/testQueries.help';
-import { getUploadUrl } from '../../utils/s3.utils';
-import fakeReq from '../../helpers/mockRequest.help';
+/* eslint-disable consistent-return */
+/* eslint-disable no-underscore-dangle */
 import supertest from 'supertest';
 import app from '../../app';
-import { uploadFileToS3 } from '../../helpers/downloadUpload.help';
+import client from '../../helpers/mockClient.help';
+import { deleteManyFileQuery } from '../../helpers/testQueries.help';
+import 'dotenv/config';
 
 const request = supertest(app);
 
-let err1: any, err2: any, url1: any, url2: any, res1: any, res2: any;
-beforeAll(async () => {
-  process.env.NODE_ENV === 'test';
-  process.env.TEST_AUTH = 'true';
+const s3MockClient = client();
 
-  [err1, url1] = await getUploadUrl({
-    req: fakeReq,
-    fileName: 'example.txt',
-    path: 'translations',
-  });
-  [err2, url2] = await getUploadUrl({
-    req: fakeReq,
-    fileName: 'example2.txt',
-    path: 'translations',
-  });
-  if (!err1 && !err2) {
-    res1 = await uploadFileToS3(url1!, './src/pseudo/', 'example.txt');
-    res2 = await uploadFileToS3(url2!, './src/pseudo/', 'example2.txt');
-  }
+beforeAll(async () => {
+  process.env.NODE_ENV = 'test';
+  process.env.TEST_AUTH = 'true';
+});
+
+beforeEach(() => {
+  s3MockClient.client.reset();
+  s3MockClient.setup();
 });
 
 afterAll(() => {
@@ -33,16 +25,9 @@ afterAll(() => {
 });
 
 test('Should delete files example.txt & example2.txt', (done) => {
-  expect(err1).toBeUndefined();
-  expect(err2).toBeUndefined();
-  expect(res1.status).toBe(200);
-  expect(res2.status).toBe(200);
-
   const query = deleteManyFileQuery;
   query.variables.fileNames = ['example.txt', 'example2.txt'];
   query.variables.path = 'translations';
-  query.variables.versionIds = [''];
-  query.variables.rootPath = false;
 
   request
     .post('/gql')
@@ -53,6 +38,8 @@ test('Should delete files example.txt & example2.txt', (done) => {
     .end((err: any, res: any) => {
       if (err) return done(err);
       expect(res.body).toBeInstanceOf(Object);
+      expect(res.body.data.deleteManyFiles).not.toBeUndefined();
+      expect(res.body.data.deleteManyFiles.__typename).toBe('FileNameList');
       expect(res.body.data.deleteManyFiles.names).not.toBeUndefined();
       expect(res.body.data.deleteManyFiles.names[0]).toMatch('example.txt');
       expect(res.body.data.deleteManyFiles.names[1]).toMatch('example2.txt');
@@ -61,16 +48,10 @@ test('Should delete files example.txt & example2.txt', (done) => {
 });
 
 test('Should be blocked when trying to delete files example.txt & example2.txt from root (Unauthorized)', (done) => {
-  expect(err1).toBeUndefined();
-  expect(err2).toBeUndefined();
-  expect(res1.status).toBe(200);
-  expect(res2.status).toBe(200);
-
   const query = deleteManyFileQuery;
   query.variables.fileNames = ['example.txt', 'example2.txt'];
   query.variables.path = 'translations';
-  query.variables.versionIds = [''];
-  query.variables.rootPath = true;
+  query.variables.root = 'other-user-1234abcd';
 
   process.env.TEST_AUTH = 'false';
 

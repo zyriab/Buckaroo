@@ -1,28 +1,26 @@
-import { deleteFileQuery } from '../../helpers/testQueries.help';
-import { uploadFileToS3 } from '../../helpers/downloadUpload.help';
-import { getUploadUrl } from '../../utils/s3.utils';
+/* eslint-disable consistent-return */
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable @typescript-eslint/no-shadow */
 import supertest from 'supertest';
 import app from '../../app';
-import fakeReq from '../../helpers/mockRequest.help';
+import client from '../../helpers/mockClient.help';
+import { deleteFileQuery } from '../../helpers/testQueries.help';
+import 'dotenv/config';
 
 const request = supertest(app);
 
-let err: any, url: any, res: any;
 const fileName = 'example.txt';
 const path = 'translations';
+const s3MockClient = client();
+
 beforeAll(async () => {
-  process.env.NODE_ENV === 'test';
+  process.env.NODE_ENV = 'test';
   process.env.TEST_AUTH = 'true';
+});
 
-  [err, url] = await getUploadUrl({
-    req: fakeReq,
-    fileName,
-    path,
-  });
-
-  if (!err) {
-    res = await uploadFileToS3(url!, './src/pseudo/', fileName);
-  }
+beforeEach(() => {
+  s3MockClient.client.reset();
+  s3MockClient.setup();
 });
 
 afterAll(() => {
@@ -30,13 +28,9 @@ afterAll(() => {
 });
 
 test('Should delete specified file', (done) => {
-  expect(err).toBeUndefined();
-  expect(res.status).toBe(200);
-
   const query = deleteFileQuery;
   query.variables.fileName = fileName;
   query.variables.path = path;
-  query.variables.rootPath = false;
 
   request
     .post('/gql')
@@ -47,20 +41,18 @@ test('Should delete specified file', (done) => {
     .end((err: any, res: any) => {
       if (err) return done(err);
       expect(res.body).toBeInstanceOf(Object);
-      expect(res.body.data.deleteOneFile.name).not.toBeUndefined();
+      expect(res.body.data.deleteOneFile).not.toBeUndefined();
+      expect(res.body.data.deleteOneFile.__typename).toBe('FileName');
       expect(res.body.data.deleteOneFile.name).toMatch(fileName);
       done();
     });
 });
 
 test('Should be blocked when deleting specified file from root (Unauthorized)', (done) => {
-  expect(err).toBeUndefined();
-  expect(res.status).toBe(200);
-
   const query = deleteFileQuery;
   query.variables.fileName = fileName;
   query.variables.path = path;
-  query.variables.rootPath = true;
+  query.variables.root = 'other-user-1234abcd';
 
   process.env.TEST_AUTH = 'false';
 

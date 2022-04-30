@@ -13,7 +13,7 @@ export function hasJsonStructure(str: string): boolean {
 
 export function safeJsonParse(str: string): [undefined, Object] | [Error] {
   try {
-    if (typeof str !== 'string') throw new Error('Invalid JSON string');
+    if (typeof str !== 'string') throw new Error('Invalid JSON string.');
     return [undefined, JSON.parse(str)];
   } catch (e) {
     return [e as Error];

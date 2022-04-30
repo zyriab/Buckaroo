@@ -1,6 +1,6 @@
 import { S3Client } from '@aws-sdk/client-s3';
 
-export function s3Client() {
+export default function s3Client() {
   return new S3Client({
     region: process.env.S3_REGION!,
     credentials: {

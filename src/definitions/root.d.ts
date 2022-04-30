@@ -4,7 +4,7 @@ import { DecodedToken, Permission } from './auth';
 export interface Tenant {
   name: string;
   bucket: {
-    exists: boolean,
+    isVersioned: boolean,
     name: string;
   };
 }

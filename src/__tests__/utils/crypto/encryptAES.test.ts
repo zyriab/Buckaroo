@@ -1,5 +1,9 @@
-import { encryptAES } from '../../../utils/crypto/encryptAES';
+import encryptAES from '../../../utils/crypto/encryptAES';
 import 'dotenv/config';
+
+beforeAll(() => {
+  process.env.NODE_ENV = 'test';
+});
 
 test('Should encrypt test-user to ENCRYPTED_TEST_TENANT', () => {
   const result = encryptAES('test-user');

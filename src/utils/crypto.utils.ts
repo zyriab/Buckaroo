@@ -1,2 +1,4 @@
-export { encryptAES as encrypt } from './crypto/encryptAES';
-export { decryptAES as decrypt } from './crypto/decryptAES';
+import encrypt from './crypto/encryptAES';
+import decrypt from './crypto/decryptAES';
+
+export { encrypt, decrypt };

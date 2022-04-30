@@ -1,5 +1,5 @@
 import { RequestBody } from '../definitions/root';
-import 'dotenv/config'
+import 'dotenv/config';
 
 const tkn = {
   aud: [],
@@ -12,26 +12,27 @@ const tkn = {
   sub: 'auth0|1234abcd',
 };
 
- let permissions: any = [];
+let permissions: any = [];
 
- if (process.env.TEST_AUTH === 'true')
-   permissions = [
-     'read:bucket',
-     'delete:directory',
-     'create:file',
-     'update:file',
-     'delete:file',
-   ];
+if (process.env.TEST_AUTH === 'true')
+  permissions = [
+    'read:bucket',
+    'delete:directory',
+    'create:file',
+    'update:file',
+    'delete:file',
+  ];
 
 const tenant = {
   name: 'test-bucket',
   bucket: {
     exists: true,
+    isVersioned: true,
     name: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
   },
 };
 
-//@ts-ignore
+// @ts-ignore
 const req: RequestBody = {
   body: {
     token: tkn,
@@ -39,8 +40,8 @@ const req: RequestBody = {
     userId: '1234abcd',
     username: 'test-user',
     userEmail: 'test-user@example.com',
-    permissions: permissions,
-    tenant: tenant
+    permissions,
+    tenant,
   },
 };
 

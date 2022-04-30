@@ -1,7 +1,7 @@
-import { RequestBody, ResponseBody } from '../definitions/root';
-import { AccessToken } from '../definitions/auth';
 import jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
+import { RequestBody, ResponseBody } from '../definitions/root';
+import { AccessToken } from '../definitions/auth';
 import 'dotenv/config';
 
 const client = jwksClient({
@@ -15,7 +15,8 @@ function getKey(header: any, callback: (a: any, key: any) => any) {
   });
 }
 
-export async function checkAuth(
+// eslint-disable-next-line consistent-return
+export default async function checkAuth(
   req: RequestBody,
   res: ResponseBody<any>,
   next: () => void
@@ -35,7 +36,7 @@ export async function checkAuth(
     }
 
     try {
-      decodedToken = await new Promise((resolve, reject) => {
+      decodedToken = await new Promise((resolve) => {
         jwt.verify(
           token,
           getKey,

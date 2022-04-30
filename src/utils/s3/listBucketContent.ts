@@ -1,107 +1,120 @@
-import { RequestBody } from '../../definitions/root';
-import { File, Version } from '../../definitions/generated/graphql';
-import {
-  DeleteMarkerEntry,
-  ListObjectVersionsCommand,
-  ObjectVersion,
-} from '@aws-sdk/client-s3';
-import { s3Client } from './s3Client';
+import { ListObjectVersionsCommand, ObjectVersion } from '@aws-sdk/client-s3';
 import normalize from 'normalize-path';
+import formatPath from '../tools/formatPath.utils';
+import getFileExtension from '../tools/getFileExtension.utils';
+import s3Client from './s3Client';
+import { File, Version } from '../../definitions/generated/graphql';
+import { RequestBody } from '../../definitions/root';
+import { DeleteMarker, Directory } from '../../definitions/s3';
+import isDirectory from '../tools/isDirectory.utils';
 
 interface InputArgs {
   req: RequestBody;
+  bucketName: string;
+  root: string;
   path?: string;
-  getMarkersIds?: boolean;
+  getDeleteMarkers?: boolean;
   getDirs?: boolean;
-  showRoot?: boolean;
 }
 
-export interface MarkerData {
-  name: string;
-  id: string;
-}
-
-export async function listBucketContent(
+export default async function listBucketContent(
   args: InputArgs
 ): Promise<
   | [undefined, File[]]
-  | [undefined, File[], MarkerData[]]
-  | [undefined, File[], string[]]
-  | [undefined, File[], MarkerData[], string[]]
+  | [undefined, File[], DeleteMarker[]]
+  | [undefined, File[], Directory[]]
+  | [undefined, File[], DeleteMarker[], Directory[]]
   | [Error]
 > {
   try {
-    const dirName = args.showRoot
-      ? ''
-      : `${args.req.body.username}-${args.req.body.userId}/`;
-    const prefix = args.path
-      ? `${dirName}${normalize(args.path)}/`
-      : `${dirName}`;
-    const params = { Bucket: args.req.body.tenant.bucket.name, Prefix: prefix };
-    const res = await s3Client().send(new ListObjectVersionsCommand(params));
+    const root = normalize(args.root);
+    const path = normalize(args.path || '');
+    const fullPath = formatPath(`${root}/${path}/`, { stripTrailing: false });
     const data: any = [];
 
-    const status = res.$metadata.httpStatusCode;
-    if (status && status >= 200 && status <= 299) {
-      // Returns file extension if there's one or undefined if not, /folder.name/ returns undefined
-      const fileExtensionRegExp = /(?:\.([^./]+))?$/;
+    const params = {
+      Bucket: args.bucketName,
+      Prefix: fullPath,
+    };
+
+    const res = await s3Client().send(new ListObjectVersionsCommand(params));
+
+    const status = res?.$metadata.httpStatusCode || 500;
+
+    if (status >= 200 && status <= 299) {
       const files =
         res.Versions?.filter(
-          (v: ObjectVersion) =>
-            v.Key && fileExtensionRegExp.exec(v.Key)![1] !== undefined
+          (v: ObjectVersion) => v.Key && getFileExtension(v.Key)
         ) || [];
+
       const versions = files.filter((f: ObjectVersion) => !f.IsLatest);
+
       const dirSet = [
-        ...new Set(
-          res.Versions?.map((v: ObjectVersion) => {
-            const a = v.Key!.split('/');
-            fileExtensionRegExp.exec(a[a.length - 1])![1] !== undefined
-              ? a.pop()
-              : '';
-            return a.join('/');
-          })
+        ...new Set<Directory>(
+          res.Versions?.filter((v: ObjectVersion) => isDirectory(v.Key!)).map(
+            (d) => ({ path: d.Key!, id: d.VersionId! })
+          )
         ),
       ];
-      const dirs = dirSet.filter((d) => normalize(`${d}/`, false) !== prefix);
 
-      const markers =
-        res.DeleteMarkers?.filter(
-          (m: DeleteMarkerEntry) =>
-            m.Key && m.VersionId !== 'null' && m.Key !== prefix
-        ).map((m) => {
-          return { name: m.Key!.replace(prefix, ''), id: m.VersionId! };
-        }) || [];
+      const dirs: Directory[] = dirSet.map((d) => ({
+        path: normalize(`${d.path.replace(`${root}/`, '')}/`, false),
+        id: d.id,
+      }));
 
-      const fileList = files!
+      const markers: DeleteMarker[] =
+        res.DeleteMarkers?.filter((m) => m.Key && m.VersionId !== 'null').map(
+          (m) => {
+            const mname =
+              m.Key === fullPath ? m.Key : m.Key!.replace(fullPath, '');
+            const mpath = `${normalize(
+              m.Key!.replace(`${mname}/`, ''),
+              false
+            )}`;
+
+            return {
+              name: mname,
+              id: m.VersionId!,
+              path: mpath,
+              isLatest: m.IsLatest!,
+            };
+          }
+        ) || [];
+
+      const fileList: File[] = files!
         .filter((f: ObjectVersion) => f.IsLatest)
         .map((f) => {
+          const filePath = `${f.Key!.slice(0, f.Key!.lastIndexOf('/'))}/`;
+
           return {
-            id: f.VersionId!,
-            name: f.Key?.replace(prefix, '')!,
-            lastModified: f.LastModified?.toISOString()!,
+            id: f.VersionId,
+            name: f.Key!.replace(filePath, ''),
+            lastModified: f.LastModified!.toISOString(),
             size: f.Size!,
-            path: prefix,
+            path: filePath,
             versions: [] as Version[],
           };
         });
 
-      for (const f of fileList) {
-        f.versions = versions!
-          .filter((v) => v.Key?.replace(prefix, '') === f.name)
-          .map((v) => {
-            return {
-              id: v.VersionId!,
-              name: v.Key?.replace(prefix, '')!,
-              lastModified: v.LastModified?.toISOString()!,
-              size: v.Size!,
-              path: prefix,
-            } as Version;
-          });
-      }
+      if (args.req.body.tenant.bucket.isVersioned)
+        for (const f of fileList) {
+          f.versions = versions!
+            .filter((v) => normalize(v.Key!).split('/').pop() === f.name)
+            .map(
+              (v) =>
+                ({
+                  id: v.VersionId,
+                  name: normalize(v.Key!).split('/').pop(),
+                  lastModified: v.LastModified!.toISOString(),
+                  size: v.Size,
+                  path: v.Key!.replace(normalize(v.Key!).split('/').pop()!, ''),
+                } as Version)
+            );
+        }
 
       data.push(undefined);
       data.push(fileList);
-      if (args.getMarkersIds) data.push(markers);
+      if (args.getDeleteMarkers) data.push(markers);
       if (args.getDirs) data.push(dirs);
 
       return data;

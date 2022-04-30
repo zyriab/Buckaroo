@@ -1,16 +1,12 @@
 import { GetBucketVersioningCommand } from '@aws-sdk/client-s3';
-import { s3Client } from './s3Client';
+import s3Client from './s3Client';
 
-interface InputArgs {
-  bucketName: string;
-}
-
-export async function checkBucketVersioning(
-  args: InputArgs
+export default async function isBucketVersioned(
+  bucketName: string
 ): Promise<[undefined, boolean] | [Error]> {
   try {
     const res = await s3Client().send(
-      new GetBucketVersioningCommand({ Bucket: args.bucketName })
+      new GetBucketVersioningCommand({ Bucket: bucketName })
     );
 
     return [undefined, res.Status === 'Enabled'];

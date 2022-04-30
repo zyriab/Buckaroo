@@ -1,3 +1,5 @@
+scalar PostFields
+
 type Version {
   id: ID!
   name: String!
@@ -23,6 +25,11 @@ type SignedUrl {
   url: String!
 }
 
+type SignedPost {
+  url: String!
+  fields: PostFields!
+}
+
 type FileName {
   name: String!
 }
@@ -41,6 +48,10 @@ type Directory {
   bucketName: String
 }
 
+type VersionControlSuccess {
+  message: String!
+}
+
 "ERROR TYPES"
 type Unauthenticated {
   message: String!
@@ -50,8 +61,13 @@ type StorageNotFound {
   message: String!
 }
 
+type FileNotFound {
+  message: String!
+}
+
 type ServerError {
   message: String!
+  stack: String
 }
 
 type Unauthorized {
@@ -61,26 +77,45 @@ type Unauthorized {
 "INPUT TYPES"
 input ListInput {
   path: String!
-  showRoot: Boolean
+  root: String
+  bucketName: String
+}
+
+input UploadInput {
+  fileName: String!
+  fileType: String!
+  path: String!
+  root: String
+  bucketName: String
 }
 
 input FileInput {
   fileName: String!
   path: String!
+  root: String
   versionId: String
-  rootPath: Boolean
+  bucketName: String
 }
 
 input FilesInput {
   fileNames: [String!]!
   path: String!
+  root: String
   versionIds: [String!]
-  rootPath: Boolean
+  bucketName: String
 }
 
 input DirectoryInput {
-  dirPath: String!
+  path: String!
+  root: String
   bucketName: String
+}
+
+input VersionControlInput {
+  bucketName: String!
+  fileName: String!
+  root: String!
+  maxNumberOfVersions: Int!
 }
 
 union ListBucketResult =
@@ -92,9 +127,11 @@ union ListBucketResult =
 
 union SignedUrlResult =
     SignedUrl
+  | SignedPost
   | Unauthenticated
   | Unauthorized
   | StorageNotFound
+  | FileNotFound
   | ServerError
 
 union DeleteFileResult =
@@ -103,6 +140,7 @@ union DeleteFileResult =
   | Unauthenticated
   | Unauthorized
   | StorageNotFound
+  | FileNotFound
   | ServerError
 
 union DeleteDirectoryResult =
@@ -110,6 +148,7 @@ union DeleteDirectoryResult =
   | Unauthenticated
   | Unauthorized
   | StorageNotFound
+  | FileNotFound
   | ServerError
 
 union RestoreFileResult =
@@ -117,11 +156,19 @@ union RestoreFileResult =
   | Unauthenticated
   | Unauthorized
   | StorageNotFound
+  | FileNotFound
+  | ServerError
+
+union VersionControlResult =
+    VersionControlSuccess
+  | Unauthenticated
+  | StorageNotFound
+  | FileNotFound
   | ServerError
 
 type Queries {
   listBucketContent(listInput: ListInput!): ListBucketResult!
-  getUploadUrl(fileInput: FileInput!): SignedUrlResult!
+  getUploadUrl(uploadInput: UploadInput!): SignedUrlResult!
   getDownloadUrl(fileInput: FileInput!): SignedUrlResult!
 }
 
@@ -130,6 +177,7 @@ type Mutations {
   deleteManyFiles(filesInput: FilesInput!): DeleteFileResult
   deleteDirectory(directoryInput: DirectoryInput): DeleteDirectoryResult
   restoreFileVersion(fileInput: FileInput!): RestoreFileResult
+  controlVersions(versionControlInput: VersionControlInput!): VersionControlResult
 }
 schema {
   query: Queries

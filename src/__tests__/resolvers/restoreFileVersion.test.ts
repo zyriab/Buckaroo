@@ -1,64 +1,41 @@
-import { restoreFileVersionQuery } from '../../helpers/testQueries.help';
-import { getAllFileVersions } from '../../utils/s3/getAllFileVersions';
-import fakeReq from '../../helpers/mockRequest.help';
-import app from '../../app';
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable consistent-return */
+/* eslint-disable @typescript-eslint/no-shadow */
 import supertest from 'supertest';
-import { deleteOneFile, getUploadUrl } from '../../utils/s3.utils';
-import { uploadFileToS3 } from '../../helpers/downloadUpload.help';
+import app from '../../app';
+import getOneFileVersionsIds from '../../utils/s3/getOneFileVersionsIds';
+import { restoreFileVersionQuery } from '../../helpers/testQueries.help';
+import client from '../../helpers/mockClient.help';
+import req from '../../helpers/mockRequest.help';
+import 'dotenv/config';
 
 const request = supertest(app);
 
-let e: any, v: any;
-let errors: any[], urls: any[], res: any[];
-const fileName = 'example3.txt';
+const fileName = 'example.txt';
 const path = 'translations';
+const versionId = 'abcdefgh12345678';
+const s3MockClient = client();
 
 beforeAll(async () => {
-  process.env.NODE_ENV === 'test';
+  process.env.NODE_ENV = 'test';
   process.env.TEST_AUTH = 'true';
+});
 
-  errors = [];
-  urls = ([] as string[]) || undefined;
-  res = [];
-
-  for (let i = 0; i < 3; i++) {
-    const [err, url] = await getUploadUrl({
-      req: fakeReq,
-      fileName,
-      path,
-    });
-    errors.push(err);
-    urls.push(`${url}`);
-  }
-
-  if (!urls.includes('undefined')) {
-    for (const u of urls)
-      res.push(await uploadFileToS3(u, './src/pseudo/', fileName));
-  }
-
-  [e, v] = await getAllFileVersions({
-    req: fakeReq,
-    fileName,
-    path,
-  });
+beforeEach(() => {
+  s3MockClient.client.reset();
+  s3MockClient.setup();
 });
 
 afterAll(async () => {
-  if (process.env.TEST_AUTH === 'true')
-    await deleteOneFile({ req: fakeReq, fileName, path });
   process.env.TEST_AUTH = 'false';
 });
 
 test('Should restore older version of file', (done) => {
-  for (const err of errors) expect(err).toBeUndefined();
-  expect(e).toBeUndefined();
-  expect(v.length).toBeGreaterThan(0);
-
   const query = restoreFileVersionQuery;
   query.variables.fileName = fileName;
   query.variables.path = path;
-  query.variables.versionId = v[v.length - 1];
-  query.variables.rootPath = false;
+  query.variables.versionId = versionId;
+  query.variables.root = undefined;
 
   request
     .post('/gql')
@@ -69,14 +46,18 @@ test('Should restore older version of file', (done) => {
     .end((err: any, res: any) => {
       if (err) return done(err);
       expect(res.body).toBeInstanceOf(Object);
+      expect(res.body.data.restoreFileVersion).not.toBeUndefined();
+      expect(res.body.data.restoreFileVersion.__typename).toBe('VersionId');
       expect(res.body.data.restoreFileVersion.id).not.toBeUndefined();
 
-      getAllFileVersions({
-        req: fakeReq,
+      getOneFileVersionsIds({
+        req,
         fileName,
         path,
+        root: 'test-user-1234abcd',
+        bucketName: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
       }).then((ids) => {
-        expect(ids).not.toContain(v[v.length - 1]);
+        expect(ids).not.toContain(versionId);
         expect(ids[1]![0]).toBe(res.body.data.restoreFileVersion.id);
         done();
       });
@@ -84,17 +65,13 @@ test('Should restore older version of file', (done) => {
 });
 
 test('Should be blocked when restoring older version of file (Unauthorized)', (done) => {
-  for (const err of errors) expect(err).toBeUndefined();
-  expect(e).toBeUndefined();
-  expect(v.length).toBeGreaterThan(0);
-
   process.env.TEST_AUTH = 'false';
 
   const query = restoreFileVersionQuery;
   query.variables.fileName = fileName;
   query.variables.path = path;
-  query.variables.versionId = v[v.length - 1];
-  query.variables.rootPath = true;
+  query.variables.versionId = versionId;
+  query.variables.root = 'other-user-1234abcd';
 
   request
     .post('/gql')
@@ -107,6 +84,7 @@ test('Should be blocked when restoring older version of file (Unauthorized)', (d
       expect(res.body).toBeInstanceOf(Object);
       expect(res.body.data.restoreFileVersion).not.toBeUndefined();
       expect(res.body.data.restoreFileVersion.__typename).toBe('Unauthorized');
+      process.env.TEST_AUTH = 'true';
       done();
     });
 }, 10000);

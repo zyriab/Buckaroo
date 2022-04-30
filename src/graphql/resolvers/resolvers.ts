@@ -1,40 +1,64 @@
+import normalize from 'normalize-path';
 import {
   ListInput,
   FileInput,
   FilesInput,
   DirectoryInput,
+  UploadInput,
+  VersionControlInput,
 } from '../../definitions/generated/graphql';
+import { FileType, GqlError } from '../../definitions/types';
+import { RequestBody } from '../../definitions/root';
 import {
   deleteManyFiles,
   deleteOneFile,
   restoreFileVersion,
   deleteDirectory,
-  checkBucketExists,
-  checkBucketVersioning,
+  isBucketVersioned,
   getDownloadUrl,
   getUploadUrl,
+  listBucketContent,
+  controlVersions,
+  resolveBucket,
+  resolveOneFile,
+  resolveManyFiles,
 } from '../../utils/s3.utils';
-import { listBucketContent } from '../../utils/s3/listBucketContent';
+import { formatPath, handleErrorResponse } from '../../utils/tools.utils';
 import { resolveAuth } from '../../utils/auth.utils';
-import { RequestBody } from '../../definitions/root';
-import normalize from 'normalize-path';
 
-export const gqlResolvers = {
+const gqlResolvers = {
   listBucketContent: async (
     args: { listInput: ListInput },
     req: RequestBody
   ) => {
     try {
-      const [authed, error] = resolveAuth(
+      const { path } = args.listInput;
+      const isExternalBucket =
+        args.listInput.bucketName &&
+        args.listInput.bucketName !== req.body.tenant.bucket.name;
+      const root =
+        args.listInput.root ?? `${req.body.username}-${req.body.userId}`;
+      const bucketName =
+        args.listInput.bucketName || req.body.tenant.bucket.name;
+
+      const [authed, authError] = resolveAuth(
         req,
-        args.listInput.showRoot ? 'read:bucket' : undefined
+        args.listInput.root !== undefined || isExternalBucket
+          ? 'read:bucket'
+          : undefined
       );
-      if (!authed) return error;
+
+      if (!authed) return authError;
+
+      const [exists, error] = await resolveBucket(req, bucketName);
+
+      if (!exists) return error;
 
       const [failure, content] = await listBucketContent({
-        req: req,
-        path: args.listInput.path,
-        showRoot: args.listInput.showRoot || undefined,
+        req,
+        root,
+        path,
+        bucketName,
       });
 
       if (failure) throw failure;
@@ -44,95 +68,150 @@ export const gqlResolvers = {
         list: content,
       };
     } catch (err) {
-      return {
-        __typename: 'ServerError',
-        message: `${err}`,
-      };
+      return handleErrorResponse(err as Error);
     }
   },
-  getUploadUrl: async (args: { fileInput: FileInput }, req: RequestBody) => {
+  getUploadUrl: async (
+    args: { uploadInput: UploadInput },
+    req: RequestBody
+  ) => {
     try {
-      const [authed, error] = resolveAuth(
-        req,
-        args.fileInput.rootPath ? 'create:file' : undefined
-      );
-      if (!authed) return error;
+      const { fileName, fileType, path } = args.uploadInput;
+      const root =
+        args.uploadInput.root ?? `${req.body.username}-${req.body.userId}`;
+      const bucketName =
+        args.uploadInput.bucketName || req.body.tenant.bucket.name;
 
-      const [failure, url] = await getUploadUrl({
+      const [authed, authError] = resolveAuth(
         req,
-        fileName: args.fileInput.fileName,
-        path: args.fileInput.path,
-        rootPath: args.fileInput.rootPath || undefined,
+        args.uploadInput.root !== undefined ? 'create:file' : undefined
+      );
+
+      if (!authed) return authError;
+
+      const [exists, error] = await resolveBucket(req, bucketName);
+
+      if (!exists) return error;
+
+      const [failure, signedPost] = await getUploadUrl({
+        req,
+        fileName,
+        fileType: <FileType>fileType,
+        root,
+        path,
+        bucketName,
       });
 
       if (failure !== undefined) throw failure;
 
       return {
-        __typename: 'SignedUrl',
-        url: url,
+        __typename: 'SignedPost',
+        url: signedPost.url,
+        fields: signedPost.fields,
       };
     } catch (err) {
-      return {
-        __typename: 'ServerError',
-        message: `${err}`,
-      };
+      return handleErrorResponse(err as Error);
     }
   },
   getDownloadUrl: async (args: { fileInput: FileInput }, req: RequestBody) => {
     try {
-      const [authed, error] = resolveAuth(
+      let exists: boolean;
+      let error: GqlError | undefined;
+
+      const { fileName, path, versionId } = args.fileInput;
+      const root =
+        args.fileInput.root ?? `${req.body.username}-${req.body.userId}`;
+      const bucketName =
+        args.fileInput.bucketName || req.body.tenant.bucket.name;
+
+      const [authed, authError] = resolveAuth(
         req,
-        args.fileInput.rootPath ? 'read:bucket' : undefined
+        args.fileInput.root !== undefined ? 'read:bucket' : undefined
       );
-      if (!authed) return error;
+
+      if (!authed) return authError;
+
+      [exists, error] = await resolveBucket(req, bucketName);
+
+      if (!exists) return error;
+
+      [exists, error] = await resolveOneFile({
+        req,
+        fileName,
+        root,
+        path,
+        bucketName,
+      });
+
+      if (!exists) return error;
 
       const [failure, url] = await getDownloadUrl({
         req,
-        fileName: args.fileInput.fileName,
-        path: args.fileInput.path,
-        versionId: args.fileInput.versionId || undefined,
-        rootPath: args.fileInput.rootPath || undefined,
+        fileName,
+        root,
+        path,
+        versionId: versionId || undefined,
+        bucketName,
       });
 
       if (failure) throw failure;
 
       return {
         __typename: 'SignedUrl',
-        url: url,
+        url,
       };
     } catch (err) {
-      return {
-        __typename: 'ServerError',
-        message: `${err}`,
-      };
+      return handleErrorResponse(err as Error);
     }
   },
   deleteOneFile: async (args: { fileInput: FileInput }, req: RequestBody) => {
     try {
-      const [authed, error] = resolveAuth(
-        req,
-        args.fileInput.rootPath ? 'delete:file' : undefined
-      );
-      if (!authed) return error;
+      let exists: boolean;
+      let error: GqlError | undefined;
 
-      const [failure, fileName] = await deleteOneFile({
+      const { fileName, path } = args.fileInput;
+      const root =
+        args.fileInput.root ?? `${req.body.username}-${req.body.userId}`;
+      const bucketName =
+        args.fileInput.bucketName || req.body.tenant.bucket.name;
+
+      const [authed, authError] = resolveAuth(
         req,
-        fileName: args.fileInput.fileName,
-        path: args.fileInput.path,
-        rootPath: args.fileInput.rootPath || undefined,
+        args.fileInput.root !== undefined ? 'delete:file' : undefined
+      );
+
+      if (!authed) return authError;
+
+      [exists, error] = await resolveBucket(req, bucketName);
+
+      if (!exists) return error;
+
+      [exists, error] = await resolveOneFile({
+        req,
+        fileName,
+        root,
+        path,
+        bucketName,
+      });
+
+      if (!exists) return error;
+
+      const [failure, name] = await deleteOneFile({
+        req,
+        fileName,
+        root,
+        path,
+        bucketName,
       });
 
       if (failure) throw failure;
 
       return {
         __typename: 'FileName',
-        name: fileName,
+        name,
       };
     } catch (err) {
-      return {
-        __typename: 'ServerError',
-        message: `${err}`,
-      };
+      return handleErrorResponse(err as Error);
     }
   },
   deleteManyFiles: async (
@@ -140,26 +219,52 @@ export const gqlResolvers = {
     req: RequestBody
   ) => {
     try {
-      const [authed, error] = resolveAuth(req, args.filesInput.rootPath ? 'delete:file' : undefined);
-      if (!authed) return error;
+      let exists: boolean;
+      let error: GqlError | undefined;
 
-      const [failure, fileNames] = await deleteManyFiles({
+      const { fileNames, path } = args.filesInput;
+      const root =
+        args.filesInput.root ?? `${req.body.username}-${req.body.userId}`;
+      const bucketName =
+        args.filesInput.bucketName || req.body.tenant.bucket.name;
+
+      const [authed, authError] = resolveAuth(
         req,
-        fileNames: args.filesInput.fileNames,
-        path: args.filesInput.path,
+        args.filesInput.root !== undefined ? 'delete:file' : undefined
+      );
+
+      if (!authed) return authError;
+
+      [exists, error] = await resolveBucket(req, bucketName);
+
+      if (!exists) return error;
+
+      [exists, error] = await resolveManyFiles({
+        req,
+        fileNames,
+        root,
+        path,
+        bucketName,
+      });
+
+      if (!exists) return error;
+
+      const [failure, names] = await deleteManyFiles({
+        req,
+        fileNames,
+        root,
+        bucketName,
+        path,
       });
 
       if (failure) throw failure;
 
       return {
         __typename: 'FileNameList',
-        names: fileNames,
+        names,
       };
     } catch (err) {
-      return {
-        __typename: 'ServerError',
-        message: `${err}`,
-      };
+      return handleErrorResponse(err as Error);
     }
   },
   deleteDirectory: async (
@@ -167,58 +272,61 @@ export const gqlResolvers = {
     req: RequestBody
   ) => {
     try {
-      const isOwner =
-        args.directoryInput.dirPath ===
-        `${req.body.username}-${req.body.userId}`;
+      let exists: boolean;
+      let error: GqlError | undefined;
 
-      const [authed, error] = resolveAuth(
+      const { path } = args.directoryInput;
+      const root =
+        args.directoryInput.root ?? `${req.body.username}-${req.body.userId}`;
+      const bucketName =
+        args.directoryInput.bucketName || req.body.tenant.bucket.name;
+      const isOwner = root.startsWith(
+        `${req.body.username}-${req.body.userId}`
+      );
+
+      const [authed, authError] = resolveAuth(
         req,
         !isOwner ? 'delete:directory' : undefined
       );
-      if (!authed) return error;
 
-      const [storageError, exists] = await checkBucketExists(
-        args.directoryInput.bucketName || req.body.tenant.bucket.name
-      );
+      if (!authed) return authError;
 
-      if (storageError) throw storageError;
-      if (!exists)
-        return [
-          undefined,
-          false,
-          {
-            __typename: 'StorageNotFound',
-            message: 'The requested bucket could not be found',
-          },
-        ];
+      [exists, error] = await resolveBucket(req, bucketName);
+
+      if (!exists) return error;
+
+      [exists, error] = await resolveOneFile({
+        req,
+        fileName: '', // checking for path existence
+        path: args.directoryInput.path,
+        root,
+        bucketName,
+      });
+
+      if (!exists) return error;
 
       const [failure, done] = await deleteDirectory({
         req,
-        dirPath: args.directoryInput.dirPath,
-        bucketName: args.directoryInput.bucketName || undefined,
+        path,
+        root,
+        bucketName,
       });
 
       if (failure) throw failure;
       if (!done) throw new Error('Something went wrong...');
 
-      const dirName = normalize(args.directoryInput.dirPath)
-        .split('/')
-        .filter(Boolean)
-        .pop()!;
-      const path = normalize(args.directoryInput.dirPath.replace(dirName, ''));
+      const fullPath = formatPath(`${root}/${args.directoryInput.path}`);
+      const dirName = fullPath.split('/').filter(Boolean).pop()!;
+      const dirPath = normalize(fullPath.replace(dirName, ''));
 
       return {
         __typename: 'Directory',
         name: `${dirName}/`,
-        path: normalize(`${path}/`, false),
-        bucketName:
-          args.directoryInput.bucketName || req.body.tenant.bucket.name,
+        path: normalize(`${dirPath}/`, false),
+        bucketName,
       };
     } catch (err) {
-      return {
-        __typename: 'ServerError',
-        message: `${err}`,
-      };
+      return handleErrorResponse(err as Error);
     }
   },
   restoreFileVersion: async (
@@ -226,25 +334,51 @@ export const gqlResolvers = {
     req: RequestBody
   ) => {
     try {
-      const [authed, error] = resolveAuth(
-        req,
-        args.fileInput.rootPath ? 'update:file' : undefined
-      );
-      if (!authed) return error;
+      let exists: boolean;
+      let error: GqlError | undefined;
 
-      if (
-        !(await checkBucketVersioning({
-          bucketName: req.body.tenant.bucket.name,
-        }))
-      )
+      const { fileName, path, versionId } = args.fileInput;
+      const root =
+        args.fileInput.root ?? `${req.body.username}-${req.body.userId}`;
+      const bucketName =
+        args.fileInput.bucketName || req.body.tenant.bucket.name;
+
+      const [authed, authError] = resolveAuth(
+        req,
+        args.fileInput.root !== undefined ? 'update:file' : undefined
+      );
+
+      if (!authed) return authError;
+
+      if (!versionId) {
+        throw new Error('No version id specified!');
+      }
+
+      [exists, error] = await resolveBucket(req, bucketName);
+
+      if (!exists) return error;
+
+      if (!req.body.tenant.bucket.isVersioned) {
         throw new Error('The requested file is not on a versioned storage.');
+      }
+
+      [exists, error] = await resolveOneFile({
+        req,
+        fileName,
+        path,
+        root,
+        bucketName,
+      });
+
+      if (!exists) return error;
 
       const [failure, newId] = await restoreFileVersion({
         req,
-        fileName: args.fileInput.fileName,
-        path: args.fileInput.path,
-        versionId: args.fileInput.versionId!,
-        rootPath: args.fileInput.rootPath || undefined,
+        fileName,
+        root,
+        path,
+        bucketName,
+        versionId,
       });
 
       if (failure) throw failure;
@@ -254,10 +388,51 @@ export const gqlResolvers = {
         id: newId,
       };
     } catch (err) {
+      return handleErrorResponse(err as Error);
+    }
+  },
+  controlVersions: async (
+    args: { versionControlInput: VersionControlInput },
+    req: RequestBody
+  ) => {
+    try {
+      const [authed, error] = resolveAuth(req, 'update:file');
+
+      if (!authed) return error;
+
+      const [exists, err] = await resolveBucket(
+        req,
+        args.versionControlInput.bucketName
+      );
+
+      if (!exists) return err;
+
+      if (!(await isBucketVersioned(args.versionControlInput.bucketName))) {
+        throw new Error('The requested file is not on a versioned storage.');
+      }
+
+      const [failure, done] = await controlVersions({
+        req,
+        bucketName: args.versionControlInput.bucketName,
+        fileName: args.versionControlInput.fileName,
+        root: args.versionControlInput.root,
+        maxNumberOfVersions: args.versionControlInput.maxNumberOfVersions,
+      });
+
+      if (failure) throw failure;
+
+      const message = done
+        ? `Successfully removed last version of ${args.versionControlInput.fileName}.`
+        : `${args.versionControlInput.fileName} hasn't reach its maximum versions quota or doesn't exist.`;
+
       return {
-        __typename: 'ServerError',
-        message: `${err}`,
+        __typename: 'VersionControlSuccess',
+        message,
       };
+    } catch (err) {
+      return handleErrorResponse(err as Error);
     }
   },
 };
+
+export default gqlResolvers;
