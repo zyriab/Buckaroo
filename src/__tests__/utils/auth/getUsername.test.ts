@@ -1,8 +1,12 @@
 import getUsername from '../../../utils/auth/getUsername';
-import fakeToken from '../../../helpers/mockToken.help';
+import mockToken from '../../../helpers/mockToken.help';
 import 'dotenv/config';
 
+beforeAll(() => {
+  process.env.NODE_ENV = 'test';
+});
+
 test('Should return username', () => {
-  const result = getUsername(fakeToken);
+  const result = getUsername(mockToken);
   expect(result).toBe('test-user');
 });

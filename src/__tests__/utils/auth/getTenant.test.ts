@@ -1,6 +1,10 @@
 import getTenant from '../../../utils/auth/getTenant';
-import fakeToken from '../../../helpers/mockToken.help';
+import mockToken from '../../../helpers/mockToken.help';
 import 'dotenv/config';
+
+beforeAll(() => {
+  process.env.NODE_ENV = 'test';
+});
 
 test('Should return decrypted tenant', () => {
   const expectedTenant = {
@@ -11,6 +15,6 @@ test('Should return decrypted tenant', () => {
     },
   };
 
-  const result = getTenant(fakeToken);
+  const result = getTenant(mockToken);
   expect(result).toEqual(expectedTenant);
 });
