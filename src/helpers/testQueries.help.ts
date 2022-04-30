@@ -52,6 +52,9 @@ export const fetchDlUrlQuery = {
         ... on SignedUrl {
           url
         }
+        ... on FileNotFound {
+          message
+        }
         ${errorSpreads}
       }
     }
@@ -92,6 +95,9 @@ export const deleteFileQuery = {
         ... on FileName {
           name
         }
+        ... on FileNotFound {
+          message
+        }
         ${errorSpreads}
       }
     }
@@ -110,6 +116,9 @@ export const deleteManyFileQuery = {
         __typename
         ... on FileNameList {
           names
+        }
+        ... on FileNotFound {
+          message
         }
         ${errorSpreads}
       }
@@ -131,6 +140,9 @@ export const restoreFileVersionQuery = {
       ... on VersionId {
         id
       }
+      ... on FileNotFound {
+          message
+        }
       ${errorSpreads}
     }
   }
@@ -152,6 +164,9 @@ export const deleteDirectoryQuery = {
           name
           path
           bucketName
+        }
+        ... on FileNotFound {
+          message
         }
         ${errorSpreads}
       }
