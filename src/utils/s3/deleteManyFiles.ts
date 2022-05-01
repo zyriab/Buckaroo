@@ -23,6 +23,7 @@ export default async function deleteManyFiles(
     const path = normalize(args.path);
     const fileNames = args.fileNames.map((n) => sanitize(n));
     const fullPath = formatPath(`${root}/${path}/`, { stripTrailing: false });
+    const { isVersioned } = args.req.body.tenant.bucket;
 
     const params = {
       Bucket: args.bucketName,
@@ -34,7 +35,7 @@ export default async function deleteManyFiles(
     let versionIdsMap: [string, string[]][] | undefined;
     let error: Error | undefined;
 
-    if (args.req.body.tenant.bucket.isVersioned && !args.versionIds) {
+    if (isVersioned && !args.versionIds) {
       [error, versionIdsMap] = await getManyFilesVersionsIds({
         req: args.req,
         fileNames,
@@ -53,7 +54,7 @@ export default async function deleteManyFiles(
             VersionId: i,
           });
       }
-    } else if (args.req.body.tenant.bucket.isVersioned && args.versionIds) {
+    } else if (isVersioned && args.versionIds) {
       for (const n of args.fileNames)
         for (const i of args.versionIds!) {
           params.Delete.Objects.push({
