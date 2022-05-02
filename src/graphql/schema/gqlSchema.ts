@@ -124,7 +124,7 @@ input VersionControlInput {
   bucketName: String!
   fileName: String!
   root: String!
-  maxNumberOfVersions: Int!
+  maxVersionsNumber: Int!
 }
 
 union ListBucketResult =
