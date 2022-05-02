@@ -7,12 +7,12 @@ interface InputArgs {
   bucketName: string;
   root: string;
   fileName: string;
-  maxNumberOfVersions: number;
+  maxVersionsNumber: number;
 }
 
 export default async function controlVersions(
   args: InputArgs
-): Promise<[undefined, boolean] | [Error]> {
+): Promise<[undefined, boolean] | [Error, boolean] | [Error]> {
   try {
     const [error, files] = await listBucketContent({
       req: args.req,
@@ -22,28 +22,36 @@ export default async function controlVersions(
 
     if (error) throw error;
 
-    const fileToUpdate = files.filter((f) => f.name === args.fileName);
+    const fileToUpdate = files.find((f) => f.name === args.fileName);
 
     if (
-      fileToUpdate.length === 0 ||
-      fileToUpdate[0].versions!.length < args.maxNumberOfVersions
+      fileToUpdate === undefined ||
+      fileToUpdate.versions!.length <= args.maxVersionsNumber
     ) {
       return [undefined, false];
     }
 
-    const [fail] = await deleteOneFile({
-      req: args.req,
-      fileName: args.fileName,
-      root: args.root,
-      path: fileToUpdate[0].path,
-      versionId:
-        fileToUpdate[0].versions![fileToUpdate[0].versions!.length - 1].id,
-      bucketName: args.bucketName,
-    });
+    const filesToDelete = await Promise.all(
+      fileToUpdate
+        .versions!.sort(
+          (a, b) =>
+            new Date(a.lastModified).getTime() -
+            new Date(b.lastModified).getTime()
+        )
+        .slice(args.maxVersionsNumber)
+        .map((v) =>
+          deleteOneFile({
+            req: args.req,
+            fileName: args.fileName,
+            root: args.root,
+            path: fileToUpdate.path.replace(args.root, ''),
+            versionId: v.id,
+            bucketName: args.bucketName,
+          })
+        )
+    );
 
-    if (fail) throw fail;
-
-    return [undefined, true];
+    return [filesToDelete.find(([e]) => e !== undefined)![0], true];
   } catch (err) {
     return [err as Error];
   }
