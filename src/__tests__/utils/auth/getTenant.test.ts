@@ -8,10 +8,10 @@ beforeAll(() => {
 
 test('Should return decrypted tenant', () => {
   const expectedTenant = {
-    name: 'test-bucket',
+    name: 'foobar',
     bucket: {
       isVersioned: false,
-      name: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
+      name: `test-bucket`,
     },
   };
 

@@ -1,3 +1,4 @@
+import { encrypt } from '../utils/crypto.utils';
 import { DecodedToken } from '../definitions/auth';
 import 'dotenv/config';
 
@@ -15,7 +16,7 @@ const token: DecodedToken = {
   scope: '',
   sub: 'auth0|1234abcd',
   [METADATA_NS]: {
-    tenant: 'U2FsdGVkX1/f7VV9Za2Gs1pRpHAeROx/5I/F58RK88E=',
+    tenant: `${encrypt('foobar')}`,
   },
   [EMAIL_NS]: 'test-user@example.com',
   [USERNAME_NS]: 'test-user',
