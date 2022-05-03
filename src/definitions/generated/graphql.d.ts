@@ -15,9 +15,9 @@ export type Scalars = {
   PostFields: any;
 };
 
-export type DeleteDirectoryResult = Directory | ServerError | StorageNotFound | Unauthenticated | Unauthorized;
+export type DeleteDirectoryResult = Directory | FileNotFound | ServerError | StorageNotFound | Unauthenticated | Unauthorized;
 
-export type DeleteFileResult = FileName | FileNameList | ServerError | StorageNotFound | Unauthenticated | Unauthorized;
+export type DeleteFileResult = FileName | FileNameList | FileNotFound | ServerError | StorageNotFound | Unauthenticated | Unauthorized;
 
 export type Directory = {
   __typename?: 'Directory';
@@ -63,6 +63,11 @@ export type FileName = {
 export type FileNameList = {
   __typename?: 'FileNameList';
   names: Array<Scalars['String']>;
+};
+
+export type FileNotFound = {
+  __typename?: 'FileNotFound';
+  message: Scalars['String'];
 };
 
 export type FilesInput = {
@@ -138,7 +143,7 @@ export type QueriesListBucketContentArgs = {
   listInput: ListInput;
 };
 
-export type RestoreFileResult = ServerError | StorageNotFound | Unauthenticated | Unauthorized | VersionId;
+export type RestoreFileResult = FileNotFound | ServerError | StorageNotFound | Unauthenticated | Unauthorized | VersionId;
 
 export type ServerError = {
   __typename?: 'ServerError';
@@ -157,7 +162,7 @@ export type SignedUrl = {
   url: Scalars['String'];
 };
 
-export type SignedUrlResult = ServerError | SignedPost | SignedUrl | StorageNotFound | Unauthenticated | Unauthorized;
+export type SignedUrlResult = FileNotFound | ServerError | SignedPost | SignedUrl | StorageNotFound | Unauthenticated | Unauthorized;
 
 export type StorageNotFound = {
   __typename?: 'StorageNotFound';
@@ -195,11 +200,11 @@ export type Version = {
 export type VersionControlInput = {
   bucketName: Scalars['String'];
   fileName: Scalars['String'];
-  maxNumberOfVersions: Scalars['Int'];
+  maxVersionsNumber: Scalars['Int'];
   root: Scalars['String'];
 };
 
-export type VersionControlResult = ServerError | StorageNotFound | Unauthenticated | VersionControlSuccess;
+export type VersionControlResult = FileNotFound | ServerError | StorageNotFound | Unauthenticated | VersionControlSuccess;
 
 export type VersionControlSuccess = {
   __typename?: 'VersionControlSuccess';
@@ -281,8 +286,8 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
-  DeleteDirectoryResult: ResolversTypes['Directory'] | ResolversTypes['ServerError'] | ResolversTypes['StorageNotFound'] | ResolversTypes['Unauthenticated'] | ResolversTypes['Unauthorized'];
-  DeleteFileResult: ResolversTypes['FileName'] | ResolversTypes['FileNameList'] | ResolversTypes['ServerError'] | ResolversTypes['StorageNotFound'] | ResolversTypes['Unauthenticated'] | ResolversTypes['Unauthorized'];
+  DeleteDirectoryResult: ResolversTypes['Directory'] | ResolversTypes['FileNotFound'] | ResolversTypes['ServerError'] | ResolversTypes['StorageNotFound'] | ResolversTypes['Unauthenticated'] | ResolversTypes['Unauthorized'];
+  DeleteFileResult: ResolversTypes['FileName'] | ResolversTypes['FileNameList'] | ResolversTypes['FileNotFound'] | ResolversTypes['ServerError'] | ResolversTypes['StorageNotFound'] | ResolversTypes['Unauthenticated'] | ResolversTypes['Unauthorized'];
   Directory: ResolverTypeWrapper<Directory>;
   DirectoryInput: DirectoryInput;
   File: ResolverTypeWrapper<File>;
@@ -290,6 +295,7 @@ export type ResolversTypes = {
   FileList: ResolverTypeWrapper<FileList>;
   FileName: ResolverTypeWrapper<FileName>;
   FileNameList: ResolverTypeWrapper<FileNameList>;
+  FileNotFound: ResolverTypeWrapper<FileNotFound>;
   FilesInput: FilesInput;
   ID: ResolverTypeWrapper<Scalars['ID']>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
@@ -298,11 +304,11 @@ export type ResolversTypes = {
   Mutations: ResolverTypeWrapper<{}>;
   PostFields: ResolverTypeWrapper<Scalars['PostFields']>;
   Queries: ResolverTypeWrapper<{}>;
-  RestoreFileResult: ResolversTypes['ServerError'] | ResolversTypes['StorageNotFound'] | ResolversTypes['Unauthenticated'] | ResolversTypes['Unauthorized'] | ResolversTypes['VersionId'];
+  RestoreFileResult: ResolversTypes['FileNotFound'] | ResolversTypes['ServerError'] | ResolversTypes['StorageNotFound'] | ResolversTypes['Unauthenticated'] | ResolversTypes['Unauthorized'] | ResolversTypes['VersionId'];
   ServerError: ResolverTypeWrapper<ServerError>;
   SignedPost: ResolverTypeWrapper<SignedPost>;
   SignedUrl: ResolverTypeWrapper<SignedUrl>;
-  SignedUrlResult: ResolversTypes['ServerError'] | ResolversTypes['SignedPost'] | ResolversTypes['SignedUrl'] | ResolversTypes['StorageNotFound'] | ResolversTypes['Unauthenticated'] | ResolversTypes['Unauthorized'];
+  SignedUrlResult: ResolversTypes['FileNotFound'] | ResolversTypes['ServerError'] | ResolversTypes['SignedPost'] | ResolversTypes['SignedUrl'] | ResolversTypes['StorageNotFound'] | ResolversTypes['Unauthenticated'] | ResolversTypes['Unauthorized'];
   StorageNotFound: ResolverTypeWrapper<StorageNotFound>;
   String: ResolverTypeWrapper<Scalars['String']>;
   Unauthenticated: ResolverTypeWrapper<Unauthenticated>;
@@ -310,7 +316,7 @@ export type ResolversTypes = {
   UploadInput: UploadInput;
   Version: ResolverTypeWrapper<Version>;
   VersionControlInput: VersionControlInput;
-  VersionControlResult: ResolversTypes['ServerError'] | ResolversTypes['StorageNotFound'] | ResolversTypes['Unauthenticated'] | ResolversTypes['VersionControlSuccess'];
+  VersionControlResult: ResolversTypes['FileNotFound'] | ResolversTypes['ServerError'] | ResolversTypes['StorageNotFound'] | ResolversTypes['Unauthenticated'] | ResolversTypes['VersionControlSuccess'];
   VersionControlSuccess: ResolverTypeWrapper<VersionControlSuccess>;
   VersionId: ResolverTypeWrapper<VersionId>;
 };
@@ -318,8 +324,8 @@ export type ResolversTypes = {
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
   Boolean: Scalars['Boolean'];
-  DeleteDirectoryResult: ResolversParentTypes['Directory'] | ResolversParentTypes['ServerError'] | ResolversParentTypes['StorageNotFound'] | ResolversParentTypes['Unauthenticated'] | ResolversParentTypes['Unauthorized'];
-  DeleteFileResult: ResolversParentTypes['FileName'] | ResolversParentTypes['FileNameList'] | ResolversParentTypes['ServerError'] | ResolversParentTypes['StorageNotFound'] | ResolversParentTypes['Unauthenticated'] | ResolversParentTypes['Unauthorized'];
+  DeleteDirectoryResult: ResolversParentTypes['Directory'] | ResolversParentTypes['FileNotFound'] | ResolversParentTypes['ServerError'] | ResolversParentTypes['StorageNotFound'] | ResolversParentTypes['Unauthenticated'] | ResolversParentTypes['Unauthorized'];
+  DeleteFileResult: ResolversParentTypes['FileName'] | ResolversParentTypes['FileNameList'] | ResolversParentTypes['FileNotFound'] | ResolversParentTypes['ServerError'] | ResolversParentTypes['StorageNotFound'] | ResolversParentTypes['Unauthenticated'] | ResolversParentTypes['Unauthorized'];
   Directory: Directory;
   DirectoryInput: DirectoryInput;
   File: File;
@@ -327,6 +333,7 @@ export type ResolversParentTypes = {
   FileList: FileList;
   FileName: FileName;
   FileNameList: FileNameList;
+  FileNotFound: FileNotFound;
   FilesInput: FilesInput;
   ID: Scalars['ID'];
   Int: Scalars['Int'];
@@ -335,11 +342,11 @@ export type ResolversParentTypes = {
   Mutations: {};
   PostFields: Scalars['PostFields'];
   Queries: {};
-  RestoreFileResult: ResolversParentTypes['ServerError'] | ResolversParentTypes['StorageNotFound'] | ResolversParentTypes['Unauthenticated'] | ResolversParentTypes['Unauthorized'] | ResolversParentTypes['VersionId'];
+  RestoreFileResult: ResolversParentTypes['FileNotFound'] | ResolversParentTypes['ServerError'] | ResolversParentTypes['StorageNotFound'] | ResolversParentTypes['Unauthenticated'] | ResolversParentTypes['Unauthorized'] | ResolversParentTypes['VersionId'];
   ServerError: ServerError;
   SignedPost: SignedPost;
   SignedUrl: SignedUrl;
-  SignedUrlResult: ResolversParentTypes['ServerError'] | ResolversParentTypes['SignedPost'] | ResolversParentTypes['SignedUrl'] | ResolversParentTypes['StorageNotFound'] | ResolversParentTypes['Unauthenticated'] | ResolversParentTypes['Unauthorized'];
+  SignedUrlResult: ResolversParentTypes['FileNotFound'] | ResolversParentTypes['ServerError'] | ResolversParentTypes['SignedPost'] | ResolversParentTypes['SignedUrl'] | ResolversParentTypes['StorageNotFound'] | ResolversParentTypes['Unauthenticated'] | ResolversParentTypes['Unauthorized'];
   StorageNotFound: StorageNotFound;
   String: Scalars['String'];
   Unauthenticated: Unauthenticated;
@@ -347,17 +354,17 @@ export type ResolversParentTypes = {
   UploadInput: UploadInput;
   Version: Version;
   VersionControlInput: VersionControlInput;
-  VersionControlResult: ResolversParentTypes['ServerError'] | ResolversParentTypes['StorageNotFound'] | ResolversParentTypes['Unauthenticated'] | ResolversParentTypes['VersionControlSuccess'];
+  VersionControlResult: ResolversParentTypes['FileNotFound'] | ResolversParentTypes['ServerError'] | ResolversParentTypes['StorageNotFound'] | ResolversParentTypes['Unauthenticated'] | ResolversParentTypes['VersionControlSuccess'];
   VersionControlSuccess: VersionControlSuccess;
   VersionId: VersionId;
 };
 
 export type DeleteDirectoryResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteDirectoryResult'] = ResolversParentTypes['DeleteDirectoryResult']> = {
-  __resolveType: TypeResolveFn<'Directory' | 'ServerError' | 'StorageNotFound' | 'Unauthenticated' | 'Unauthorized', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'Directory' | 'FileNotFound' | 'ServerError' | 'StorageNotFound' | 'Unauthenticated' | 'Unauthorized', ParentType, ContextType>;
 };
 
 export type DeleteFileResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteFileResult'] = ResolversParentTypes['DeleteFileResult']> = {
-  __resolveType: TypeResolveFn<'FileName' | 'FileNameList' | 'ServerError' | 'StorageNotFound' | 'Unauthenticated' | 'Unauthorized', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'FileName' | 'FileNameList' | 'FileNotFound' | 'ServerError' | 'StorageNotFound' | 'Unauthenticated' | 'Unauthorized', ParentType, ContextType>;
 };
 
 export type DirectoryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Directory'] = ResolversParentTypes['Directory']> = {
@@ -392,6 +399,11 @@ export type FileNameListResolvers<ContextType = any, ParentType extends Resolver
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type FileNotFoundResolvers<ContextType = any, ParentType extends ResolversParentTypes['FileNotFound'] = ResolversParentTypes['FileNotFound']> = {
+  message?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type ListBucketResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['ListBucketResult'] = ResolversParentTypes['ListBucketResult']> = {
   __resolveType: TypeResolveFn<'FileList' | 'ServerError' | 'StorageNotFound' | 'Unauthenticated' | 'Unauthorized', ParentType, ContextType>;
 };
@@ -415,7 +427,7 @@ export type QueriesResolvers<ContextType = any, ParentType extends ResolversPare
 };
 
 export type RestoreFileResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['RestoreFileResult'] = ResolversParentTypes['RestoreFileResult']> = {
-  __resolveType: TypeResolveFn<'ServerError' | 'StorageNotFound' | 'Unauthenticated' | 'Unauthorized' | 'VersionId', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'FileNotFound' | 'ServerError' | 'StorageNotFound' | 'Unauthenticated' | 'Unauthorized' | 'VersionId', ParentType, ContextType>;
 };
 
 export type ServerErrorResolvers<ContextType = any, ParentType extends ResolversParentTypes['ServerError'] = ResolversParentTypes['ServerError']> = {
@@ -436,7 +448,7 @@ export type SignedUrlResolvers<ContextType = any, ParentType extends ResolversPa
 };
 
 export type SignedUrlResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['SignedUrlResult'] = ResolversParentTypes['SignedUrlResult']> = {
-  __resolveType: TypeResolveFn<'ServerError' | 'SignedPost' | 'SignedUrl' | 'StorageNotFound' | 'Unauthenticated' | 'Unauthorized', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'FileNotFound' | 'ServerError' | 'SignedPost' | 'SignedUrl' | 'StorageNotFound' | 'Unauthenticated' | 'Unauthorized', ParentType, ContextType>;
 };
 
 export type StorageNotFoundResolvers<ContextType = any, ParentType extends ResolversParentTypes['StorageNotFound'] = ResolversParentTypes['StorageNotFound']> = {
@@ -464,7 +476,7 @@ export type VersionResolvers<ContextType = any, ParentType extends ResolversPare
 };
 
 export type VersionControlResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['VersionControlResult'] = ResolversParentTypes['VersionControlResult']> = {
-  __resolveType: TypeResolveFn<'ServerError' | 'StorageNotFound' | 'Unauthenticated' | 'VersionControlSuccess', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'FileNotFound' | 'ServerError' | 'StorageNotFound' | 'Unauthenticated' | 'VersionControlSuccess', ParentType, ContextType>;
 };
 
 export type VersionControlSuccessResolvers<ContextType = any, ParentType extends ResolversParentTypes['VersionControlSuccess'] = ResolversParentTypes['VersionControlSuccess']> = {
@@ -485,6 +497,7 @@ export type Resolvers<ContextType = any> = {
   FileList?: FileListResolvers<ContextType>;
   FileName?: FileNameResolvers<ContextType>;
   FileNameList?: FileNameListResolvers<ContextType>;
+  FileNotFound?: FileNotFoundResolvers<ContextType>;
   ListBucketResult?: ListBucketResultResolvers<ContextType>;
   Mutations?: MutationsResolvers<ContextType>;
   PostFields?: GraphQLScalarType;

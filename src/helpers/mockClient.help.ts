@@ -69,27 +69,24 @@ export default function s3MockClient() {
         Versions: [],
         $metadata: { httpStatusCode: 200 },
       })
-      .on(ListObjectVersionsCommand, {
-        Bucket: bucketName,
-        Prefix: 'another-user/',
-      })
+      .on(ListObjectVersionsCommand, { Bucket: bucketName })
       .resolves({
         DeleteMarkers: [],
         Versions: [
           {
-            VersionId: 'folderab00000000',
-            Key: 'another-user/',
-            IsLatest: true,
-            Size: 0,
+            VersionId: 'abcdefgh33333333',
+            Key: fileKey,
+            IsLatest: false,
+            Size: 256,
             LastModified: new Date(),
           },
-        ],
-        $metadata: { httpStatusCode: 200 },
-      })
-      .on(ListObjectVersionsCommand, { Bucket: bucketName, Prefix: filePath })
-      .resolves({
-        DeleteMarkers: [],
-        Versions: [
+          {
+            VersionId: 'abcdefgh22222222',
+            Key: fileKey,
+            IsLatest: false,
+            Size: 256,
+            LastModified: new Date(),
+          },
           {
             VersionId: 'abcdefgh11111111',
             Key: fileKey,
@@ -114,6 +111,32 @@ export default function s3MockClient() {
           {
             VersionId: 'folderab12345678',
             Key: filePath,
+            IsLatest: true,
+            Size: 0,
+            LastModified: new Date(),
+          },
+        ],
+        $metadata: { httpStatusCode: 200 },
+      })
+      .on(ListObjectVersionsCommand, {
+        Bucket: bucketName,
+        Prefix: 'translations/',
+      })
+      .resolves({
+        DeleteMarkers: [],
+        Versions: [],
+        $metadata: { httpStatusCode: 200 },
+      })
+      .on(ListObjectVersionsCommand, {
+        Bucket: bucketName,
+        Prefix: 'another-user/',
+      })
+      .resolves({
+        DeleteMarkers: [],
+        Versions: [
+          {
+            VersionId: 'folderab00000000',
+            Key: 'another-user/',
             IsLatest: true,
             Size: 0,
             LastModified: new Date(),

@@ -416,7 +416,7 @@ const gqlResolvers = {
         bucketName: args.versionControlInput.bucketName,
         fileName: args.versionControlInput.fileName,
         root: args.versionControlInput.root,
-        maxNumberOfVersions: args.versionControlInput.maxNumberOfVersions,
+        maxVersionsNumber: args.versionControlInput.maxVersionsNumber,
       });
 
       if (failure) throw failure;

@@ -35,9 +35,9 @@ export default async function deleteOneFile(
       VersionId: isVersioned ? args.versionId : 'null',
     };
 
-    if (!args.req.body.tenant.bucket.isVersioned) {
+    if (!isVersioned) {
       res = await s3Client().send(new DeleteObjectCommand(params));
-    } else if (args.req.body.tenant.bucket.isVersioned && args.versionId) {
+    } else if (isVersioned && args.versionId) {
       res = await s3Client().send(new DeleteObjectCommand(params));
     } else {
       const [error] = await deleteManyFiles({

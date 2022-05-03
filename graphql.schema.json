@@ -34,6 +34,11 @@
           },
           {
             "kind": "OBJECT",
+            "name": "FileNotFound",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
             "name": "ServerError",
             "ofType": null
           },
@@ -71,6 +76,11 @@
           {
             "kind": "OBJECT",
             "name": "FileNameList",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "FileNotFound",
             "ofType": null
           },
           {
@@ -473,6 +483,33 @@
                     "ofType": null
                   }
                 }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "FileNotFound",
+        "description": null,
+        "fields": [
+          {
+            "name": "message",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
               }
             },
             "isDeprecated": false,
@@ -969,6 +1006,11 @@
         "possibleTypes": [
           {
             "kind": "OBJECT",
+            "name": "FileNotFound",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
             "name": "ServerError",
             "ofType": null
           },
@@ -1112,6 +1154,11 @@
         "interfaces": null,
         "enumValues": null,
         "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "FileNotFound",
+            "ofType": null
+          },
           {
             "kind": "OBJECT",
             "name": "ServerError",
@@ -1448,7 +1495,7 @@
             "deprecationReason": null
           },
           {
-            "name": "maxNumberOfVersions",
+            "name": "maxVersionsNumber",
             "description": null,
             "type": {
               "kind": "NON_NULL",
@@ -1493,6 +1540,11 @@
         "interfaces": null,
         "enumValues": null,
         "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "FileNotFound",
+            "ofType": null
+          },
           {
             "kind": "OBJECT",
             "name": "ServerError",
