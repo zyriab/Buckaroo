@@ -24,11 +24,11 @@ if (process.env.TEST_AUTH === 'true')
   ];
 
 const tenant = {
-  name: 'test-bucket',
+  name: 'foobar',
   bucket: {
     exists: true,
     isVersioned: true,
-    name: `${process.env.BUCKET_NAMESPACE}test-bucket-app`,
+    name: `test-bucket`,
   },
 };
 
