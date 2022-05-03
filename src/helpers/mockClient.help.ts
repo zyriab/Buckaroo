@@ -88,6 +88,20 @@ export default function s3MockClient() {
             LastModified: new Date(),
           },
           {
+            VersionId: 'abcdefgh33333333',
+            Key: fileKey,
+            IsLatest: false,
+            Size: 256,
+            LastModified: new Date(),
+          },
+          {
+            VersionId: 'abcdefgh22222222',
+            Key: fileKey,
+            IsLatest: false,
+            Size: 256,
+            LastModified: new Date(),
+          },
+          {
             VersionId: 'abcdefgh11111111',
             Key: fileKey,
             IsLatest: false,
