@@ -1,6 +1,7 @@
-import { DecodedToken } from '../../../definitions/auth';
 import getAppMetadata from '../../../utils/auth/getAppMetadata';
+import { decrypt } from '../../../utils/crypto.utils';
 import mockToken from '../../../helpers/mockToken.help';
+import { DecodedToken } from '../../../definitions/auth';
 import 'dotenv/config';
 
 beforeAll(() => {
@@ -11,5 +12,5 @@ test('Should return App metadata', () => {
   const token: DecodedToken = { ...mockToken };
   const result = getAppMetadata(token);
   expect(result).not.toBeUndefined();
-  expect(result).toEqual({ tenant: process.env.ENCRYPTED_TEST_TENANT });
+  expect(decrypt(`${result?.tenant}`)).toEqual('foobar');
 });
