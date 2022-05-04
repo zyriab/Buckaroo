@@ -27,4 +27,11 @@ jobs:
         env:
           NAMESPACE: ${{ secrets.NAMESPACE }}
           AES_KEY: ${{ secrets.AES_KEY }}
-        run: npm test
+        uses: raulanatol/jest-coverage-comment-action@main
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}'
+      # - name: 'Running tests'
+      #   env:
+      #     NAMESPACE: ${{ secrets.NAMESPACE }}
+      #     AES_KEY: ${{ secrets.AES_KEY }}
+      #   run: npm test
