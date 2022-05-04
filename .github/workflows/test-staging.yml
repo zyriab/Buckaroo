@@ -29,7 +29,7 @@ jobs:
           AES_KEY: ${{ secrets.AES_KEY }}
         uses: raulanatol/jest-coverage-comment-action@main
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}'
+          github-token: ${{ secrets.GH_TOKEN }}'
       # - name: 'Running tests'
       #   env:
       #     NAMESPACE: ${{ secrets.NAMESPACE }}
