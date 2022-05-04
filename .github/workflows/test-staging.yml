@@ -24,14 +24,7 @@ jobs:
       - name: 'Linting code'
         run: npm run lint
       - name: 'Running tests'
-        uses: raulanatol/jest-coverage-comment-action@main
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}'
         env:
           NAMESPACE: ${{ secrets.NAMESPACE }}
           AES_KEY: ${{ secrets.AES_KEY }}
-      # - name: 'Running tests'
-      #   env:
-      #     NAMESPACE: ${{ secrets.NAMESPACE }}
-      #     AES_KEY: ${{ secrets.AES_KEY }}
-      #   run: npm test
+        run: npm test
