@@ -39,4 +39,4 @@ jobs:
       - name: 'Zipping bundled file'
         run: zip -j deploy.zip ./dist/*
       - name: 'Deploying to AWS Lambda'
-        run: aws lambda update-function-code --function-name=buckaroo-production --zip-file=fileb://deploy.zip
+        run: aws lambda update-function-code --function-name=buckaroo --zip-file=fileb://deploy.zip
