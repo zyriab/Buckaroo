@@ -32,7 +32,6 @@ jobs:
       - name: 'Running tests'
         env:
           NAMESPACE: ${{ secrets.NAMESPACE }}
-          ENCRYPTED_TEST_TENANT: ${{ secrets.ENCRYPTED_TEST_TENANT }}
           AES_KEY: ${{ secrets.AES_KEY }}
         run: npm test
       - name: 'Bundling files'
