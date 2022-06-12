@@ -13,18 +13,16 @@ export default async function setReqMetadata(
   next: () => void
 ) {
   try {
-    if (!req.body.isAuth) next();
+    if (!req.body.isAuth) {
+      return next();
+    }
 
+    // TODO: check if token, tenant, etc exists
     const tkn = req.body.token;
     const tenant = getTenant(tkn);
 
     if (!tenant) {
       req.body.isAuth = false;
-      return next();
-    }
-
-    if(req.body.tenant.name === 's3-versioning-control') {
-      req.body.permissions = tkn.permissions;
       return next();
     }
 

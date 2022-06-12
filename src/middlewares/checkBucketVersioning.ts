@@ -13,21 +13,13 @@ export default async function checkBucketVersioning(
       return next();
     }
 
-    if (req.body.tenant.name === 's3-versioning-control') {
-      req.body.tenant.bucket.isVersioned = true;
-      return next();
-    }
-
-    const [error, exists] = await isBucketVersioned(req.body.tenant.bucket.name);
+    const [error, isVersioned] = await isBucketVersioned(
+      req.body.tenant.bucket.name
+    );
 
     if (error) throw error;
 
-    if (!exists) {
-      req.body.tenant.bucket.isVersioned = false;
-      return next();
-    }
-
-    req.body.tenant.bucket.isVersioned = true;
+    req.body.tenant.bucket.isVersioned = isVersioned;
     next();
   } catch (err) {
     return next();
