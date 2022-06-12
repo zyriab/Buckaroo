@@ -2,13 +2,16 @@ import jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
 import { RequestBody, ResponseBody } from '../definitions/root';
 import { AccessToken } from '../definitions/auth';
-import 'dotenv/config';
+import getIssuerUrl from '../utils/auth/getIssuerUrl.utils';
 
-const client = jwksClient({
-  jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`,
-});
+// dirty fix
+let AUTH0_ISSUER = '';
 
 function getKey(header: any, callback: (a: any, key: any) => any) {
+  const client = jwksClient({
+    jwksUri: `${AUTH0_ISSUER}.well-known/jwks.json`,
+  });
+
   client.getSigningKey(header.kid, (e, key: any) => {
     const signingKey: jwksClient.SigningKey = key.publicKey || key.rsaPublicKey;
     callback(null, signingKey);
@@ -35,6 +38,8 @@ export default async function checkAuth(
       return next();
     }
 
+    AUTH0_ISSUER = `https://${getIssuerUrl(authHeader.split(' ')[2])}/`;
+
     try {
       decodedToken = await new Promise((resolve) => {
         jwt.verify(
@@ -42,7 +47,7 @@ export default async function checkAuth(
           getKey,
           {
             audience: process.env.AUTH0_AUDIENCE,
-            issuer: `https://${process.env.AUTH0_DOMAIN}/`,
+            issuer: AUTH0_ISSUER,
             algorithms: ['RS256'],
           },
           (error: any, decoded: any) => {
