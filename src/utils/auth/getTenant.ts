@@ -10,6 +10,9 @@ export default function getTenant(tkn: DecodedToken): Tenant | undefined {
 
   if (!name) return undefined;
 
+  name = name.replace('-dev', '');
+  name = name.replace('-staging', '');
+
   switch (process.env.NODE_ENV) {
     case 'development':
       bucketName = `${
