@@ -4,6 +4,8 @@
   "description": "A miniservice to interact with S3 buckets",
   "private": true,
   "main": "index.ts",
+  "author": "Arthur Wallendorff - Metaoist Dsgn",
+  "license": "MIT",
   "scripts": {
     "dev": "ts-node-dev --respawn --pretty --transpile-only src/server.ts",
     "build": "ncc build src/index.ts",
@@ -12,8 +14,6 @@
     "gqlgen": "graphql-codegen --config codegen.yml",
     "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx"
   },
-  "author": "Arthur Wallendorff - Metaoist Dsgn",
-  "license": "MIT",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.56.0",
     "@aws-sdk/s3-presigned-post": "^3.56.0",

@@ -110,3 +110,4 @@ dist
 .tern-port
 *.pseudo
 src/__tests__/tmp.test.ts
+.dccache
