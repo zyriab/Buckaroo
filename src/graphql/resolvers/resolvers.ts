@@ -400,30 +400,32 @@ const gqlResolvers = {
 
       if (!authed) return error;
 
-      const [exists, err] = await resolveBucket(
-        req,
-        args.versionControlInput.bucketName
-      );
+      const message = `[DEPRECATED] This query is not supported anymore. Connect a Lambda function to your bucket to regulate versions. If you want to gain some time, I've written one. See: [GH URL]`; // TODO: add github repo URL to s3-versioning-control webhook
 
-      if (!exists) return err;
+      // const [exists, err] = await resolveBucket(
+      //   req,
+      //   args.versionControlInput.bucketName
+      // );
 
-      if (!(await isBucketVersioned(args.versionControlInput.bucketName))) {
-        throw new Error('The requested file is not on a versioned storage.');
-      }
+      // if (!exists) return err;
 
-      const [failure, done] = await controlVersions({
-        req,
-        bucketName: args.versionControlInput.bucketName,
-        fileName: args.versionControlInput.fileName,
-        root: args.versionControlInput.root,
-        maxVersionsNumber: args.versionControlInput.maxVersionsNumber,
-      });
+      // if (!(await isBucketVersioned(args.versionControlInput.bucketName))) {
+      //   throw new Error('The requested file is not on a versioned storage.');
+      // }
 
-      if (failure) throw failure;
+      // const [failure, done] = await controlVersions({
+      //   req,
+      //   bucketName: args.versionControlInput.bucketName,
+      //   fileName: args.versionControlInput.fileName,
+      //   root: args.versionControlInput.root,
+      //   maxVersionsNumber: args.versionControlInput.maxVersionsNumber,
+      // });
 
-      const message = done
-        ? `Successfully removed last version of ${args.versionControlInput.fileName}.`
-        : `${args.versionControlInput.fileName} hasn't reach its maximum versions quota or doesn't exist.`;
+      // if (failure) throw failure;
+
+      // const message = done
+      //   ? `Successfully removed last version of ${args.versionControlInput.fileName}.`
+      //   : `${args.versionControlInput.fileName} hasn't reach its maximum versions quota or doesn't exist.`;
 
       return {
         __typename: 'VersionControlSuccess',
