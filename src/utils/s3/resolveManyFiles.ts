@@ -1,9 +1,7 @@
-import { RequestBody } from '../../definitions/root';
 import { GqlError } from '../../definitions/types';
 import isFileExisting from './isFileExisting';
 
-interface InputArgs {
-  req: RequestBody;
+interface ResolveManyFilesArgs {
   fileNames: string[];
   root: string;
   path: string;
@@ -11,7 +9,7 @@ interface InputArgs {
 }
 
 export default async function resolveManyFiles(
-  args: InputArgs
+  args: ResolveManyFilesArgs
 ): Promise<[boolean, undefined] | [boolean, GqlError]> {
   const checkedFiles = await Promise.all(
     args.fileNames.map((fileName) =>

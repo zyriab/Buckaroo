@@ -3,19 +3,17 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import sanitize from 'sanitize-filename';
 import normalize from 'normalize-path';
 import s3Client from './s3Client';
-import { RequestBody } from '../../definitions/root';
 
-interface InputArgs {
-  req: RequestBody;
+interface GetDownloadUrlArgs {
   fileName: string;
   root: string;
   path: string;
   bucketName: string;
-  versionId?: string;
+  versionId?: string; // TODO: see about downloading given version?
 }
 
 export default async function getDownloadUrl(
-  args: InputArgs
+  args: GetDownloadUrlArgs
 ): Promise<[undefined, string] | [Error]> {
   try {
     const client = s3Client();

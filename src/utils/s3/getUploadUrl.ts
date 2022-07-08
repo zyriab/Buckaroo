@@ -8,11 +8,9 @@ import normalize from 'normalize-path';
 import formatPath from '../tools/formatPath.utils';
 import getFileSizeRange from '../tools/getFileSizeRange.utils';
 import s3Client from './s3Client';
-import { RequestBody } from '../../definitions/root';
 import { FileType } from '../../definitions/types';
 
-interface InputArgs {
-  req: RequestBody;
+interface GetUploadUrlArgs {
   fileName: string;
   fileType: FileType;
   root: string;
@@ -21,7 +19,7 @@ interface InputArgs {
 }
 
 export default async function getUploadUrl(
-  args: InputArgs
+  args: GetUploadUrlArgs
 ): Promise<[undefined, PresignedPost] | [Error]> {
   try {
     const fileName = sanitize(args.fileName);

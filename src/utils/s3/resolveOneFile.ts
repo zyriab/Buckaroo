@@ -1,9 +1,7 @@
-import { RequestBody } from '../../definitions/root';
 import { GqlError } from '../../definitions/types';
 import isFileExisting from './isFileExisting';
 
-interface InputArgs {
-  req: RequestBody;
+interface ResolveOneFileArgs {
   fileName: string;
   root: string;
   path: string;
@@ -11,7 +9,7 @@ interface InputArgs {
 }
 
 export default async function resolveOneFile(
-  args: InputArgs
+  args: ResolveOneFileArgs
 ): Promise<[boolean, undefined] | [boolean, GqlError]> {
   const [fErr, fExists] = await isFileExisting(args);
 
