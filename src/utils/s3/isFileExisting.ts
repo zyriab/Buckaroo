@@ -4,7 +4,7 @@ import normalize from 'normalize-path';
 import formatPath from '../tools/formatPath.utils';
 import s3Client from './s3Client';
 
-interface InputArgs {
+interface IsFileExistingArgs {
   fileName: string;
   root: string;
   path: string;
@@ -12,7 +12,7 @@ interface InputArgs {
 }
 
 export default async function isFileExisting(
-  args: InputArgs
+  args: IsFileExistingArgs
 ): Promise<[undefined, boolean] | [Error]> {
   try {
     const fileName = sanitize(args.fileName);

@@ -6,7 +6,7 @@ import formatPath from '../tools/formatPath.utils';
 import s3Client from './s3Client';
 import { RequestBody } from '../../definitions/root';
 
-interface InputArgs {
+interface DeleteManyFilesArgs {
   req: RequestBody;
   fileNames: string[];
   root: string;
@@ -16,7 +16,7 @@ interface InputArgs {
 }
 
 export default async function deleteManyFiles(
-  args: InputArgs
+  args: DeleteManyFilesArgs
 ): Promise<[undefined, string[]] | [Error]> {
   try {
     const root = normalize(args.root);

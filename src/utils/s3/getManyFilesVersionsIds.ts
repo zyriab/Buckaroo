@@ -3,7 +3,7 @@ import listBucketContent from './listBucketContent';
 import { RequestBody } from '../../definitions/root';
 import { DeleteMarker } from '../../definitions/s3';
 
-interface InputArgs {
+interface GetManyFilesVersionsIdsArgs {
   req: RequestBody;
   fileNames: string[];
   root: string;
@@ -13,7 +13,7 @@ interface InputArgs {
 }
 
 export default async function getManyFilesVersionsIds(
-  args: InputArgs
+  args: GetManyFilesVersionsIdsArgs
 ): Promise<[undefined, [string, string[]][]] | [Error]> {
   try {
     const data: [undefined, [string, string[]][]] = [undefined, []];
