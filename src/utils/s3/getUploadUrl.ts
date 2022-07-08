@@ -40,7 +40,7 @@ export default async function getUploadUrl(
     const presignedPost = await createPresignedPost(s3Client(), params);
 
     return [undefined, presignedPost];
-  } catch (err: any) {
+  } catch (err) {
     return [err as Error];
   }
 }
