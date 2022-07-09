@@ -8,7 +8,9 @@ import {
   DeleteObjectsCommand,
   CopyObjectCommand,
   ListObjectVersionsCommand,
+  GetObjectCommand,
 } from '@aws-sdk/client-s3';
+import { Readable } from 'stream';
 
 export default function s3MockClient() {
   const client = mockClient(S3Client);
@@ -157,6 +159,10 @@ export default function s3MockClient() {
           },
         ],
         $metadata: { httpStatusCode: 200 },
+      })
+      .on(GetObjectCommand)
+      .resolves({
+        Body: Readable.from('test123'),
       });
   };
 
