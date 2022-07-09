@@ -1,6 +1,7 @@
 import getDownloadUrl from './s3/getDownloadUrl';
 import getUploadUrl from './s3/getUploadUrl';
 import listBucketContent from './s3/listBucketContent';
+import getTextFileContent from './s3/getTextFileContent';
 import deleteOneFile from './s3/deleteOneFile';
 import deleteManyFiles from './s3/deleteManyFiles';
 import deleteDirectory from './s3/deleteDirectory';
@@ -19,6 +20,7 @@ import s3Client from './s3/s3Client';
 export { getDownloadUrl };
 export { getUploadUrl };
 export { listBucketContent };
+export { getTextFileContent };
 export { deleteOneFile };
 export { deleteManyFiles };
 export { deleteDirectory };
