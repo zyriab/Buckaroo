@@ -50,7 +50,7 @@ const gqlResolvers = {
 
       if (!authed) return authError;
 
-      const [exists, error] = await resolveBucket(req, bucketName);
+      const [exists, error] = await resolveBucket(bucketName);
 
       if (!exists) return error;
 
@@ -89,12 +89,11 @@ const gqlResolvers = {
 
       if (!authed) return authError;
 
-      const [exists, error] = await resolveBucket(req, bucketName);
+      const [exists, error] = await resolveBucket(bucketName);
 
       if (!exists) return error;
 
       const [failure, signedPost] = await getUploadUrl({
-        req,
         fileName,
         fileType: <FileType>fileType,
         root,
@@ -131,12 +130,11 @@ const gqlResolvers = {
 
       if (!authed) return authError;
 
-      [exists, error] = await resolveBucket(req, bucketName);
+      [exists, error] = await resolveBucket(bucketName);
 
       if (!exists) return error;
 
       [exists, error] = await resolveOneFile({
-        req,
         fileName,
         root,
         path,
@@ -146,7 +144,6 @@ const gqlResolvers = {
       if (!exists) return error;
 
       const [failure, url] = await getDownloadUrl({
-        req,
         fileName,
         root,
         path,
@@ -182,12 +179,11 @@ const gqlResolvers = {
 
       if (!authed) return authError;
 
-      [exists, error] = await resolveBucket(req, bucketName);
+      [exists, error] = await resolveBucket(bucketName);
 
       if (!exists) return error;
 
       [exists, error] = await resolveOneFile({
-        req,
         fileName,
         root,
         path,
@@ -235,12 +231,11 @@ const gqlResolvers = {
 
       if (!authed) return authError;
 
-      [exists, error] = await resolveBucket(req, bucketName);
+      [exists, error] = await resolveBucket(bucketName);
 
       if (!exists) return error;
 
       [exists, error] = await resolveManyFiles({
-        req,
         fileNames,
         root,
         path,
@@ -291,12 +286,11 @@ const gqlResolvers = {
 
       if (!authed) return authError;
 
-      [exists, error] = await resolveBucket(req, bucketName);
+      [exists, error] = await resolveBucket(bucketName);
 
       if (!exists) return error;
 
       [exists, error] = await resolveOneFile({
-        req,
         fileName: '', // checking for path existence
         path: args.directoryInput.path,
         root,
@@ -354,7 +348,7 @@ const gqlResolvers = {
         throw new Error('No version id specified!');
       }
 
-      [exists, error] = await resolveBucket(req, bucketName);
+      [exists, error] = await resolveBucket(bucketName);
 
       if (!exists) return error;
 
@@ -363,7 +357,6 @@ const gqlResolvers = {
       }
 
       [exists, error] = await resolveOneFile({
-        req,
         fileName,
         path,
         root,
