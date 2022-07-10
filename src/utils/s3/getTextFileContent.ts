@@ -5,7 +5,6 @@ import sanitize from 'sanitize-filename';
 import normalize from 'normalize-path';
 import formatPath from '../tools/formatPath.utils';
 import s3Client from './s3Client';
-import 'dotenv/config';
 
 interface GetTextFileContentArgs {
   fileName: string;
@@ -33,9 +32,12 @@ export default async function getTextFileContent(
       })
     );
 
-    content = await getStream(res.Body as IncomingMessage);
+    if (res.ContentType?.includes('text')) {
+      content = await getStream(res.Body as IncomingMessage);
+      return [undefined, content];
+    }
 
-    return [undefined, content];
+    throw new Error(`${fileName} is not of type "text/*"`);
   } catch (err) {
     return [err as Error];
   }
