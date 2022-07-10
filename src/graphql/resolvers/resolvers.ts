@@ -22,6 +22,7 @@ import {
   resolveBucket,
   resolveOneFile,
   resolveManyFiles,
+  getTextFileContent,
 } from '../../utils/s3.utils';
 import { formatPath, handleErrorResponse } from '../../utils/tools.utils';
 import { resolveAuth } from '../../utils/auth.utils';
@@ -101,7 +102,7 @@ const gqlResolvers = {
         bucketName,
       });
 
-      if (failure !== undefined) throw failure;
+      if (failure) throw failure;
 
       return {
         __typename: 'SignedPost',
@@ -156,6 +157,48 @@ const gqlResolvers = {
       return {
         __typename: 'SignedUrl',
         url,
+      };
+    } catch (err) {
+      return handleErrorResponse(err as Error);
+    }
+  },
+  getTextFileContent: async (
+    args: { fileInput: FileInput },
+    req: RequestBody
+  ) => {
+    try {
+      const { fileName, path, versionId } = args.fileInput;
+      const root =
+        args.fileInput.root ?? `${req.body.username}-${req.body.userId}`;
+      const bucketName =
+        args.fileInput.bucketName || req.body.tenant.bucket.name;
+
+      const [authed, authError] = resolveAuth(
+        req,
+        args.fileInput.root !== undefined ? 'read:file' : undefined
+      );
+
+      if (!authed) return authError;
+
+      const [exists, error] = await resolveBucket(bucketName);
+
+      if (!exists) return error;
+
+      // TODO: check if requested file is TXT
+
+      const [failure, content] = await getTextFileContent({
+        fileName,
+        bucketName,
+        path,
+        root,
+        versionId: <string | undefined>versionId,
+      });
+
+      if (failure) throw failure;
+
+      return {
+        __typename: 'TextFileContent',
+        content,
       };
     } catch (err) {
       return handleErrorResponse(err as Error);
