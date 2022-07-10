@@ -87,6 +87,29 @@ export const fetchUpUrlQuery = {
   },
 };
 
+export const getTextFileContentQuery = {
+  query: `
+    query GetTextFileContent($fileName: String!, $path: String!, $root: String, $versionId: String) {
+      getTextFileContent(fileInput: {fileName: $fileName, path: $path, root: $root, versionId: $versionId}) {
+        __typename
+        ... on TextFileContent {
+          content
+        }
+        ... on FileNotFound {
+          message
+        }
+        ${errorSpreads}
+      }
+    }
+  `,
+  variables: <FileInput>{
+    fileName: '',
+    path: '',
+    versionId: '',
+    root: undefined,
+  },
+};
+
 export const deleteFileQuery = {
   query: `
     mutation DeleteOneFile($fileName: String!, $path: String!, $root: String) {
@@ -111,7 +134,7 @@ export const deleteFileQuery = {
 
 export const deleteManyFileQuery = {
   query: `
-    mutation deleteManyFiles($fileNames: [String!]!, $path: String!, $versionIds: [String!], $root: String) {
+    mutation DeleteManyFiles($fileNames: [String!]!, $path: String!, $versionIds: [String!], $root: String) {
       deleteManyFiles(filesInput: { fileNames: $fileNames, path: $path, versionIds: $versionIds, root: $root }) {
         __typename
         ... on FileNameList {
@@ -207,5 +230,5 @@ interface UploadInput {
 interface DirectoryInput {
   path: string;
   root?: string;
-  bucketName?: string
+  bucketName?: string;
 }
