@@ -1,4 +1,4 @@
-export type Permission = 'read:bucket' | 'delete:directory' | 'create:file' | 'update:file' | 'delete:file'
+export type Permission = 'read:bucket' | 'delete:directory' | 'create:file' | 'update:file' | 'delete:file' | 'read:file'
 
 export interface AccessToken {
   decoded?: DecodedToken;
