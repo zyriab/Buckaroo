@@ -9,6 +9,8 @@ import 'dotenv/config';
 const request = supertest(app);
 
 const fileName = 'example.txt';
+const path = 'translations';
+const versionId = 'abcd';
 const s3MockClient = client();
 
 beforeAll(async () => {
@@ -25,6 +27,9 @@ afterAll(() => {
 test('Should get specified file content', (done) => {
   const query = getTextFileContentQuery;
   query.variables.fileName = fileName;
+  query.variables.path = path;
+  query.variables.root = undefined;
+  query.variables.versionId = undefined;
 
   request
     .post('/gql')
@@ -39,7 +44,56 @@ test('Should get specified file content', (done) => {
       expect(res.body.data.getTextFileContent.__typename).toBe(
         'TextFileContent'
       );
-      expect(res.body.data.getTextFileContent.content).toBe('test123');
+      expect(res.body.data.getTextFileContent.content).toBe('Latest');
+      done();
+    });
+});
+
+test('Should get specified file version content', (done) => {
+  const query = getTextFileContentQuery;
+  query.variables.fileName = fileName;
+  query.variables.path = path;
+  query.variables.root = undefined;
+  query.variables.versionId = versionId;
+
+  request
+    .post('/gql')
+    .send(query)
+    .set('Accept', 'application/json')
+    .expect('Content-Type', /json/)
+    .expect(200)
+    .end((err: any, res: any) => {
+      if (err) return done(err);
+      expect(res.body).toBeInstanceOf(Object);
+      expect(res.body.data.getTextFileContent).not.toBeUndefined();
+      expect(res.body.data.getTextFileContent.__typename).toBe(
+        'TextFileContent'
+      );
+      expect(res.body.data.getTextFileContent.content).toBe('Older');
+      done();
+    });
+});
+
+test('Should be blocked when trying to read a file (Unauthorized)', (done) => {
+  const query = getTextFileContentQuery;
+  query.variables.fileName = fileName;
+  query.variables.path = path;
+  query.variables.root = 'other-user-1234abcd';
+  query.variables.versionId = undefined;
+
+  process.env.TEST_AUTH = 'false';
+
+  request
+    .post('/gql')
+    .send(query)
+    .set('Accept', 'application/json')
+    .expect('Content-Type', /json/)
+    .expect(200)
+    .end((err: any, res: any) => {
+      if (err) return done(err);
+      expect(res.body).toBeInstanceOf(Object);
+      expect(res.body.data.getTextFileContent).not.toBeUndefined();
+      expect(res.body.data.getTextFileContent.__typename).toBe('Unauthorized');
       done();
     });
 });
