@@ -172,6 +172,7 @@ export default function s3MockClient() {
       .resolves({
         Body: Readable.from('Latest'),
         $metadata: { httpStatusCode: 200 },
+        ContentType: 'text/csv',
       })
       .on(GetObjectCommand, {
         Bucket: bucketName,
@@ -181,6 +182,11 @@ export default function s3MockClient() {
       .resolves({
         Body: Readable.from('Older'),
         $metadata: { httpStatusCode: 200 },
+        ContentType: 'text/csv',
+      })
+      .on(GetObjectCommand, { Key: `${filePath}test.png` })
+      .resolves({
+        ContentType: 'image/png',
       });
   };
 
