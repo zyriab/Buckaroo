@@ -12,6 +12,7 @@ interface GetTextFileContentArgs {
   root: string;
   path: string;
   bucketName: string;
+  versionId?: string;
 }
 
 export default async function getTextFileContent(
@@ -28,6 +29,7 @@ export default async function getTextFileContent(
       new GetObjectCommand({
         Bucket: args.bucketName,
         Key: `${fullPath}${fileName}`,
+        VersionId: args.versionId,
       })
     );
 
