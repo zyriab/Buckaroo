@@ -160,9 +160,27 @@ export default function s3MockClient() {
         ],
         $metadata: { httpStatusCode: 200 },
       })
+
+      /* getTextFileContent */
       .on(GetObjectCommand)
+      .rejects({ $metadata: { httpStatusCode: 404 } })
+      .on(GetObjectCommand, {
+        Bucket: bucketName,
+        Key: fileKey,
+        VersionId: undefined,
+      })
       .resolves({
-        Body: Readable.from('test123'),
+        Body: Readable.from('Latest'),
+        $metadata: { httpStatusCode: 200 },
+      })
+      .on(GetObjectCommand, {
+        Bucket: bucketName,
+        Key: fileKey,
+        VersionId: 'abcd',
+      })
+      .resolves({
+        Body: Readable.from('Older'),
+        $metadata: { httpStatusCode: 200 },
       });
   };
 
