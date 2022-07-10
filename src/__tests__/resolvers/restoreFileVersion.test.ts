@@ -1,6 +1,5 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable consistent-return */
-/* eslint-disable @typescript-eslint/no-shadow */
 import supertest from 'supertest';
 import app from '../../app';
 import getOneFileVersionsIds from '../../utils/s3/getOneFileVersionsIds';
