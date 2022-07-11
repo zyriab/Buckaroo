@@ -9,7 +9,7 @@ import formatPath from '../tools/formatPath.utils';
 import deleteManyFiles from './deleteManyFiles';
 import { RequestBody } from '../../definitions/root';
 
-interface InputArgs {
+interface DeleteOneFileArgs {
   req: RequestBody;
   fileName: string;
   root: string;
@@ -19,7 +19,7 @@ interface InputArgs {
 }
 
 export default async function deleteOneFile(
-  args: InputArgs
+  args: DeleteOneFileArgs
 ): Promise<[undefined, string] | [Error]> {
   try {
     let res: DeleteObjectCommandOutput | undefined;

@@ -8,7 +8,9 @@ import {
   DeleteObjectsCommand,
   CopyObjectCommand,
   ListObjectVersionsCommand,
+  GetObjectCommand,
 } from '@aws-sdk/client-s3';
+import { Readable } from 'stream';
 
 export default function s3MockClient() {
   const client = mockClient(S3Client);
@@ -157,6 +159,34 @@ export default function s3MockClient() {
           },
         ],
         $metadata: { httpStatusCode: 200 },
+      })
+
+      /* getTextFileContent */
+      .on(GetObjectCommand)
+      .rejects({ $metadata: { httpStatusCode: 404 } })
+      .on(GetObjectCommand, {
+        Bucket: bucketName,
+        Key: fileKey,
+        VersionId: undefined,
+      })
+      .resolves({
+        Body: Readable.from('Latest'),
+        $metadata: { httpStatusCode: 200 },
+        ContentType: 'text/csv',
+      })
+      .on(GetObjectCommand, {
+        Bucket: bucketName,
+        Key: fileKey,
+        VersionId: 'abcd',
+      })
+      .resolves({
+        Body: Readable.from('Older'),
+        $metadata: { httpStatusCode: 200 },
+        ContentType: 'text/csv',
+      })
+      .on(GetObjectCommand, { Key: `${filePath}test.png` })
+      .resolves({
+        ContentType: 'image/png',
       });
   };
 

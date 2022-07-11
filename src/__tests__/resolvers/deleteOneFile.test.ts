@@ -1,6 +1,5 @@
 /* eslint-disable consistent-return */
 /* eslint-disable no-underscore-dangle */
-/* eslint-disable @typescript-eslint/no-shadow */
 import supertest from 'supertest';
 import app from '../../app';
 import client from '../../helpers/mockClient.help';

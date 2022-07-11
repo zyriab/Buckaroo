@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable consistent-return */
-/* eslint-disable @typescript-eslint/no-shadow */
 import supertest from 'supertest';
 import app from '../../app';
 import { listQuery } from '../../helpers/testQueries.help';

@@ -57,12 +57,21 @@ type Directory {
   bucketName: String
 }
 
+type TextFileContent {
+  content: String!
+}
+
+"Deprecated"
 type VersionControlSuccess {
   message: String!
 }
 
 "ERROR TYPES"
 type Unauthenticated {
+  message: String!
+}
+
+type Unauthorized {
   message: String!
 }
 
@@ -74,14 +83,15 @@ type FileNotFound {
   message: String!
 }
 
+type WrongFileType {
+  message: String!
+}
+
 type ServerError {
   message: String!
   stack: String
 }
 
-type Unauthorized {
-  message: String!
-}
 
 "INPUT TYPES"
 input ListInput {
@@ -143,6 +153,15 @@ union SignedUrlResult =
   | FileNotFound
   | ServerError
 
+union TextFileContentResult =
+    TextFileContent
+  | Unauthenticated
+  | Unauthorized
+  | StorageNotFound
+  | FileNotFound
+  | WrongFileType
+  | ServerError
+
 union DeleteFileResult =
     FileName
   | FileNameList
@@ -179,6 +198,7 @@ type Queries {
   listBucketContent(listInput: ListInput!): ListBucketResult!
   getUploadUrl(uploadInput: UploadInput!): SignedUrlResult!
   getDownloadUrl(fileInput: FileInput!): SignedUrlResult!
+  getTextFileContent(fileInput: FileInput!): TextFileContentResult
 }
 
 type Mutations {

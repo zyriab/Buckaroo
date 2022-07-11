@@ -5,14 +5,11 @@ import {
 } from '@aws-sdk/s3-presigned-post';
 import sanitize from 'sanitize-filename';
 import normalize from 'normalize-path';
-import formatPath from '../tools/formatPath.utils';
-import getFileSizeRange from '../tools/getFileSizeRange.utils';
 import s3Client from './s3Client';
-import { RequestBody } from '../../definitions/root';
+import { getFileExtension, getFileSizeRange, formatPath } from '../tools.utils';
 import { FileType } from '../../definitions/types';
 
-interface InputArgs {
-  req: RequestBody;
+interface GetUploadUrlArgs {
   fileName: string;
   fileType: FileType;
   root: string;
@@ -21,26 +18,32 @@ interface InputArgs {
 }
 
 export default async function getUploadUrl(
-  args: InputArgs
+  args: GetUploadUrlArgs
 ): Promise<[undefined, PresignedPost] | [Error]> {
   try {
     const fileName = sanitize(args.fileName);
     const root = normalize(args.root);
     const path = normalize(args.path);
     const fullPath = formatPath(`${root}/${path}/`, { stripTrailing: false });
-    const expirationTime = 60 * 0.5;
+    const expirationTime = 30; // seconds before the presigned post expires. 3600 by default.
 
     const params: PresignedPostOptions = {
       Bucket: args.bucketName,
       Key: `${fullPath}${fileName}`,
       Expires: expirationTime,
-      Conditions: [getFileSizeRange(args.fileType)],
+      Conditions: [
+        getFileSizeRange(args.fileType),
+        ['starts-with', '$key', fullPath],
+      ],
+      Fields: {
+        'Content-Type': `${args.fileType}/${getFileExtension(fileName)}`,
+      },
     };
 
     const presignedPost = await createPresignedPost(s3Client(), params);
 
     return [undefined, presignedPost];
-  } catch (err: any) {
+  } catch (err) {
     return [err as Error];
   }
 }

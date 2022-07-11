@@ -7,7 +7,7 @@ import { RequestBody } from '../../definitions/root';
 import { DeleteMarker, Directory } from '../../definitions/s3';
 import deleteOneFile from './deleteOneFile';
 
-interface InputArgs {
+interface DeleteDirectoryArgs {
   req: RequestBody;
   path: string;
   root: string;
@@ -15,7 +15,7 @@ interface InputArgs {
 }
 
 export default async function deleteDirectory(
-  args: InputArgs
+  args: DeleteDirectoryArgs
 ): Promise<[undefined, boolean] | [Error]> {
   try {
     const path = normalize(args.path);

@@ -8,7 +8,7 @@ import { RequestBody } from '../../definitions/root';
 import { DeleteMarker, Directory } from '../../definitions/s3';
 import isDirectory from '../tools/isDirectory.utils';
 
-interface InputArgs {
+interface ListBucketContentArgs {
   req: RequestBody;
   bucketName: string;
   root: string;
@@ -18,7 +18,7 @@ interface InputArgs {
 }
 
 export default async function listBucketContent(
-  args: InputArgs
+  args: ListBucketContentArgs
 ): Promise<
   | [undefined, File[]]
   | [undefined, File[], DeleteMarker[]]

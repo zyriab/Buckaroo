@@ -6,7 +6,7 @@ import s3Client from './s3Client';
 import deleteOneFile from './deleteOneFile';
 import { RequestBody } from '../../definitions/root';
 
-interface InputArgs {
+interface RestoreFileVersionArgs {
   req: RequestBody;
   fileName: string;
   root: string;
@@ -16,7 +16,7 @@ interface InputArgs {
 }
 
 export default async function restoreFileVersion(
-  args: InputArgs
+  args: RestoreFileVersionArgs
 ): Promise<[undefined, string] | [Error]> {
   try {
     const root = normalize(args.root);
