@@ -61,11 +61,6 @@ type TextFileContent {
   content: String!
 }
 
-"Deprecated"
-type VersionControlSuccess {
-  message: String!
-}
-
 "ERROR TYPES"
 type Unauthenticated {
   message: String!
@@ -80,10 +75,6 @@ type StorageNotFound {
 }
 
 type FileNotFound {
-  message: String!
-}
-
-type WrongFileType {
   message: String!
 }
 
@@ -130,13 +121,6 @@ input DirectoryInput {
   bucketName: String
 }
 
-input VersionControlInput {
-  bucketName: String!
-  fileName: String!
-  root: String!
-  maxVersionsNumber: Int!
-}
-
 union ListBucketResult =
     FileList
   | Unauthenticated
@@ -159,7 +143,6 @@ union TextFileContentResult =
   | Unauthorized
   | StorageNotFound
   | FileNotFound
-  | WrongFileType
   | ServerError
 
 union DeleteFileResult =
@@ -187,18 +170,11 @@ union RestoreFileResult =
   | FileNotFound
   | ServerError
 
-union VersionControlResult =
-    VersionControlSuccess
-  | Unauthenticated
-  | StorageNotFound
-  | FileNotFound
-  | ServerError
-
 type Queries {
   listBucketContent(listInput: ListInput!): ListBucketResult!
   getUploadUrl(uploadInput: UploadInput!): SignedUrlResult!
   getDownloadUrl(fileInput: FileInput!): SignedUrlResult!
-  getTextFileContent(fileInput: FileInput!): TextFileContentResult
+  getTextFileContent(fileInput: FileInput!): TextFileContentResult!
 }
 
 type Mutations {
@@ -206,7 +182,6 @@ type Mutations {
   deleteManyFiles(filesInput: FilesInput!): DeleteFileResult
   deleteDirectory(directoryInput: DirectoryInput): DeleteDirectoryResult
   restoreFileVersion(fileInput: FileInput!): RestoreFileResult
-  controlVersions(versionControlInput: VersionControlInput!): VersionControlResult
 }
 schema {
   query: Queries
