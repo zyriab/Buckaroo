@@ -89,16 +89,10 @@ export type ListInput = {
 
 export type Mutations = {
   __typename?: 'Mutations';
-  controlVersions?: Maybe<VersionControlResult>;
   deleteDirectory?: Maybe<DeleteDirectoryResult>;
   deleteManyFiles?: Maybe<DeleteFileResult>;
   deleteOneFile?: Maybe<DeleteFileResult>;
   restoreFileVersion?: Maybe<RestoreFileResult>;
-};
-
-
-export type MutationsControlVersionsArgs = {
-  versionControlInput: VersionControlInput;
 };
 
 
@@ -124,12 +118,18 @@ export type MutationsRestoreFileVersionArgs = {
 export type Queries = {
   __typename?: 'Queries';
   getDownloadUrl: SignedUrlResult;
+  getTextFileContent: TextFileContentResult;
   getUploadUrl: SignedUrlResult;
   listBucketContent: ListBucketResult;
 };
 
 
 export type QueriesGetDownloadUrlArgs = {
+  fileInput: FileInput;
+};
+
+
+export type QueriesGetTextFileContentArgs = {
   fileInput: FileInput;
 };
 
@@ -169,6 +169,13 @@ export type StorageNotFound = {
   message: Scalars['String'];
 };
 
+export type TextFileContent = {
+  __typename?: 'TextFileContent';
+  content: Scalars['String'];
+};
+
+export type TextFileContentResult = FileNotFound | ServerError | StorageNotFound | TextFileContent | Unauthenticated | Unauthorized;
+
 /** ERROR TYPES */
 export type Unauthenticated = {
   __typename?: 'Unauthenticated';
@@ -195,20 +202,6 @@ export type Version = {
   name: Scalars['String'];
   path: Scalars['String'];
   size: Scalars['Int'];
-};
-
-export type VersionControlInput = {
-  bucketName: Scalars['String'];
-  fileName: Scalars['String'];
-  maxVersionsNumber: Scalars['Int'];
-  root: Scalars['String'];
-};
-
-export type VersionControlResult = FileNotFound | ServerError | StorageNotFound | Unauthenticated | VersionControlSuccess;
-
-export type VersionControlSuccess = {
-  __typename?: 'VersionControlSuccess';
-  message: Scalars['String'];
 };
 
 export type VersionId = {
@@ -311,13 +304,12 @@ export type ResolversTypes = {
   SignedUrlResult: ResolversTypes['FileNotFound'] | ResolversTypes['ServerError'] | ResolversTypes['SignedPost'] | ResolversTypes['SignedUrl'] | ResolversTypes['StorageNotFound'] | ResolversTypes['Unauthenticated'] | ResolversTypes['Unauthorized'];
   StorageNotFound: ResolverTypeWrapper<StorageNotFound>;
   String: ResolverTypeWrapper<Scalars['String']>;
+  TextFileContent: ResolverTypeWrapper<TextFileContent>;
+  TextFileContentResult: ResolversTypes['FileNotFound'] | ResolversTypes['ServerError'] | ResolversTypes['StorageNotFound'] | ResolversTypes['TextFileContent'] | ResolversTypes['Unauthenticated'] | ResolversTypes['Unauthorized'];
   Unauthenticated: ResolverTypeWrapper<Unauthenticated>;
   Unauthorized: ResolverTypeWrapper<Unauthorized>;
   UploadInput: UploadInput;
   Version: ResolverTypeWrapper<Version>;
-  VersionControlInput: VersionControlInput;
-  VersionControlResult: ResolversTypes['FileNotFound'] | ResolversTypes['ServerError'] | ResolversTypes['StorageNotFound'] | ResolversTypes['Unauthenticated'] | ResolversTypes['VersionControlSuccess'];
-  VersionControlSuccess: ResolverTypeWrapper<VersionControlSuccess>;
   VersionId: ResolverTypeWrapper<VersionId>;
 };
 
@@ -349,13 +341,12 @@ export type ResolversParentTypes = {
   SignedUrlResult: ResolversParentTypes['FileNotFound'] | ResolversParentTypes['ServerError'] | ResolversParentTypes['SignedPost'] | ResolversParentTypes['SignedUrl'] | ResolversParentTypes['StorageNotFound'] | ResolversParentTypes['Unauthenticated'] | ResolversParentTypes['Unauthorized'];
   StorageNotFound: StorageNotFound;
   String: Scalars['String'];
+  TextFileContent: TextFileContent;
+  TextFileContentResult: ResolversParentTypes['FileNotFound'] | ResolversParentTypes['ServerError'] | ResolversParentTypes['StorageNotFound'] | ResolversParentTypes['TextFileContent'] | ResolversParentTypes['Unauthenticated'] | ResolversParentTypes['Unauthorized'];
   Unauthenticated: Unauthenticated;
   Unauthorized: Unauthorized;
   UploadInput: UploadInput;
   Version: Version;
-  VersionControlInput: VersionControlInput;
-  VersionControlResult: ResolversParentTypes['FileNotFound'] | ResolversParentTypes['ServerError'] | ResolversParentTypes['StorageNotFound'] | ResolversParentTypes['Unauthenticated'] | ResolversParentTypes['VersionControlSuccess'];
-  VersionControlSuccess: VersionControlSuccess;
   VersionId: VersionId;
 };
 
@@ -409,7 +400,6 @@ export type ListBucketResultResolvers<ContextType = any, ParentType extends Reso
 };
 
 export type MutationsResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutations'] = ResolversParentTypes['Mutations']> = {
-  controlVersions?: Resolver<Maybe<ResolversTypes['VersionControlResult']>, ParentType, ContextType, RequireFields<MutationsControlVersionsArgs, 'versionControlInput'>>;
   deleteDirectory?: Resolver<Maybe<ResolversTypes['DeleteDirectoryResult']>, ParentType, ContextType, Partial<MutationsDeleteDirectoryArgs>>;
   deleteManyFiles?: Resolver<Maybe<ResolversTypes['DeleteFileResult']>, ParentType, ContextType, RequireFields<MutationsDeleteManyFilesArgs, 'filesInput'>>;
   deleteOneFile?: Resolver<Maybe<ResolversTypes['DeleteFileResult']>, ParentType, ContextType, RequireFields<MutationsDeleteOneFileArgs, 'fileInput'>>;
@@ -422,6 +412,7 @@ export interface PostFieldsScalarConfig extends GraphQLScalarTypeConfig<Resolver
 
 export type QueriesResolvers<ContextType = any, ParentType extends ResolversParentTypes['Queries'] = ResolversParentTypes['Queries']> = {
   getDownloadUrl?: Resolver<ResolversTypes['SignedUrlResult'], ParentType, ContextType, RequireFields<QueriesGetDownloadUrlArgs, 'fileInput'>>;
+  getTextFileContent?: Resolver<ResolversTypes['TextFileContentResult'], ParentType, ContextType, RequireFields<QueriesGetTextFileContentArgs, 'fileInput'>>;
   getUploadUrl?: Resolver<ResolversTypes['SignedUrlResult'], ParentType, ContextType, RequireFields<QueriesGetUploadUrlArgs, 'uploadInput'>>;
   listBucketContent?: Resolver<ResolversTypes['ListBucketResult'], ParentType, ContextType, RequireFields<QueriesListBucketContentArgs, 'listInput'>>;
 };
@@ -456,6 +447,15 @@ export type StorageNotFoundResolvers<ContextType = any, ParentType extends Resol
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type TextFileContentResolvers<ContextType = any, ParentType extends ResolversParentTypes['TextFileContent'] = ResolversParentTypes['TextFileContent']> = {
+  content?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type TextFileContentResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['TextFileContentResult'] = ResolversParentTypes['TextFileContentResult']> = {
+  __resolveType: TypeResolveFn<'FileNotFound' | 'ServerError' | 'StorageNotFound' | 'TextFileContent' | 'Unauthenticated' | 'Unauthorized', ParentType, ContextType>;
+};
+
 export type UnauthenticatedResolvers<ContextType = any, ParentType extends ResolversParentTypes['Unauthenticated'] = ResolversParentTypes['Unauthenticated']> = {
   message?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -472,15 +472,6 @@ export type VersionResolvers<ContextType = any, ParentType extends ResolversPare
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   path?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   size?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type VersionControlResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['VersionControlResult'] = ResolversParentTypes['VersionControlResult']> = {
-  __resolveType: TypeResolveFn<'FileNotFound' | 'ServerError' | 'StorageNotFound' | 'Unauthenticated' | 'VersionControlSuccess', ParentType, ContextType>;
-};
-
-export type VersionControlSuccessResolvers<ContextType = any, ParentType extends ResolversParentTypes['VersionControlSuccess'] = ResolversParentTypes['VersionControlSuccess']> = {
-  message?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -508,11 +499,11 @@ export type Resolvers<ContextType = any> = {
   SignedUrl?: SignedUrlResolvers<ContextType>;
   SignedUrlResult?: SignedUrlResultResolvers<ContextType>;
   StorageNotFound?: StorageNotFoundResolvers<ContextType>;
+  TextFileContent?: TextFileContentResolvers<ContextType>;
+  TextFileContentResult?: TextFileContentResultResolvers<ContextType>;
   Unauthenticated?: UnauthenticatedResolvers<ContextType>;
   Unauthorized?: UnauthorizedResolvers<ContextType>;
   Version?: VersionResolvers<ContextType>;
-  VersionControlResult?: VersionControlResultResolvers<ContextType>;
-  VersionControlSuccess?: VersionControlSuccessResolvers<ContextType>;
   VersionId?: VersionIdResolvers<ContextType>;
 };
 
