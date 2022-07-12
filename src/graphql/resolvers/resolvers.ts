@@ -184,8 +184,6 @@ const gqlResolvers = {
 
       if (!exists) return error;
 
-      // TODO: check if requested file is TXT
-
       const [failure, content] = await getTextFileContent({
         fileName,
         bucketName,
