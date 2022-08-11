@@ -21,8 +21,9 @@ import {
   resolveManyFiles,
   getTextFileContent,
 } from '../../utils/s3.utils';
-import { formatPath, handleErrorResponse } from '../../utils/tools.utils';
+import { formatPath, handleErrorResponse, DirsToFiles } from '../../utils/tools.utils';
 import { resolveAuth } from '../../utils/auth.utils';
+import { Directory } from '../../definitions/s3';
 
 const gqlResolvers = {
   listBucketContent: async (
@@ -41,7 +42,7 @@ const gqlResolvers = {
 
       const [authed, authError] = resolveAuth(
         req,
-        args.listInput.root !== undefined || isExternalBucket
+        args.listInput.root != null || isExternalBucket
           ? 'read:bucket'
           : undefined
       );
@@ -52,18 +53,21 @@ const gqlResolvers = {
 
       if (!exists) return error;
 
-      const [failure, content] = await listBucketContent({
+      const [failure, files, dirs] = await listBucketContent({
         req,
         root,
         path,
         bucketName,
+        getDirs: true,
       });
 
       if (failure) throw failure;
 
+      const objects = [...files, ...DirsToFiles(<Directory[]>dirs)];
+
       return {
-        __typename: 'FileList',
-        list: content,
+        __typename: 'ObjectList',
+        objects,
       };
     } catch (err) {
       return handleErrorResponse(err as Error);
@@ -82,7 +86,7 @@ const gqlResolvers = {
 
       const [authed, authError] = resolveAuth(
         req,
-        args.uploadInput.root !== undefined ? 'create:file' : undefined
+        args.uploadInput.root != null ? 'create:file' : undefined
       );
 
       if (!authed) return authError;
@@ -123,7 +127,7 @@ const gqlResolvers = {
 
       const [authed, authError] = resolveAuth(
         req,
-        args.fileInput.root !== undefined ? 'read:bucket' : undefined
+        args.fileInput.root != null ? 'read:bucket' : undefined
       );
 
       if (!authed) return authError;
@@ -172,7 +176,7 @@ const gqlResolvers = {
 
       const [authed, authError] = resolveAuth(
         req,
-        args.fileInput.root !== undefined ? 'read:file' : undefined
+        args.fileInput.root != null ? 'read:file' : undefined
       );
 
       if (!authed) return authError;
@@ -212,7 +216,7 @@ const gqlResolvers = {
 
       const [authed, authError] = resolveAuth(
         req,
-        args.fileInput.root !== undefined ? 'delete:file' : undefined
+        args.fileInput.root != null ? 'delete:file' : undefined
       );
 
       if (!authed) return authError;
@@ -264,7 +268,7 @@ const gqlResolvers = {
 
       const [authed, authError] = resolveAuth(
         req,
-        args.filesInput.root !== undefined ? 'delete:file' : undefined
+        args.filesInput.root != null ? 'delete:file' : undefined
       );
 
       if (!authed) return authError;
@@ -377,7 +381,7 @@ const gqlResolvers = {
 
       const [authed, authError] = resolveAuth(
         req,
-        args.fileInput.root !== undefined ? 'update:file' : undefined
+        args.fileInput.root != null ? 'update:file' : undefined
       );
 
       if (!authed) return authError;
