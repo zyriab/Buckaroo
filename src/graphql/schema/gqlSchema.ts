@@ -26,8 +26,8 @@ type File {
   versions: [Version!]
 }
 
-type FileList {
-  list: [File!]!
+type ObjectList {
+  objects: [File!]!
 }
 
 type SignedUrl {
@@ -83,7 +83,6 @@ type ServerError {
   stack: String
 }
 
-
 "INPUT TYPES"
 input ListInput {
   path: String!
@@ -122,7 +121,7 @@ input DirectoryInput {
 }
 
 union ListBucketResult =
-    FileList
+    ObjectList
   | Unauthenticated
   | Unauthorized
   | StorageNotFound

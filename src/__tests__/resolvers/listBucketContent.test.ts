@@ -40,9 +40,9 @@ test("Should query and list current user's directory content", (done) => {
     .end((err: any, res: any) => {
       if (err) return done(err);
       expect(res.body).toBeInstanceOf(Object);
-      expect(res.body.data.listBucketContent.list).not.toBeUndefined();
-      expect(res.body.data.listBucketContent.list.length).toBe(2);
-      expect(res.body.data.listBucketContent.list[0].name).toBe(fileName);
+      expect(res.body.data.listBucketContent.objects).not.toBeUndefined();
+      expect(res.body.data.listBucketContent.objects.length).toBe(2);
+      expect(res.body.data.listBucketContent.objects[0].name).toBe(fileName);
       done();
     });
 });
@@ -62,8 +62,8 @@ test("Should query and list other user's directory content", (done) => {
       if (err) return done(err);
       expect(res.body).toBeInstanceOf(Object);
       expect(res.body.data.listBucketContent).not.toBeUndefined();
-      expect(res.body.data.listBucketContent.__typename).toBe('FileList');
-      expect(res.body.data.listBucketContent.list).not.toBeUndefined();
+      expect(res.body.data.listBucketContent.__typename).toBe('ObjectList');
+      expect(res.body.data.listBucketContent.objects).not.toBeUndefined();
       done();
     });
 });
@@ -82,8 +82,8 @@ test('Should query and list an empty folder (non-existant folder)', (done) => {
     .end((err: any, res: any) => {
       if (err) return done(err);
       expect(res.body).toBeInstanceOf(Object);
-      expect(res.body.data.listBucketContent.list).not.toBeUndefined();
-      expect(res.body.data.listBucketContent.list.length).toBe(0);
+      expect(res.body.data.listBucketContent.objects).not.toBeUndefined();
+      expect(res.body.data.listBucketContent.objects.length).toBe(0);
       done();
     });
 });

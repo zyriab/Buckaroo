@@ -18,8 +18,8 @@ export const listQuery = {
     query ListBucketContent($path: String!, $root: String) {
       listBucketContent(listInput: { path: $path, root: $root }) {
         __typename
-        ... on FileList {
-          list {
+        ... on ObjectList {
+          objects {
             id
             name
             lastModified
