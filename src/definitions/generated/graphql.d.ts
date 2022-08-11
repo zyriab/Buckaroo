@@ -50,11 +50,6 @@ export type FileInput = {
   versionId?: InputMaybe<Scalars['String']>;
 };
 
-export type FileList = {
-  __typename?: 'FileList';
-  list: Array<File>;
-};
-
 export type FileName = {
   __typename?: 'FileName';
   name: Scalars['String'];
@@ -78,7 +73,7 @@ export type FilesInput = {
   versionIds?: InputMaybe<Array<Scalars['String']>>;
 };
 
-export type ListBucketResult = FileList | ServerError | StorageNotFound | Unauthenticated | Unauthorized;
+export type ListBucketResult = ObjectList | ServerError | StorageNotFound | Unauthenticated | Unauthorized;
 
 /** INPUT TYPES */
 export type ListInput = {
@@ -113,6 +108,11 @@ export type MutationsDeleteOneFileArgs = {
 
 export type MutationsRestoreFileVersionArgs = {
   fileInput: FileInput;
+};
+
+export type ObjectList = {
+  __typename?: 'ObjectList';
+  objects: Array<File>;
 };
 
 export type Queries = {
@@ -285,16 +285,16 @@ export type ResolversTypes = {
   DirectoryInput: DirectoryInput;
   File: ResolverTypeWrapper<File>;
   FileInput: FileInput;
-  FileList: ResolverTypeWrapper<FileList>;
   FileName: ResolverTypeWrapper<FileName>;
   FileNameList: ResolverTypeWrapper<FileNameList>;
   FileNotFound: ResolverTypeWrapper<FileNotFound>;
   FilesInput: FilesInput;
   ID: ResolverTypeWrapper<Scalars['ID']>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
-  ListBucketResult: ResolversTypes['FileList'] | ResolversTypes['ServerError'] | ResolversTypes['StorageNotFound'] | ResolversTypes['Unauthenticated'] | ResolversTypes['Unauthorized'];
+  ListBucketResult: ResolversTypes['ObjectList'] | ResolversTypes['ServerError'] | ResolversTypes['StorageNotFound'] | ResolversTypes['Unauthenticated'] | ResolversTypes['Unauthorized'];
   ListInput: ListInput;
   Mutations: ResolverTypeWrapper<{}>;
+  ObjectList: ResolverTypeWrapper<ObjectList>;
   PostFields: ResolverTypeWrapper<Scalars['PostFields']>;
   Queries: ResolverTypeWrapper<{}>;
   RestoreFileResult: ResolversTypes['FileNotFound'] | ResolversTypes['ServerError'] | ResolversTypes['StorageNotFound'] | ResolversTypes['Unauthenticated'] | ResolversTypes['Unauthorized'] | ResolversTypes['VersionId'];
@@ -322,16 +322,16 @@ export type ResolversParentTypes = {
   DirectoryInput: DirectoryInput;
   File: File;
   FileInput: FileInput;
-  FileList: FileList;
   FileName: FileName;
   FileNameList: FileNameList;
   FileNotFound: FileNotFound;
   FilesInput: FilesInput;
   ID: Scalars['ID'];
   Int: Scalars['Int'];
-  ListBucketResult: ResolversParentTypes['FileList'] | ResolversParentTypes['ServerError'] | ResolversParentTypes['StorageNotFound'] | ResolversParentTypes['Unauthenticated'] | ResolversParentTypes['Unauthorized'];
+  ListBucketResult: ResolversParentTypes['ObjectList'] | ResolversParentTypes['ServerError'] | ResolversParentTypes['StorageNotFound'] | ResolversParentTypes['Unauthenticated'] | ResolversParentTypes['Unauthorized'];
   ListInput: ListInput;
   Mutations: {};
+  ObjectList: ObjectList;
   PostFields: Scalars['PostFields'];
   Queries: {};
   RestoreFileResult: ResolversParentTypes['FileNotFound'] | ResolversParentTypes['ServerError'] | ResolversParentTypes['StorageNotFound'] | ResolversParentTypes['Unauthenticated'] | ResolversParentTypes['Unauthorized'] | ResolversParentTypes['VersionId'];
@@ -375,11 +375,6 @@ export type FileResolvers<ContextType = any, ParentType extends ResolversParentT
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type FileListResolvers<ContextType = any, ParentType extends ResolversParentTypes['FileList'] = ResolversParentTypes['FileList']> = {
-  list?: Resolver<Array<ResolversTypes['File']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export type FileNameResolvers<ContextType = any, ParentType extends ResolversParentTypes['FileName'] = ResolversParentTypes['FileName']> = {
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -396,7 +391,7 @@ export type FileNotFoundResolvers<ContextType = any, ParentType extends Resolver
 };
 
 export type ListBucketResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['ListBucketResult'] = ResolversParentTypes['ListBucketResult']> = {
-  __resolveType: TypeResolveFn<'FileList' | 'ServerError' | 'StorageNotFound' | 'Unauthenticated' | 'Unauthorized', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'ObjectList' | 'ServerError' | 'StorageNotFound' | 'Unauthenticated' | 'Unauthorized', ParentType, ContextType>;
 };
 
 export type MutationsResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutations'] = ResolversParentTypes['Mutations']> = {
@@ -404,6 +399,11 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   deleteManyFiles?: Resolver<Maybe<ResolversTypes['DeleteFileResult']>, ParentType, ContextType, RequireFields<MutationsDeleteManyFilesArgs, 'filesInput'>>;
   deleteOneFile?: Resolver<Maybe<ResolversTypes['DeleteFileResult']>, ParentType, ContextType, RequireFields<MutationsDeleteOneFileArgs, 'fileInput'>>;
   restoreFileVersion?: Resolver<Maybe<ResolversTypes['RestoreFileResult']>, ParentType, ContextType, RequireFields<MutationsRestoreFileVersionArgs, 'fileInput'>>;
+};
+
+export type ObjectListResolvers<ContextType = any, ParentType extends ResolversParentTypes['ObjectList'] = ResolversParentTypes['ObjectList']> = {
+  objects?: Resolver<Array<ResolversTypes['File']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export interface PostFieldsScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['PostFields'], any> {
@@ -485,12 +485,12 @@ export type Resolvers<ContextType = any> = {
   DeleteFileResult?: DeleteFileResultResolvers<ContextType>;
   Directory?: DirectoryResolvers<ContextType>;
   File?: FileResolvers<ContextType>;
-  FileList?: FileListResolvers<ContextType>;
   FileName?: FileNameResolvers<ContextType>;
   FileNameList?: FileNameListResolvers<ContextType>;
   FileNotFound?: FileNotFoundResolvers<ContextType>;
   ListBucketResult?: ListBucketResultResolvers<ContextType>;
   Mutations?: MutationsResolvers<ContextType>;
+  ObjectList?: ObjectListResolvers<ContextType>;
   PostFields?: GraphQLScalarType;
   Queries?: QueriesResolvers<ContextType>;
   RestoreFileResult?: RestoreFileResultResolvers<ContextType>;
