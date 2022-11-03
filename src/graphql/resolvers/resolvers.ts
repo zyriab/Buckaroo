@@ -22,7 +22,7 @@ import {
   getTextFileContent,
 } from '../../utils/s3.utils';
 import { formatPath, handleErrorResponse, DirsToFiles } from '../../utils/tools.utils';
-import { resolveAuth } from '../../utils/auth.utils';
+import { checkRequestIsAuthed } from '../../utils/auth.utils';
 import { Directory } from '../../definitions/s3';
 
 const gqlResolvers = {
@@ -40,7 +40,7 @@ const gqlResolvers = {
       const bucketName =
         args.listInput.bucketName || req.body.tenant.bucket.name;
 
-      const [authed, authError] = resolveAuth(
+      const [authed, authError] = checkRequestIsAuthed(
         req,
         args.listInput.root != null || isExternalBucket
           ? 'read:bucket'
@@ -84,7 +84,7 @@ const gqlResolvers = {
       const bucketName =
         args.uploadInput.bucketName || req.body.tenant.bucket.name;
 
-      const [authed, authError] = resolveAuth(
+      const [authed, authError] = checkRequestIsAuthed(
         req,
         args.uploadInput.root != null ? 'create:file' : undefined
       );
@@ -125,7 +125,7 @@ const gqlResolvers = {
       const bucketName =
         args.fileInput.bucketName || req.body.tenant.bucket.name;
 
-      const [authed, authError] = resolveAuth(
+      const [authed, authError] = checkRequestIsAuthed(
         req,
         args.fileInput.root != null ? 'read:bucket' : undefined
       );
@@ -174,7 +174,7 @@ const gqlResolvers = {
       const bucketName =
         args.fileInput.bucketName || req.body.tenant.bucket.name;
 
-      const [authed, authError] = resolveAuth(
+      const [authed, authError] = checkRequestIsAuthed(
         req,
         args.fileInput.root != null ? 'read:file' : undefined
       );
@@ -214,7 +214,7 @@ const gqlResolvers = {
       const bucketName =
         args.fileInput.bucketName || req.body.tenant.bucket.name;
 
-      const [authed, authError] = resolveAuth(
+      const [authed, authError] = checkRequestIsAuthed(
         req,
         args.fileInput.root != null ? 'delete:file' : undefined
       );
@@ -266,7 +266,7 @@ const gqlResolvers = {
       const bucketName =
         args.filesInput.bucketName || req.body.tenant.bucket.name;
 
-      const [authed, authError] = resolveAuth(
+      const [authed, authError] = checkRequestIsAuthed(
         req,
         args.filesInput.root != null ? 'delete:file' : undefined
       );
@@ -321,7 +321,7 @@ const gqlResolvers = {
         `${req.body.username}-${req.body.userId}`
       );
 
-      const [authed, authError] = resolveAuth(
+      const [authed, authError] = checkRequestIsAuthed(
         req,
         !isOwner ? 'delete:directory' : undefined
       );
@@ -379,7 +379,7 @@ const gqlResolvers = {
       const bucketName =
         args.fileInput.bucketName || req.body.tenant.bucket.name;
 
-      const [authed, authError] = resolveAuth(
+      const [authed, authError] = checkRequestIsAuthed(
         req,
         args.fileInput.root != null ? 'update:file' : undefined
       );
