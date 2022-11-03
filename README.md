@@ -12,11 +12,144 @@ A serverless miniservice wrapping AWS S3 SDK to manage files easily.
 
 ## Installation
 
-_This guide assumes you have basic knowledge about NPM (also that it's installed) and possess an AWS account._
+_This guide assumes you have basic knowledge about NPM (also that it's installed) and possess an AWS and Auth0 accounts._
 
 Automatic CI/CD using GH Actions is not covered in this readme.
 
 First you need to clone this repo, then you can follow along the instructions below 😉
+
+### Auth0
+
+**Note**: You can also remove the authentication from Buckaroo (it's just an Express middleware you can tweak).
+
+_Buckaroo pairs up with your frontend, both should use Auth0 for authentication/authorization and be in the same tenant._
+
+First of, you need to create an API in the Auth0 dashboard, you can follow [this tutorial](https://auth0.com/docs/quickstart/spa/vanillajs/02-calling-an-api) to get it done.
+
+In the API's settings:
+
+- Make sure "Enable RBAC" is enabled
+- Make sure "Add Permissions in the Access Token" is enabled
+
+In the "Permissions" tab, add the following:
+
+| Permission       | Description                                           |
+| ---------------- | ----------------------------------------------------- |
+| read:bucket      | LIST an entire bucket                                 |
+| create:file      | POST or PUT a file in a bucket                        |
+| update:file      | RESTORE a file in a bucket (internally COPY + DELETE) |
+| delete:file      | DELETE a file in a directory                          |
+| delete:directory | DELETE a directory in a bucket                        |
+| read:file        | read content of a file                                |
+
+Click on "Actions > Library" on the left side menu.
+
+- Click on "Build Custom"
+
+  - Name: Add app metadata to access token
+  - Trigger: Login / Post Login
+  - Runtime: Node 16
+  - Past the following code (don't forget to add your custom namespace):
+
+```js
+exports.onExecutePostLogin = async (event, api) => {
+  if (event.client.metadata) {
+    const namespace = 'https://your.namespace.com';
+    api.accessToken.setCustomClaim(
+      `${namespace}/app_metadata`,
+      event.client.metadata
+    );
+  }
+};
+```
+
+- Name: Add user email to access token
+  - Trigger: Login / Post Login
+  - Runtime: Node 16
+  - Past the following code (don't forget to add your custom namespace):
+
+```js
+exports.onExecutePostLogin = async (event, api) => {
+  const namespace = 'https://your.namespace.com';
+  api.accessToken.setCustomClaim(`${namespace}/email`, event.user.email);
+};
+```
+
+- Name: Add username to access token
+  - Trigger: Login / Post Login
+  - Runtime: Node 16
+  - Past the following code (don't forget to add your custom namespace):
+
+```js
+exports.onExecutePostLogin = async (event, api) => {
+  const namespace = 'https://your.namespace.com';
+  api.accessToken.setCustomClaim(`${namespace}/username`, event.user.nickname);
+};
+```
+
+**Don't forget to click "Deploy" once you pasted the code.**
+
+Now, click on "Actions > Flows"
+
+- Select "Login"
+- On the right menu, select the "Custom" tab
+- Drag and drop the 3 actions you created earlier in the flow (under "Start")
+- Click "Apply"
+
+_This will make sure that every app in this tenant applies those actions on login._
+
+Lastly, in Buckaroo source code, go to `src/helpers/contants.help.ts`, remove the currently set domains and add your own.
+
+The key of the map is the name of the tenant (sent by the frontend), the value is the Auth0 tenant domain (from the Auth0 dashboard).
+
+i.e.: `AUTH0_DOMAINS.set('shopicsv', 'my-domain.eu.auth0.com');`
+
+This map is used in order to use Buckaroo with multiple Auth0 tenants.
+
+### AWS IAM
+
+These are the steps to create a IAM user with permission to work with your S3 Buckets
+
+- On the left menu, click "Users"
+  - Click "Add users"
+    - User name: Whatever you want (i.e.: "S3-versioning-controller")
+    - Check: `Access key - Programmatic access`
+    - Click "Next: Permissions"
+    - Select "Attach existing policies directly", then click on "Create policy"
+    - For the sake of simplicity, select `AmazonS3FullAccess` (**note**: It is recommended that you create a new policy, giving the minimum permissions required).
+    - Copy/Paste the policy below these steps.
+    - Click "Next" twice, review the user you created
+    - Click "Create user"
+    - Copy and keep in a text file the "Access key ID" and "Secret access key" (**keep the later absolutely secret, don't put it on a github repo or anything!**)
+
+Buckaroo's policy:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "VisualEditor0",
+      "Effect": "Allow",
+      "Action": [
+        "s3:ReplicateObject",
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:ListAllMyBuckets",
+        "s3:DeleteObjectVersion",
+        "s3:ListBucketVersions",
+        "s3:RestoreObject",
+        "s3:ListBucket",
+        "s3:GetBucketVersioning",
+        "s3:DeleteObject",
+        "s3:ReplicateDelete",
+        "s3:GetObjectVersion"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
 
 ### AWS Lambda
 
@@ -42,6 +175,7 @@ These are the steps to set up a Lambda function in order to host the API.
      - Under "Allow methods", check "POST".
 
 5. In the "Environment variables" menu section (on the left):
+   **Note:** You can find more information about the uses of environment variables in the "Usage" section.
 
    - Click "Edit" then "Add environment variable"
    - Add the following:
@@ -49,10 +183,18 @@ These are the steps to set up a Lambda function in order to host the API.
      - Value: `production`
      - Key: `AES_KEY`
      - Value: A randomly generated AES key
-     - Key: `MONGODB_URI`
-     - Value: The URI to your database
-     - Key: `EDIT_SUBSCRIBER_URL`
-     - Value: The URL to your endpoint where the query `removeSubscriber` will be called (`?email=xxxx` will be automatically appended)
+     - Key: `NAMESPACE`
+     - Value: `your.namespace.com` (from the actions you created in Auth0)
+     - Key: `BUCKET_NAMESPACE` (optional, leave empty string if not needed)
+     - Value: `optional-namespace-`
+     - Key: `AUTH0_AUDIENCE`
+     - Value: `https://example.express`
+     - Key: `S3_REGION`
+     - Value: `AWS_REGION` (i.e.: eu-central-1)
+     - Key: `S3_ACCESS_KEY_ID`
+     - Value: ``
+     - Key: `S3_SECRET_ACCESS_KEY`
+     - Value: ``
 
 6. Don't forget to note the function URL, we'll use it to call the API from the frontend.
 
@@ -72,135 +214,35 @@ These are the steps to automatically bundle the API's code in one big JS file an
 
 You can now call the Lambda URL, passing your query as a POST request (see example below).
 
-You can find the queries and mutations in `nouvell/src/schema/schema.graphql`.  
+You can find the queries and mutations in `src/schema/schema.graphql`.
 (gqlSchema.ts is pasted from that file in order to comply with `ncc`'s limitations).
 
-You can find the already implemented queries and mutations in `nouvell/src/resolvers/[queries | mutations]`.
+You can find the already implemented queries and mutations in `src/resolvers/resolvers.ts`.
+
+Check out [Buckaroo SDK](https://github.com/zyriabdsgn/buckaroo-sdk) to see how to interact with Buckaroo from your frontend.
 
 If you want to test the API locally you can run `npm run dev` in the API's directory and check the debug console for any error, don't forget to create a `.env` file (or remove the "example" from `.env.example`) and put in the following lines:
 
 - `NODE_ENV=development`
 - `PORT=3000` <-- Feel free to change this value if this port is already in use.
 - `AES_KEY=your_aes_key`
-- `MONGODB_URI=your_mongodb_uri`
-- `EDIT_SUBSCRIBER_URL=your_url`
+- `NAMESPACE=your.namespace.com`
+- `BUCKET_NAMESPACE=optional-namespace-` (if not needed, leave an empty string)
+- `AUTH0_AUDIENCE=https://example.express`
+- `S3_REGION=AWS_REGION` (i.e.: eu-central-1)
+- `S3_ACCESS_KEY_ID=XXXXXXXXXXXXXX`
+- `S3_SECRET_ACCESS_KEY=XXXXXXXXXXXXXX`
 
-Here is an example of an API call to add a user with TypeScript and the fetch API:
+### Meaning and usage of each environment variable
 
-```ts
-interface AddSubscriberArgs {
-  email: string;
-  products: [{ name: string }];
-  occupation: {
-    name: string;
-    displayName?: string;
-  };
-  language?: string;
-}
-
-async function addSubscriber(args: AddSubscriberArgs) {
-  try {
-    const query = {
-      query: `
-        mutation AddSub(
-          $email: String!
-          $products: [ProductInput!]!
-          $occupation: OccupationInput!
-          $language: String!
-        ) {
-          addSubscriber(
-            subscriberInput: {
-              email: $email
-              products: $products
-              occupation: $occupation
-              language: $language
-            }
-          ) {
-            __typename
-            ... on Subscriber {
-              email
-              products {
-                name
-                category
-                displayName
-              }
-              occupation {
-                name
-                displayName
-              }
-              language
-            }
-            ... on WrongEmailFormat {
-              message
-            }
-            ... on ServerError {
-              message
-              stack
-            }
-          }
-        }
-      `,
-      variables: {
-        email: args.email,
-        products: args.products,
-        occupation: args.occupation,
-        language: args.language,
-      },
-    };
-
-    const res = await fetch('https://your_lambda_url.com/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(query),
-    });
-
-    const resData = await res.json();
-    const typename = resData.data.addSubscriber.__typename;
-
-    if (typename === 'Subscriber') {
-      return resData.data.addSubscriber;
-    }
-
-    throw new Error(resData.data.addSubscriber.message);
-  } catch (e) {
-    console.log(e);
-    return undefined;
-  }
-
-  // Somewhere else in the code...
-
-  const subscriber = await addSubscriber({
-    email: 'example@email.com',
-    products: [{name: 'some-product'}], // product has to exist in DB!
-    occupation: {name: 'merchant', displayName: 'Merchant'}, // if undefined, name will be used as displayName
-    language: 'fr', // if undefined, defaults to 'en'. Language has to exist in DB!
-  }):
-
-  if(subscriber != null) {
-    console.log(subscriber);
-    
-        // subscriber: {
-        // 	__typename: 'Subscriber',
-	// 	email: 'example@email.com',
-	// 	products: [
-	// 		{
-	// 		  name: 'some-product',
-	// 		  category: 'the-category',
-	// 		  displayName: 'Some Product',
-	// 		}
-	// 	],
-	// 	occupation: {
-	// 		name: 'merchant',
-	// 		displayName: 'Merchant'
-	// 	},
-	// 	language: 'fr',
-	// }
-	}
-  }
-}
-```
+- `NODE_ENV` - Represents the current environment, will be used to determine if the bucket's name needs "dev" or "staging" at the end of its name (check `getTenant.ts`)
+- `AES_KEY` - Used to encrypt/decrypt the tenant's name from the request body
+- `NAMESPACE` - Auth0 actions namespace
+- `BUCKET_NAMESPACE` - Optional namespace, will be added before the bucket's name
+- `AUTH0_AUDIENCE` - API's audience in the Auth0 dashboard
+- `S3_REGION` - Region in which your IAM user has been created
+- `S3_ACCESS_KEY_ID` - Access key ID of the IAM user
+- `S3_SECRET_ACCESS_KEY` - Secret access key of the IAM user
 
 ## Contributing
 
@@ -210,23 +252,22 @@ Feel free to send a PR, this is a work in progress and if you spot any error in 
 
 This software is under the [MIT](https://choosealicense.com/licenses/mit/) license, a short and simple permissive license with conditions only requiring preservation of copyright and license notices. Licensed works, modifications, and larger works may be distributed under different terms and without source code. (Do whatever you want with it 🤙).<br/><br/>
 
-	              ,,))))))));,
-	           __)))))))))))))),
-	          -\(((((''''((((((((.
-	           ((''  .     `)))))),
-	         ))| o    ;-.    '(((((                                  ,(,
-	         ( `|    /  )    ;))))'                               ,_))^;(~
-	            |   |   |   ,))((((_     _____------~~~-.        %,;(;(>';'~
-	            o_);   ;    )))(((` ~---~  `::           \      %%~~)(v;(`('~
-	                  ;    ''''````         `:       `:::|\,__,%%    );`'; ~
-	                 |   _                )     /      `:|`----'     `-'
-	           ______/\/~    |                 /        /
-	         /~;;.____/;;'  /          ___--,-(   `;;;/
-	        / //  _;______;'------~~~~~    /;;/\    /
-	       //  | |                        / ;   \;;,\
-	      (<_  | ;                      /',/-----'  _>
-	       \_| ||_                     //~;~~~~~~~~~
-	           `\_|                   (,~~
-	                                   \~\
-	                                    ~~
-
+                  ,,))))))));,
+               __)))))))))))))),
+              -\(((((''''((((((((.
+               ((''  .     `)))))),
+             ))| o    ;-.    '(((((                                  ,(,
+             ( `|    /  )    ;))))'                               ,_))^;(~
+                |   |   |   ,))((((_     _____------~~~-.        %,;(;(>';'~
+                o_);   ;    )))(((` ~---~  `::           \      %%~~)(v;(`('~
+                      ;    ''''````         `:       `:::|\,__,%%    );`'; ~
+                     |   _                )     /      `:|`----'     `-'
+               ______/\/~    |                 /        /
+             /~;;.____/;;'  /          ___--,-(   `;;;/
+            / //  _;______;'------~~~~~    /;;/\    /
+           //  | |                        / ;   \;;,\
+          (<_  | ;                      /',/-----'  _>
+           \_| ||_                     //~;~~~~~~~~~
+               `\_|                   (,~~
+                                       \~\
+                                        ~~
