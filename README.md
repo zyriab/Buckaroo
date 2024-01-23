@@ -1,5 +1,5 @@
 <p align="center"><img
-  src="https://www.wallenart.dev/src/images/buckaroo.svg"
+  src="logo.svg"
   alt="buckaroo logo" /></p>
  
  <p align="center">
